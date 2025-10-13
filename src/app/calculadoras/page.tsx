@@ -1,7 +1,14 @@
 import CalculadoraCard from '@/components/CalculadoraCard';
+import { ReactNode } from 'react';
 
 export default function Calculadoras() {
-  const calculadoras = [
+  const calculadoras: {
+    id: string;
+    title: string;
+    description: string;
+    icon: ReactNode;
+    color: 'blue' | 'emerald' | 'amber' | 'purple' | 'green' | 'red';
+  }[] = [
     {
       id: 'seccion',
       title: 'Cálculo de Sección',
