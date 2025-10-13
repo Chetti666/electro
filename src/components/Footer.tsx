@@ -1,3 +1,5 @@
+import Link from 'next/link';
+
 export default function Footer() {
   const currentYear = new Date().getFullYear();
   
@@ -16,19 +18,19 @@ export default function Footer() {
             <h3 className="text-lg font-semibold mb-4 text-gray-800 dark:text-gray-200">Enlaces rápidos</h3>
             <ul className="space-y-2">
               <li>
-                <a href="/" className="text-gray-600 hover:text-blue-500 dark:text-gray-400 dark:hover:text-blue-400">
+                <Link href="/" className="text-gray-600 hover:text-blue-500 dark:text-gray-400 dark:hover:text-blue-400">
                   Inicio
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="/calculadoras" className="text-gray-600 hover:text-blue-500 dark:text-gray-400 dark:hover:text-blue-400">
+                <Link href="/calculadoras" className="text-gray-600 hover:text-blue-500 dark:text-gray-400 dark:hover:text-blue-400">
                   Calculadoras
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="/reportes" className="text-gray-600 hover:text-blue-500 dark:text-gray-400 dark:hover:text-blue-400">
+                <Link href="/reportes" className="text-gray-600 hover:text-blue-500 dark:text-gray-400 dark:hover:text-blue-400">
                   Reportes
-                </a>
+                </Link>
               </li>
             </ul>
           </div>
@@ -37,34 +39,34 @@ export default function Footer() {
             <h3 className="text-lg font-semibold mb-4 text-gray-800 dark:text-gray-200">Calculadoras</h3>
             <ul className="space-y-2">
               <li>
-                <a href="/calculadoras/seccion" className="text-gray-600 hover:text-blue-500 dark:text-gray-400 dark:hover:text-blue-400">
+                <Link href="/calculadoras/seccion" className="text-gray-600 hover:text-blue-500 dark:text-gray-400 dark:hover:text-blue-400">
                   Cálculo de Sección
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="/calculadoras/caida-tension" className="text-gray-600 hover:text-blue-500 dark:text-gray-400 dark:hover:text-blue-400">
+                <Link href="/calculadoras/caida-tension" className="text-gray-600 hover:text-blue-500 dark:text-gray-400 dark:hover:text-blue-400">
                   Caída de Tensión
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="/calculadoras/factor-potencia" className="text-gray-600 hover:text-blue-500 dark:text-gray-400 dark:hover:text-blue-400">
+                <Link href="/calculadoras/factor-potencia" className="text-gray-600 hover:text-blue-500 dark:text-gray-400 dark:hover:text-blue-400">
                   Factor de Potencia
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="/calculadoras/luminico" className="text-gray-600 hover:text-blue-500 dark:text-gray-400 dark:hover:text-blue-400">
+                <Link href="/calculadoras/luminico" className="text-gray-600 hover:text-blue-500 dark:text-gray-400 dark:hover:text-blue-400">
                   Cálculo Lumínico
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="/calculadoras/malla-tierra" className="text-gray-600 hover:text-blue-500 dark:text-gray-400 dark:hover:text-blue-400">
+                <Link href="/calculadoras/malla-tierra" className="text-gray-600 hover:text-blue-500 dark:text-gray-400 dark:hover:text-blue-400">
                   Malla de Tierra
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="/calculadoras/motores" className="text-gray-600 hover:text-blue-500 dark:text-gray-400 dark:hover:text-blue-400">
+                <Link href="/calculadoras/motores" className="text-gray-600 hover:text-blue-500 dark:text-gray-400 dark:hover:text-blue-400">
                   Cálculo de Motores
-                </a>
+                </Link>
               </li>
             </ul>
           </div>
