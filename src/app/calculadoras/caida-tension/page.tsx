@@ -77,7 +77,7 @@ export default function CaidaTension() {
     
     let caida = 0;
     if (tipoCircuito === 'monofasico') {
-      caida = 2 * corrienteNum * 0.0175 * longitudNum / seccionNum;
+      caida = (2 * corrienteNum * 0.0175 * longitudNum) / seccionNum;
     } else if (tipoCircuito === 'trifasico') {
       caida = Math.sqrt(3) * corrienteNum * 0.0175 * longitudNum / seccionNum;
     } else { // DC
