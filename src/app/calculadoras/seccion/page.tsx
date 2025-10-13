@@ -3,6 +3,16 @@
 import { useState } from 'react';
 import Link from 'next/link';
 
+interface CalculationResult {
+  corrienteDiseño: number;
+  seccionPorCorriente: number;
+  seccionPorCaida: number;
+  seccionRecomendada: number;
+  capacidadConductor: number;
+  caidaReal: number;
+  id: number;
+}
+
 export default function CalculoSeccion() {
   // Estados para los campos del formulario
   const [tipoInstalacion, setTipoInstalacion] = useState('monofasica');
@@ -16,26 +26,20 @@ export default function CalculoSeccion() {
   const [metodoInstalacion, setMetodoInstalacion] = useState('B1');
   const [caidaMaxima, setCaidaMaxima] = useState('3');
   
-  // Estados para los resultados
-  const [corrienteDiseño, setCorrienteDiseño] = useState<number | null>(null);
-  const [seccionPorCorriente, setSeccionPorCorriente] = useState<number | null>(null);
-  const [seccionPorCaida, setSeccionPorCaida] = useState<number | null>(null);
-  const [seccionRecomendada, setSeccionRecomendada] = useState<number | null>(null);
-  const [capacidadConductor, setCapacidadConductor] = useState<number | null>(null);
-  const [caidaReal, setCaidaReal] = useState<number | null>(null);
+  // Estado para el resultado actual
+  const [resultado, setResultado] = useState<CalculationResult | null>(null);
+  
+  // Estado para el historial de resultados
+  const [historial, setHistorial] = useState<CalculationResult[]>([]);
   
   // Función para calcular
   const calcular = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Aquí iría la lógica de cálculo
-    // Por ahora solo mostraremos valores de ejemplo
     const potenciaNum = parseFloat(potencia);
     const tensionNum = parseFloat(tension);
     const factorPotenciaNum = parseFloat(factorPotencia);
-    const longitudNum = parseFloat(longitud);
     
-    // Cálculo de corriente de diseño
     let corriente = 0;
     if (tipoInstalacion === 'monofasica') {
       corriente = potenciaNum / (tensionNum * factorPotenciaNum);
@@ -43,13 +47,24 @@ export default function CalculoSeccion() {
       corriente = potenciaNum / (Math.sqrt(3) * tensionNum * factorPotenciaNum);
     }
     
-    // Valores de ejemplo para los demás resultados
-    setCorrienteDiseño(corriente);
-    setSeccionPorCorriente(2.5);
-    setSeccionPorCaida(4);
-    setSeccionRecomendada(4);
-    setCapacidadConductor(32);
-    setCaidaReal(2.1);
+    const nuevoResultado: CalculationResult = {
+      corrienteDiseño: corriente,
+      seccionPorCorriente: 2.5, // Valor de ejemplo
+      seccionPorCaida: 4, // Valor de ejemplo
+      seccionRecomendada: 4, // Valor de ejemplo
+      capacidadConductor: 32, // Valor de ejemplo
+      caidaReal: 2.1, // Valor de ejemplo
+      id: Date.now(),
+    };
+    
+    setResultado(nuevoResultado);
+  };
+
+  const guardarResultado = () => {
+    if (resultado) {
+      setHistorial([resultado, ...historial]);
+      alert('Resultado guardado en el historial.');
+    }
   };
   
   // Función para generar reporte
@@ -72,13 +87,13 @@ export default function CalculoSeccion() {
       </div>
       
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Formulario */}
-        <div className="lg:col-span-2">
+        {/* Columna principal: Formulario y Resultados */}
+        <div className="lg:col-span-2 space-y-8">
           <div className="card">
             <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Datos de entrada</h2>
-            
             <form onSubmit={calcular} className="space-y-4">
-              {/* Tipo de instalación */}
+              {/* ... (campos del formulario sin cambios) ... */}
+               {/* Tipo de instalación */}
               <div>
                 <label className="form-label">Tipo de instalación</label>
                 <div className="flex space-x-4">
@@ -244,72 +259,95 @@ export default function CalculoSeccion() {
                   required
                 />
               </div>
-              
               <div className="flex space-x-4 pt-4">
                 <button type="submit" className="btn btn-primary">
                   Calcular
                 </button>
-                <button type="button" onClick={generarReporte} className="btn btn-secondary">
-                  Generar reporte
-                </button>
-                <button type="button" onClick={guardarProyecto} className="btn btn-outline">
-                  Guardar proyecto
-                </button>
               </div>
             </form>
           </div>
-        </div>
-        
-        {/* Resultados */}
-        <div>
-          <div className="card">
-            <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Resultados</h2>
-            
-            {corrienteDiseño !== null ? (
+
+          {/* Resultados */}
+          {resultado && (
+            <div className="card">
+              <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Resultados del Cálculo</h2>
               <div className="space-y-4">
-                <div>
+                 <div>
                   <h3 className="text-md font-medium text-gray-700 dark:text-gray-300">Corriente de diseño</h3>
-                  <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{corrienteDiseño.toFixed(2)} A</p>
+                  <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{resultado.corrienteDiseño.toFixed(2)} A</p>
                 </div>
                 
                 <div>
                   <h3 className="text-md font-medium text-gray-700 dark:text-gray-300">Sección por capacidad de corriente</h3>
-                  <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{seccionPorCorriente} mm²</p>
+                  <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{resultado.seccionPorCorriente} mm²</p>
                 </div>
                 
                 <div>
                   <h3 className="text-md font-medium text-gray-700 dark:text-gray-300">Sección por caída de tensión</h3>
-                  <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{seccionPorCaida} mm²</p>
+                  <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{resultado.seccionPorCaida} mm²</p>
                 </div>
                 
                 <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
                   <h3 className="text-md font-medium text-gray-700 dark:text-gray-300">Sección recomendada</h3>
-                  <p className="text-2xl font-bold text-green-600 dark:text-green-400">{seccionRecomendada} mm²</p>
+                  <p className="text-2xl font-bold text-green-600 dark:text-green-400">{resultado.seccionRecomendada} mm²</p>
                 </div>
                 
                 <div>
                   <h3 className="text-md font-medium text-gray-700 dark:text-gray-300">Capacidad de corriente del conductor</h3>
-                  <p className="text-xl font-bold text-gray-800 dark:text-gray-200">{capacidadConductor} A</p>
+                  <p className="text-xl font-bold text-gray-800 dark:text-gray-200">{resultado.capacidadConductor} A</p>
                 </div>
                 
                 <div>
                   <h3 className="text-md font-medium text-gray-700 dark:text-gray-300">Caída de tensión real</h3>
-                  <p className="text-xl font-bold text-gray-800 dark:text-gray-200">{caidaReal}%</p>
-                  {caidaReal <= parseFloat(caidaMaxima) ? (
+                  <p className="text-xl font-bold text-gray-800 dark:text-gray-200">{resultado.caidaReal}%</p>
+                  {resultado.caidaReal <= parseFloat(caidaMaxima) ? (
                     <p className="text-green-600 dark:text-green-400 text-sm">✓ Cumple con la normativa</p>
                   ) : (
                     <p className="text-red-600 dark:text-red-400 text-sm">✗ No cumple con la normativa</p>
                   )}
                 </div>
               </div>
-            ) : (
-              <div className="text-center py-8">
-                <p className="text-gray-500 dark:text-gray-400">Complete el formulario y haga clic en "Calcular" para ver los resultados.</p>
+              <div className="flex space-x-4 pt-6">
+                <button onClick={guardarResultado} className="btn btn-secondary">
+                  Guardar Resultado
+                </button>
+                <button onClick={generarReporte} className="btn btn-outline">
+                  Añadir a Reporte
+                </button>
               </div>
+            </div>
+          )}
+        </div>
+        
+        {/* Columna Derecha: Historial */}
+        <div className="space-y-6">
+          <div className="card">
+            <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Historial de Cálculos</h2>
+            {historial.length > 0 ? (
+              <div className="space-y-4">
+                {historial.map((item) => (
+                  <div key={item.id} className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <p className="font-semibold">Sección: {item.seccionRecomendada} mm²</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Corriente: {item.corrienteDiseño.toFixed(2)} A, ΔV: {item.caidaReal}%</p>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-gray-500 dark:text-gray-400">No hay resultados guardados.</p>
             )}
           </div>
-          
-          <div className="mt-6">
+          <div className="card">
+             <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Proyecto</h2>
+             <div className="flex space-x-4">
+                <button onClick={generarReporte} className="btn btn-primary w-full">
+                  Generar Reporte
+                </button>
+                <button onClick={guardarProyecto} className="btn btn-outline w-full">
+                  Guardar
+                </button>
+              </div>
+          </div>
+           <div className="mt-6">
             <Link href="/calculadoras" className="text-blue-500 hover:text-blue-600 inline-flex items-center">
               <svg className="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />

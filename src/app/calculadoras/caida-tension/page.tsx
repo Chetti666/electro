@@ -3,6 +3,15 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 
+interface CalculationResult {
+  corrienteDiseño: number;
+  resistenciaConductor: number;
+  caidaAbsoluta: number;
+  caidaPorcentual: number;
+  cumpleNormativa: boolean;
+  id: number;
+}
+
 export default function CaidaTension() {
   // Estados para los campos del formulario
   const [tipoCircuito, setTipoCircuito] = useState('monofasico');
@@ -17,13 +26,12 @@ export default function CaidaTension() {
   const [temperatura, setTemperatura] = useState('70');
   const [caidaMaxima, setCaidaMaxima] = useState('3');
   
-  // Estados para los resultados
-  const [corrienteDiseño, setCorrienteDiseño] = useState<number | null>(null);
-  const [resistenciaConductor, setResistenciaConductor] = useState<number | null>(null);
-  const [caidaAbsoluta, setCaidaAbsoluta] = useState<number | null>(null);
-  const [caidaPorcentual, setCaidaPorcentual] = useState<number | null>(null);
-  const [cumpleNormativa, setCumpleNormativa] = useState<boolean | null>(null);
+  // Estado para el resultado actual
+  const [resultado, setResultado] = useState<CalculationResult | null>(null);
   
+  // Estado para el historial de resultados
+  const [historial, setHistorial] = useState<CalculationResult[]>([]);
+
   // Sincronizar campos de potencia y corriente
   useEffect(() => {
     if (usarPotencia && potencia && tension && factorPotencia) {
@@ -63,17 +71,13 @@ export default function CaidaTension() {
   const calcular = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Aquí iría la lógica de cálculo real
-    // Por ahora solo mostraremos valores de ejemplo
     const corrienteNum = parseFloat(corriente);
     const longitudNum = parseFloat(longitud);
     const seccionNum = parseFloat(seccion);
     const tensionNum = parseFloat(tension);
     const caidaMaximaNum = parseFloat(caidaMaxima);
     
-    // Valores de ejemplo para los resultados
-    setCorrienteDiseño(corrienteNum);
-    setResistenciaConductor(0.0175 * longitudNum / seccionNum); // Ejemplo simplificado
+    const resistencia = 0.0175 * longitudNum / seccionNum; // Ejemplo simplificado
     
     let caida = 0;
     if (tipoCircuito === 'monofasico') {
@@ -84,10 +88,25 @@ export default function CaidaTension() {
       caida = 2 * corrienteNum * 0.0175 * longitudNum / seccionNum;
     }
     
-    setCaidaAbsoluta(caida);
     const caidaPorcentaje = (caida / tensionNum) * 100;
-    setCaidaPorcentual(caidaPorcentaje);
-    setCumpleNormativa(caidaPorcentaje <= caidaMaximaNum);
+
+    const nuevoResultado: CalculationResult = {
+      corrienteDiseño: corrienteNum,
+      resistenciaConductor: resistencia,
+      caidaAbsoluta: caida,
+      caidaPorcentual: caidaPorcentaje,
+      cumpleNormativa: caidaPorcentaje <= caidaMaximaNum,
+      id: Date.now(),
+    };
+    
+    setResultado(nuevoResultado);
+  };
+
+  const guardarResultado = () => {
+    if (resultado) {
+      setHistorial([resultado, ...historial]);
+      alert('Resultado guardado en el historial.');
+    }
   };
   
   // Función para generar reporte
@@ -110,12 +129,12 @@ export default function CaidaTension() {
       </div>
       
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Formulario */}
-        <div className="lg:col-span-2">
+        {/* Columna principal: Formulario y Resultados */}
+        <div className="lg:col-span-2 space-y-8">
           <div className="card">
             <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Datos de entrada</h2>
-            
             <form onSubmit={calcular} className="space-y-4">
+              {/* ... (campos del formulario sin cambios) ... */}
               {/* Tipo de circuito */}
               <div>
                 <label className="form-label">Tipo de circuito</label>
@@ -317,72 +336,90 @@ export default function CaidaTension() {
                   required
                 />
               </div>
-              
-              <div className="flex flex-wrap gap-4 pt-4">
+              <div className="flex space-x-4 pt-4">
                 <button type="submit" className="btn btn-primary">
                   Calcular
-                </button>
-                <button type="button" onClick={generarReporte} className="btn btn-secondary">
-                  Generar reporte
-                </button>
-                <button type="button" onClick={guardarProyecto} className="btn btn-outline">
-                  Guardar proyecto
                 </button>
               </div>
             </form>
           </div>
-        </div>
-        
-        {/* Resultados */}
-        <div>
-          <div className="card">
-            <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Resultados</h2>
-            
-            {corrienteDiseño !== null ? (
+
+          {/* Resultados */}
+          {resultado && (
+            <div className="card">
+              <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Resultados del Cálculo</h2>
               <div className="space-y-4">
                 <div>
                   <h3 className="text-md font-medium text-gray-700 dark:text-gray-300">Corriente de diseño</h3>
-                  <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{corrienteDiseño.toFixed(2)} A</p>
+                  <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{resultado.corrienteDiseño.toFixed(2)} A</p>
                 </div>
                 
                 <div>
                   <h3 className="text-md font-medium text-gray-700 dark:text-gray-300">Resistencia del conductor</h3>
-                  <p className="text-xl font-bold text-gray-800 dark:text-gray-200">{resistenciaConductor?.toFixed(4)} Ω</p>
+                  <p className="text-xl font-bold text-gray-800 dark:text-gray-200">{resultado.resistenciaConductor.toFixed(4)} Ω</p>
                 </div>
                 
                 <div>
                   <h3 className="text-md font-medium text-gray-700 dark:text-gray-300">Caída de tensión absoluta</h3>
-                  <p className="text-xl font-bold text-gray-800 dark:text-gray-200">{caidaAbsoluta?.toFixed(2)} V</p>
+                  <p className="text-xl font-bold text-gray-800 dark:text-gray-200">{resultado.caidaAbsoluta.toFixed(2)} V</p>
                 </div>
                 
                 <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
                   <h3 className="text-md font-medium text-gray-700 dark:text-gray-300">Caída de tensión porcentual</h3>
-                  <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{caidaPorcentual?.toFixed(2)}%</p>
-                </div>
-                
-                <div>
-                  <h3 className="text-md font-medium text-gray-700 dark:text-gray-300">Caída máxima permitida</h3>
-                  <p className="text-xl font-bold text-gray-800 dark:text-gray-200">{caidaMaxima}%</p>
+                  <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{resultado.caidaPorcentual.toFixed(2)}%</p>
                 </div>
                 
                 <div>
                   <h3 className="text-md font-medium text-gray-700 dark:text-gray-300">Verificación normativa</h3>
-                  {cumpleNormativa ? (
-                    <p className="text-green-600 dark:text-green-400">✓ Cumple con la normativa</p>
+                  {resultado.cumpleNormativa ? (
+                    <p className="text-green-600 dark:text-green-400 text-sm">✓ Cumple con la normativa ({caidaMaxima}%)</p>
                   ) : (
-                    <p className="text-red-600 dark:text-red-400">✗ No cumple con la normativa</p>
+                    <p className="text-red-600 dark:text-red-400 text-sm">✗ No cumple con la normativa ({caidaMaxima}%)</p>
                   )}
                 </div>
               </div>
-            ) : (
-              <div className="text-center py-8">
-                <p className="text-gray-500 dark:text-gray-400">Complete el formulario y haga clic en "Calcular" para ver los resultados.</p>
+              <div className="flex space-x-4 pt-6">
+                <button onClick={guardarResultado} className="btn btn-secondary">
+                  Guardar Resultado
+                </button>
+                <button onClick={generarReporte} className="btn btn-outline">
+                  Añadir a Reporte
+                </button>
               </div>
+            </div>
+          )}
+        </div>
+        
+        {/* Columna Derecha: Historial */}
+        <div className="space-y-6">
+          <div className="card">
+            <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Historial de Cálculos</h2>
+            {historial.length > 0 ? (
+              <div className="space-y-4">
+                {historial.map((item) => (
+                  <div key={item.id} className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <p className="font-semibold">ΔV: {item.caidaPorcentual.toFixed(2)}%</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Corriente: {item.corrienteDiseño.toFixed(2)} A</p>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-gray-500 dark:text-gray-400">No hay resultados guardados.</p>
             )}
           </div>
-          
-          <div className="mt-6">
-            <Link href="/calculadoras" className="text-emerald-500 hover:text-emerald-600 inline-flex items-center">
+          <div className="card">
+             <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Proyecto</h2>
+             <div className="flex space-x-4">
+                <button onClick={generarReporte} className="btn btn-primary w-full">
+                  Generar Reporte
+                </button>
+                <button onClick={guardarProyecto} className="btn btn-outline w-full">
+                  Guardar
+                </button>
+              </div>
+          </div>
+           <div className="mt-6">
+            <Link href="/calculadoras" className="text-blue-500 hover:text-blue-600 inline-flex items-center">
               <svg className="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
