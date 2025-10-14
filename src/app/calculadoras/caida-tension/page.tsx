@@ -1,425 +1,268 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, FormEvent } from 'react';
 import Link from 'next/link';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler,
+} from 'chart.js';
+import annotationPlugin from 'chartjs-plugin-annotation';
+import { Line } from 'react-chartjs-2';
 
-interface CalculationResult {
-  corrienteDiseño: number;
-  resistenciaConductor: number;
-  caidaAbsoluta: number;
-  caidaPorcentual: number;
-  cumpleNormativa: boolean;
-  id: number;
-}
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler,
+  annotationPlugin
+);
 
-export default function CaidaTension() {
+export default function CalculoVpPage() {
   // Estados para los campos del formulario
-  const [tipoCircuito, setTipoCircuito] = useState('monofasico');
-  const [usarPotencia, setUsarPotencia] = useState(true);
-  const [potencia, setPotencia] = useState('');
-  const [corriente, setCorriente] = useState('');
-  const [tension, setTension] = useState('');
-  const [factorPotencia, setFactorPotencia] = useState('0.95');
-  const [longitud, setLongitud] = useState('');
+  const [tipoSistema, setTipoSistema] = useState('monofasico');
   const [seccion, setSeccion] = useState('');
-  const [material, setMaterial] = useState('cobre');
-  const [temperatura, setTemperatura] = useState('70');
-  const [caidaMaxima, setCaidaMaxima] = useState('3');
+  const [longitudMaxima, setLongitudMaxima] = useState('');
+  const [corriente, setCorriente] = useState('');
   
-  // Estado para el resultado actual
-  const [resultado, setResultado] = useState<CalculationResult | null>(null);
-  
-  // Estado para el historial de resultados
-  const [historial, setHistorial] = useState<CalculationResult[]>([]);
-
-  // Sincronizar campos de potencia y corriente
-  useEffect(() => {
-    if (usarPotencia && potencia && tension && factorPotencia) {
-      const potenciaNum = parseFloat(potencia);
-      const tensionNum = parseFloat(tension);
-      const factorPotenciaNum = parseFloat(factorPotencia);
-      
-      let corrienteCalculada = 0;
-      if (tipoCircuito === 'monofasico') {
-        corrienteCalculada = potenciaNum / (tensionNum * factorPotenciaNum);
-      } else if (tipoCircuito === 'trifasico') {
-        corrienteCalculada = potenciaNum / (Math.sqrt(3) * tensionNum * factorPotenciaNum);
-      } else { // DC
-        corrienteCalculada = potenciaNum / tensionNum;
-      }
-      
-      setCorriente(corrienteCalculada.toFixed(2));
-    } else if (!usarPotencia && corriente && tension && factorPotencia) {
-      const corrienteNum = parseFloat(corriente);
-      const tensionNum = parseFloat(tension);
-      const factorPotenciaNum = parseFloat(factorPotencia);
-      
-      let potenciaCalculada = 0;
-      if (tipoCircuito === 'monofasico') {
-        potenciaCalculada = corrienteNum * tensionNum * factorPotenciaNum;
-      } else if (tipoCircuito === 'trifasico') {
-        potenciaCalculada = corrienteNum * Math.sqrt(3) * tensionNum * factorPotenciaNum;
-      } else { // DC
-        potenciaCalculada = corrienteNum * tensionNum;
-      }
-      
-      setPotencia(potenciaCalculada.toFixed(2));
-    }
-  }, [usarPotencia, tipoCircuito, potencia, corriente, tension, factorPotencia]);
+  // Estados para los resultados
+  const [resultadoValor, setResultadoValor] = useState<string | null>(null);
+  const [longitudFinal, setLongitudFinal] = useState<string | null>(null);
+  const [advertenciaCruce, setAdvertenciaCruce] = useState<string | null>(null);
+  const [chartData, setChartData] = useState<any>(null);
+  const [chartOptions, setChartOptions] = useState<any>(null);
   
   // Función para calcular
-  const calcular = (e: React.FormEvent) => {
+  const calcularYGraficarVp = (e: FormEvent) => {
     e.preventDefault();
-    
-    const corrienteNum = parseFloat(corriente);
-    const longitudNum = parseFloat(longitud);
-    const seccionNum = parseFloat(seccion);
-    const tensionNum = parseFloat(tension);
-    const caidaMaximaNum = parseFloat(caidaMaxima);
-    
-    const resistencia = 0.0175 * longitudNum / seccionNum; // Ejemplo simplificado
-    
-    let caida = 0;
-    if (tipoCircuito === 'monofasico') {
-      caida = (2 * corrienteNum * 0.0175 * longitudNum) / seccionNum;
-    } else if (tipoCircuito === 'trifasico') {
-      caida = Math.sqrt(3) * corrienteNum * 0.0175 * longitudNum / seccionNum;
-    } else { // DC
-      caida = 2 * corrienteNum * 0.0175 * longitudNum / seccionNum;
-    }
-    
-    const caidaPorcentaje = (caida / tensionNum) * 100;
 
-    const nuevoResultado: CalculationResult = {
-      corrienteDiseño: corrienteNum,
-      resistenciaConductor: resistencia,
-      caidaAbsoluta: caida,
-      caidaPorcentual: caidaPorcentaje,
-      cumpleNormativa: caidaPorcentaje <= caidaMaximaNum,
-      id: Date.now(),
+    const S = parseFloat(seccion);
+    const L_max = parseFloat(longitudMaxima);
+    const I = parseFloat(corriente);
+
+    if (isNaN(S) || isNaN(L_max) || isNaN(I) || S <= 0 || L_max <= 0) {
+      alert("Por favor, ingrese valores válidos y mayores que cero.");
+      return;
+    }
+
+    const tensionNominal = (tipoSistema === 'monofasico') ? 220 : 380;
+    const limiteVp = tensionNominal * 0.03;
+    const constanteK = (tipoSistema === 'monofasico') ? 2 * 0.018 : Math.sqrt(3) * 0.018;
+
+    const vp_final = (constanteK * L_max * I) / S;
+
+    setLongitudFinal(L_max.toString());
+    setResultadoValor(`${vp_final.toFixed(2)} Volts`);
+
+    let longitudCruce: number | null = null;
+    if (vp_final > limiteVp) {
+      longitudCruce = (limiteVp * S) / (constanteK * I);
+      setAdvertenciaCruce(`La sección no cumple. El límite del 3% se alcanza a los <span>${longitudCruce.toFixed(2)} metros</span>.`);
+    } else {
+      setAdvertenciaCruce(null);
+    }
+
+    let dataPoints = [];
+    const numeroDePuntos = Math.min(L_max, 100);
+    for (let i = 0; i <= numeroDePuntos; i++) {
+      const l_actual = (L_max / numeroDePuntos) * i;
+      dataPoints.push({
+        x: l_actual,
+        y: (constanteK * l_actual * I) / S
+      });
+    }
+
+    if (longitudCruce !== null) {
+      dataPoints.push({ x: longitudCruce, y: limiteVp });
+      dataPoints.sort((a, b) => a.x - b.x);
+    }
+
+    const etiquetas = dataPoints.map(p => p.x.toFixed(2));
+    const datosVp = dataPoints.map(p => p.y);
+
+    setChartData({
+      labels: etiquetas,
+      datasets: [{
+        label: 'Caída de Tensión (Vp)',
+        data: datosVp,
+        borderColor: 'rgba(40, 167, 69, 1)',
+        backgroundColor: 'rgba(40, 167, 69, 0.2)',
+        fill: true,
+        tension: 0.1
+      }]
+    });
+
+    const annotations: any = {
+      limiteHorizontal: {
+        type: 'line',
+        yMin: limiteVp,
+        yMax: limiteVp,
+        borderColor: 'red',
+        borderWidth: 2,
+        borderDash: [10, 5],
+        label: {
+          content: `Límite 3% (${limiteVp.toFixed(2)} V)`,
+          display: true,
+          position: 'end',
+          backgroundColor: 'rgba(255, 99, 132, 0.8)'
+        }
+      },
+      puntoInicial: {
+        type: 'point',
+        xValue: etiquetas[0],
+        yValue: datosVp[0],
+        backgroundColor: 'rgba(0, 0, 0, 0.7)',
+        radius: 5,
+      },
+      labelInicial: {
+        type: 'label',
+        xValue: etiquetas[0],
+        yValue: datosVp[0],
+        content: ['0 m', `${datosVp[0].toFixed(2)} V`],
+        font: { size: 10 },
+        xAdjust: -20,
+        yAdjust: -20,
+      },
+      puntoFinal: {
+        type: 'point',
+        xValue: etiquetas[etiquetas.length - 1],
+        yValue: datosVp[datosVp.length - 1],
+        backgroundColor: 'rgba(0, 0, 0, 0.7)',
+        radius: 5,
+      },
+      labelFinal: {
+        type: 'label',
+        xValue: etiquetas[etiquetas.length - 1],
+        yValue: datosVp[datosVp.length - 1],
+        content: [`${L_max.toFixed(2)} m`, `${vp_final.toFixed(2)} V`],
+        font: { size: 10 },
+        xAdjust: 20,
+        yAdjust: 20,
+      }
     };
-    
-    setResultado(nuevoResultado);
-  };
 
-  const guardarResultado = () => {
-    if (resultado) {
-      setHistorial([resultado, ...historial]);
-      alert('Resultado guardado en el historial.');
+    if (longitudCruce !== null) {
+      const cruceX = longitudCruce;
+      annotations.limiteVertical = {
+        type: 'line',
+        xMin: cruceX,
+        xMax: cruceX,
+        borderColor: 'orange',
+        borderWidth: 2,
+        borderDash: [5, 5],
+      };
+      annotations.puntoCruce = {
+        type: 'point',
+        xValue: cruceX,
+        yValue: limiteVp,
+        backgroundColor: 'red',
+        borderColor: 'darkred',
+        borderWidth: 2,
+        radius: 6,
+      };
+      annotations.labelCruce = {
+        type: 'label',
+        xValue: cruceX,
+        yValue: limiteVp,
+        content: `${cruceX.toFixed(2)} m`,
+        font: { size: 10 },
+        backgroundColor: 'rgba(255, 165, 0, 0.8)',
+        yAdjust: -20
+      };
     }
-  };
-  
-  // Función para generar reporte
-  const generarReporte = () => {
-    alert('Funcionalidad de reporte en desarrollo');
-  };
-  
-  // Función para guardar proyecto
-  const guardarProyecto = () => {
-    alert('Funcionalidad de guardar proyecto en desarrollo');
+
+    setChartOptions({
+      responsive: true,
+      plugins: {
+        title: { display: true, text: 'Evolución de la Caída de Tensión vs. Longitud' },
+        annotation: { annotations: annotations }
+      },
+      scales: {
+        x: { title: { display: true, text: 'Longitud (Metros)' } },
+        y: { title: { display: true, text: 'Caída de Tensión (Volts)' }, beginAtZero: true }
+      }
+    });
   };
 
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Cálculo de Caída de Tensión</h1>
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Calculadora de Caída de Tensión (Vp)</h1>
         <p className="text-gray-600 dark:text-gray-400">
-          Calcula la caída de tensión en circuitos eléctricos según distancia y carga.
+          Visualiza la caída de tensión a lo largo de un conductor y su límite normativo.
         </p>
       </div>
       
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Columna principal: Formulario y Resultados */}
-        <div className="lg:col-span-2 space-y-8">
+        {/* Formulario */}
+        <div className="lg:col-span-1">
           <div className="card">
             <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Datos de entrada</h2>
-            <form onSubmit={calcular} className="space-y-4">
-              {/* ... (campos del formulario sin cambios) ... */}
-              {/* Tipo de circuito */}
+            
+            <form onSubmit={calcularYGraficarVp} className="space-y-4">
               <div>
-                <label className="form-label">Tipo de circuito</label>
-                <div className="flex flex-wrap gap-4">
-                  <label className="inline-flex items-center">
-                    <input
-                      type="radio"
-                      className="form-radio"
-                      name="tipoCircuito"
-                      value="monofasico"
-                      checked={tipoCircuito === 'monofasico'}
-                      onChange={(e) => setTipoCircuito(e.target.value)}
-                    />
-                    <span className="ml-2">Monofásico</span>
-                  </label>
-                  <label className="inline-flex items-center">
-                    <input
-                      type="radio"
-                      className="form-radio"
-                      name="tipoCircuito"
-                      value="trifasico"
-                      checked={tipoCircuito === 'trifasico'}
-                      onChange={(e) => setTipoCircuito(e.target.value)}
-                    />
-                    <span className="ml-2">Trifásico</span>
-                  </label>
-                  <label className="inline-flex items-center">
-                    <input
-                      type="radio"
-                      className="form-radio"
-                      name="tipoCircuito"
-                      value="dc"
-                      checked={tipoCircuito === 'dc'}
-                      onChange={(e) => setTipoCircuito(e.target.value)}
-                    />
-                    <span className="ml-2">DC</span>
-                  </label>
-                </div>
-              </div>
-              
-              {/* Selección de entrada: Potencia o Corriente */}
-              <div>
-                <label className="form-label">Datos de entrada</label>
-                <div className="flex space-x-4">
-                  <label className="inline-flex items-center">
-                    <input
-                      type="radio"
-                      className="form-radio"
-                      name="tipoEntrada"
-                      checked={usarPotencia}
-                      onChange={() => setUsarPotencia(true)}
-                    />
-                    <span className="ml-2">Potencia</span>
-                  </label>
-                  <label className="inline-flex items-center">
-                    <input
-                      type="radio"
-                      className="form-radio"
-                      name="tipoEntrada"
-                      checked={!usarPotencia}
-                      onChange={() => setUsarPotencia(false)}
-                    />
-                    <span className="ml-2">Corriente</span>
-                  </label>
-                </div>
-              </div>
-              
-              {/* Potencia */}
-              <div className={!usarPotencia ? 'opacity-50' : ''}>
-                <label htmlFor="potencia" className="form-label">
-                  Potencia {tipoCircuito !== 'dc' ? '(W)' : '(W)'}
-                </label>
-                <input
-                  type="number"
-                  id="potencia"
-                  className="form-input"
-                  value={potencia}
-                  onChange={(e) => setPotencia(e.target.value)}
-                  placeholder="Ej: 5000"
-                  disabled={!usarPotencia}
-                  required={usarPotencia}
-                />
-              </div>
-              
-              {/* Corriente */}
-              <div className={usarPotencia ? 'opacity-50' : ''}>
-                <label htmlFor="corriente" className="form-label">Corriente (A)</label>
-                <input
-                  type="number"
-                  id="corriente"
-                  className="form-input"
-                  value={corriente}
-                  onChange={(e) => setCorriente(e.target.value)}
-                  placeholder="Ej: 16"
-                  disabled={usarPotencia}
-                  required={!usarPotencia}
-                />
-              </div>
-              
-              {/* Tensión */}
-              <div>
-                <label htmlFor="tension" className="form-label">Tensión (V)</label>
-                <input
-                  type="number"
-                  id="tension"
-                  className="form-input"
-                  value={tension}
-                  onChange={(e) => setTension(e.target.value)}
-                  placeholder={tipoCircuito === 'monofasico' ? 'Ej: 230' : tipoCircuito === 'trifasico' ? 'Ej: 400' : 'Ej: 12'}
-                  required
-                />
-              </div>
-              
-              {/* Factor de potencia (solo para AC) */}
-              {tipoCircuito !== 'dc' && (
-                <div>
-                  <label htmlFor="factorPotencia" className="form-label">Factor de potencia</label>
-                  <input
-                    type="number"
-                    id="factorPotencia"
-                    className="form-input"
-                    value={factorPotencia}
-                    onChange={(e) => setFactorPotencia(e.target.value)}
-                    step="0.01"
-                    min="0"
-                    max="1"
-                    required
-                  />
-                </div>
-              )}
-              
-              {/* Longitud */}
-              <div>
-                <label htmlFor="longitud" className="form-label">Longitud del cable (m)</label>
-                <input
-                  type="number"
-                  id="longitud"
-                  className="form-input"
-                  value={longitud}
-                  onChange={(e) => setLongitud(e.target.value)}
-                  placeholder="Ej: 25"
-                  required
-                />
-              </div>
-              
-              {/* Sección */}
-              <div>
-                <label htmlFor="seccion" className="form-label">Sección del conductor (mm²)</label>
-                <input
-                  type="number"
-                  id="seccion"
-                  className="form-input"
-                  value={seccion}
-                  onChange={(e) => setSeccion(e.target.value)}
-                  placeholder="Ej: 2.5"
-                  required
-                />
-              </div>
-              
-              {/* Material del conductor */}
-              <div>
-                <label htmlFor="material" className="form-label">Material del conductor</label>
-                <select
-                  id="material"
-                  className="form-select"
-                  value={material}
-                  onChange={(e) => setMaterial(e.target.value)}
-                  required
-                >
-                  <option value="cobre">Cobre</option>
-                  <option value="aluminio">Aluminio</option>
+                <label htmlFor="tipoCalculo" className="form-label">Tipo de Sistema:</label>
+                <select id="tipoCalculo" value={tipoSistema} onChange={(e) => setTipoSistema(e.target.value)} className="form-select">
+                  <option value="monofasico">Monofásico (220V)</option>
+                  <option value="trifasico">Trifásico (380V)</option>
                 </select>
               </div>
               
-              {/* Temperatura de operación */}
               <div>
-                <label htmlFor="temperatura" className="form-label">Temperatura de operación (°C)</label>
-                <input
-                  type="number"
-                  id="temperatura"
-                  className="form-input"
-                  value={temperatura}
-                  onChange={(e) => setTemperatura(e.target.value)}
-                  required
-                />
+                <label htmlFor="S" className="form-label">Sección del Conductor (S):</label>
+                <input type="number" id="S" value={seccion} onChange={(e) => setSeccion(e.target.value)} placeholder="mm²" className="form-input" />
               </div>
               
-              {/* Caída de tensión máxima */}
               <div>
-                <label htmlFor="caidaMaxima" className="form-label">Caída de tensión máxima (%)</label>
-                <input
-                  type="number"
-                  id="caidaMaxima"
-                  className="form-input"
-                  value={caidaMaxima}
-                  onChange={(e) => setCaidaMaxima(e.target.value)}
-                  step="0.1"
-                  min="0"
-                  required
-                />
+                <label htmlFor="L" className="form-label">Longitud Máxima (L):</label>
+                <input type="number" id="L" value={longitudMaxima} onChange={(e) => setLongitudMaxima(e.target.value)} placeholder="Metros" className="form-input" />
               </div>
-              <div className="flex space-x-4 pt-4">
+              
+              <div>
+                <label htmlFor="I" className="form-label">Corriente (I):</label>
+                <input type="number" id="I" value={corriente} onChange={(e) => setCorriente(e.target.value)} placeholder="Amperes" className="form-input" />
+              </div>
+              
+              <div className="pt-4">
                 <button type="submit" className="btn btn-primary">
-                  Calcular
+                  Calcular y Graficar
                 </button>
               </div>
             </form>
           </div>
-
-          {/* Resultados */}
-          {resultado && (
-            <div className="card">
-              <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Resultados del Cálculo</h2>
-              <div className="space-y-4">
-                <div>
-                  <h3 className="text-md font-medium text-gray-700 dark:text-gray-300">Corriente de diseño</h3>
-                  <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{resultado.corrienteDiseño.toFixed(2)} A</p>
-                </div>
-                
-                <div>
-                  <h3 className="text-md font-medium text-gray-700 dark:text-gray-300">Resistencia del conductor</h3>
-                  <p className="text-xl font-bold text-gray-800 dark:text-gray-200">{resultado.resistenciaConductor.toFixed(4)} Ω</p>
-                </div>
-                
-                <div>
-                  <h3 className="text-md font-medium text-gray-700 dark:text-gray-300">Caída de tensión absoluta</h3>
-                  <p className="text-xl font-bold text-gray-800 dark:text-gray-200">{resultado.caidaAbsoluta.toFixed(2)} V</p>
-                </div>
-                
-                <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
-                  <h3 className="text-md font-medium text-gray-700 dark:text-gray-300">Caída de tensión porcentual</h3>
-                  <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{resultado.caidaPorcentual.toFixed(2)}%</p>
-                </div>
-                
-                <div>
-                  <h3 className="text-md font-medium text-gray-700 dark:text-gray-300">Verificación normativa</h3>
-                  {resultado.cumpleNormativa ? (
-                    <p className="text-green-600 dark:text-green-400 text-sm">✓ Cumple con la normativa ({caidaMaxima}%)</p>
-                  ) : (
-                    <p className="text-red-600 dark:text-red-400 text-sm">✗ No cumple con la normativa ({caidaMaxima}%)</p>
-                  )}
-                </div>
-              </div>
-              <div className="flex space-x-4 pt-6">
-                <button onClick={guardarResultado} className="btn btn-secondary">
-                  Guardar Resultado
-                </button>
-                <button onClick={generarReporte} className="btn btn-outline">
-                  Añadir a Reporte
-                </button>
-              </div>
-            </div>
-          )}
         </div>
         
-        {/* Columna Derecha: Historial */}
-        <div className="space-y-6">
+        {/* Resultados */}
+        <div className="lg:col-span-2">
           <div className="card">
-            <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Historial de Cálculos</h2>
-            {historial.length > 0 ? (
-              <div className="space-y-4">
-                {historial.map((item) => (
-                  <div key={item.id} className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                    <p className="font-semibold">ΔV: {item.caidaPorcentual.toFixed(2)}%</p>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Corriente: {item.corrienteDiseño.toFixed(2)} A</p>
-                  </div>
-                ))}
+            <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Resultados</h2>
+            
+            {resultadoValor && (
+              <div className="results text-center mb-4">
+                <p className="text-lg">Caída de Tensión (Vp) a <span className="font-bold text-emerald-500">{longitudFinal}</span> metros: <span className="font-bold text-emerald-500">{resultadoValor}</span></p>
               </div>
-            ) : (
-              <p className="text-gray-500 dark:text-gray-400">No hay resultados guardados.</p>
             )}
+            {advertenciaCruce && (
+              <div className="warning-message text-center mb-4" dangerouslySetInnerHTML={{ __html: advertenciaCruce }} />
+            )}
+            
+            <div className="mt-4">
+              {chartData ? <Line data={chartData} options={chartOptions} /> : <div className="text-center text-gray-500 py-8">Ingrese los datos para generar el gráfico.</div>}
+            </div>
           </div>
-          <div className="card">
-             <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Proyecto</h2>
-             <div className="flex space-x-4">
-                <button onClick={generarReporte} className="btn btn-primary w-full">
-                  Generar Reporte
-                </button>
-                <button onClick={guardarProyecto} className="btn btn-outline w-full">
-                  Guardar
-                </button>
-              </div>
-          </div>
-           <div className="mt-6">
-            <Link href="/calculadoras" className="text-blue-500 hover:text-blue-600 inline-flex items-center">
+          
+          <div className="mt-6">
+            <Link href="/calculadoras" className="text-emerald-500 hover:text-emerald-600 inline-flex items-center">
               <svg className="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>

@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { ReactNode } from 'react';
 
-type ColorType = 'blue' | 'emerald' | 'amber' | 'purple' | 'green' | 'red';
+export type ColorType = 'blue' | 'emerald' | 'amber' | 'purple' | 'green' | 'red';
 
 interface CalculadoraCardProps {
   id: string;
