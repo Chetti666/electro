@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, FormEvent, ReactNode } from 'react';
+import { useState, useMemo, FormEvent } from 'react';
 import Link from 'next/link';
 import { datosConductores, tablasDeCalculo, metodosInstalacion } from './data';
 
@@ -63,7 +63,7 @@ export default function SeccionRicPage() {
     const metodoActual = selectedConductor.tabla_ref === 'movil' ? 'E' : metodo;
 
     const seccionEncontrada = tablaDeCalculo.find(
-      (c) => c[metodoActual] !== undefined && c[metodoActual] >= corrienteNum
+      (c) => c[metodoActual] !== undefined && typeof c[metodoActual] === 'number' && c[metodoActual] >= corrienteNum
     );
 
     if (seccionEncontrada) {
@@ -73,7 +73,7 @@ export default function SeccionRicPage() {
       setResultado({
         seccion: seccionEncontrada.seccion_mm2,
         equivalente: textoAWG + textoKcmil,
-        corrienteMaxima: seccionEncontrada[metodoActual],
+        corrienteMaxima: seccionEncontrada[metodoActual] as number,
         tablaRef: selectedConductor.tabla_ref === 'movil' ? '4.5' : '4.4',
       });
     } else {

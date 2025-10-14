@@ -140,7 +140,7 @@ export default function CalculadoraCorrientePage() {
 
             {!resultado && !error && (
               <div className="text-center py-8">
-                <p className="text-gray-500 dark:text-gray-400">Complete el formulario y haga clic en "Calcular" para ver los resultados.</p>
+                <p className="text-gray-500 dark:text-gray-400">Complete el formulario y haga clic en &quot;Calcular&quot; para ver los resultados.</p>
               </div>
             )}
 

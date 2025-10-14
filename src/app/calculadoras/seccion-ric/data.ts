@@ -211,7 +211,7 @@ export const datosConductores: Record<string, ConductorData> = {
     }
 };
 
-export const tablasDeCalculo: Record<string, any[]> = {
+export const tablasDeCalculo: Record<string, TablaCalculo[]> = {
     '70C': [{ temp: 70, seccion_mm2: 1.5, A1: 14, B1: 16, E: 19 },
     { temp: 70, seccion_mm2: 2.08, awg: 14, A1: 16, B1: 19, E: 22 },
     { temp: 70, seccion_mm2: 2.5, A1: 18, B1: 21, E: 24 },
@@ -329,6 +329,43 @@ export interface ConductorData {
     cubierta: string;
     tabla_ref: '70C' | '90C' | 'movil' | 'SinTabla';
 }
+
+interface Tabla70C {
+    [key: string]: number | string | undefined;
+    temp: number;
+    seccion_mm2: number;
+    awg?: number | string;
+    kcmil?: number;
+    A1: number;
+    B1: number;
+    E: number;
+}
+
+interface Tabla90C {
+    [key: string]: number | string | undefined;
+    temp: number;
+    seccion_mm2: number;
+    awg?: number | string;
+    kcmil?: number;
+    A1: number;
+    A2: number;
+    B1: number;
+    B2: number;
+    D1: number;
+    D2: number;
+    E: number;
+    F?: number;
+}
+
+interface TablaMovil {
+    [key: string]: number | string | undefined;
+    seccion_mm2: number;
+    awg?: number | string;
+    kcmil?: number;
+    E: number;
+}
+
+export type TablaCalculo = Tabla70C | Tabla90C | TablaMovil;
 
 export const metodosInstalacion = [
     { id: 'A1', label: 'Método A1: Conductores en ductos embutidos' },

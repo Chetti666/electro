@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import Link from "next/link";
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
@@ -49,23 +49,8 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/calculadoras/factor-potencia" className="text-gray-600 hover:text-blue-500 dark:text-gray-400 dark:hover:text-blue-400">
-                  Factor de Potencia
-                </Link>
-              </li>
-              <li>
-                <Link href="/calculadoras/luminico" className="text-gray-600 hover:text-blue-500 dark:text-gray-400 dark:hover:text-blue-400">
-                  Cálculo Lumínico
-                </Link>
-              </li>
-              <li>
-                <Link href="/calculadoras/malla-tierra" className="text-gray-600 hover:text-blue-500 dark:text-gray-400 dark:hover:text-blue-400">
-                  Malla de Tierra
-                </Link>
-              </li>
-              <li>
-                <Link href="/calculadoras/motores" className="text-gray-600 hover:text-blue-500 dark:text-gray-400 dark:hover:text-blue-400">
-                  Cálculo de Motores
+                <Link href="/calculadoras/seccion-ric" className="text-gray-600 hover:text-blue-500 dark:text-gray-400 dark:hover:text-blue-400">
+                  Conductores
                 </Link>
               </li>
             </ul>

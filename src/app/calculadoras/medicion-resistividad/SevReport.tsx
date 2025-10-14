@@ -1,6 +1,7 @@
-"use client";
+'use client';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import Image from 'next/image';
 import Chart, { type Chart as ChartType } from 'chart.js/auto';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
@@ -21,6 +22,10 @@ interface AnnexImage {
   desc: string;
 }
 
+interface DocWithLastTable extends jsPDF {
+  lastAutoTable: { finalY: number };
+}
+
 // --- Componente Principal ---
 export default function SevReport() {
   // Estado para los datos del proyecto
@@ -29,9 +34,9 @@ export default function SevReport() {
   const [operator, setOperator] = useState('');
 
   // Estado para las mediciones de campo
-  const [aVal, setAVal] = useState<number | ''>('');
-  const [lVal, setLVal] = useState<number | ''>('');
-  const [rVal, setRVal] = useState<number | ''>('');
+  const [aVal, setAVal] = useState<number | '' > ('');
+  const [lVal, setLVal] = useState<number | '' > ('');
+  const [rVal, setRVal] = useState<number | '' > ('');
   const [measurements, setMeasurements] = useState<Measurement[]>([]);
   const [editIndex, setEditIndex] = useState<number | null>(null);
 
@@ -336,7 +341,7 @@ export default function SevReport() {
       });
 
       // --- Gráfico ---
-      const chartY = (doc as any).lastAutoTable.finalY + 10;
+      const chartY = (doc as DocWithLastTable).lastAutoTable.finalY + 10;
       doc.setFontSize(16);
       doc.setTextColor(50);
       doc.text("2. Curva de Campo", pageMargin, chartY);
@@ -495,7 +500,7 @@ export default function SevReport() {
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mt-4">
                   {annexImages.map((img, i) => (
                     <div key={i} className="relative group border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
-                      <img src={img.dataUrl} alt="anexo" className="w-full h-32 object-cover" />
+                      <Image src={img.dataUrl} alt="anexo" layout="fill" objectFit="cover" />
                       <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-2 text-xs truncate">
                         {escapeHtml(img.desc || "(sin descripción)")}
                       </div>

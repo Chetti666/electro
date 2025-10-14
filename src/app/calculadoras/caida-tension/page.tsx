@@ -12,8 +12,10 @@ import {
   Tooltip,
   Legend,
   Filler,
+  ChartData,
+  ChartOptions,
 } from 'chart.js';
-import annotationPlugin from 'chartjs-plugin-annotation';
+import annotationPlugin, { AnnotationOptions } from 'chartjs-plugin-annotation';
 import { Line } from 'react-chartjs-2';
 
 ChartJS.register(
@@ -39,8 +41,8 @@ export default function CalculoVpPage() {
   const [resultadoValor, setResultadoValor] = useState<string | null>(null);
   const [longitudFinal, setLongitudFinal] = useState<string | null>(null);
   const [advertenciaCruce, setAdvertenciaCruce] = useState<string | null>(null);
-  const [chartData, setChartData] = useState<any>(null);
-  const [chartOptions, setChartOptions] = useState<any>(null);
+  const [chartData, setChartData] = useState<ChartData<"line"> | null>(null);
+  const [chartOptions, setChartOptions] = useState<ChartOptions<"line">>();
   
   // Función para calcular
   const calcularYGraficarVp = (e: FormEvent) => {
@@ -72,7 +74,7 @@ export default function CalculoVpPage() {
       setAdvertenciaCruce(null);
     }
 
-    let dataPoints = [];
+    const dataPoints: {x: number, y: number}[] = [];
     const numeroDePuntos = Math.min(L_max, 100);
     for (let i = 0; i <= numeroDePuntos; i++) {
       const l_actual = (L_max / numeroDePuntos) * i;
@@ -102,7 +104,7 @@ export default function CalculoVpPage() {
       }]
     });
 
-    const annotations: any = {
+    const annotations: { [key: string]: AnnotationOptions; } = {
       limiteHorizontal: {
         type: 'line',
         yMin: limiteVp,
