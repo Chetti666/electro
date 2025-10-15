@@ -15,8 +15,11 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "ElectroCalc - Calculadora para Técnicos Eléctricos",
+  title: "ElectroCalc",
   description: "Herramienta de cálculos eléctricos para profesionales y técnicos",
+  icons: {
+    icon: '/electrocalc-logo.svg',
+  },
 };
 
 export default function RootLayout({
