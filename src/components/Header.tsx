@@ -36,6 +36,9 @@ export default function Header() {
           <Link href="/acerca" className="text-gray-700 hover:text-blue-500 dark:text-gray-300 dark:hover:text-blue-400">
             Acerca de
           </Link>
+          <Link href="/login" className="text-gray-700 hover:text-blue-500 dark:text-gray-300 dark:hover:text-blue-400">
+            Login
+          </Link>
         </nav>
         
         <button className="md:hidden focus:outline-none">

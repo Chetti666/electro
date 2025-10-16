@@ -34,7 +34,7 @@ export default function Calculadoras() {
     },
     {
       id: 'seccion-ric',
-      title: 'corriente admisible de conductores',
+      title: 'Corriente Admisible de Conductores',
       description: 'La siguiente calculadora te ayudará a determinar la corriente admisible de conductores según la norma RIC, ademas de ver las características de los distintos tipos de conductores.',
       icon: (
         <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -54,7 +54,7 @@ export default function Calculadoras() {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" />
         </svg>
       ),
-      color: 'amber'},
+      color: 'red'},
     {
       id: 'calculadora-corriente',
       title: 'Calculadora General de Corriente',
@@ -65,7 +65,7 @@ export default function Calculadoras() {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" />
         </svg>
       ),
-      color: 'amber'
+      color: 'purple'
     },
     {
       id: 'medicion-resistividad',
@@ -77,7 +77,7 @@ export default function Calculadoras() {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" />
         </svg>
       ),
-      color: 'amber'
+      color: 'green'
     }
   ];
 
