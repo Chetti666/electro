@@ -5,6 +5,19 @@ import Link from 'next/link';
 
 type TipoSistema = 'monofasico' | 'trifasico';
 
+type HistoryItem = {
+  id: number;
+  inputs: {
+    calculoObjetivo: 'corriente' | 'potencia';
+    tipoSistema: TipoSistema;
+    potencia: string;
+    voltaje: string;
+    corriente: string;
+    cosPhi: string;
+  };
+  resultado: { valor: number; unidad: string; etiqueta: string };
+};
+
 export default function CalculadoraCorrientePage() {
   const [calculoObjetivo, setCalculoObjetivo] = useState<'corriente' | 'potencia'>('corriente');
   const [tipoSistema, setTipoSistema] = useState<TipoSistema>('monofasico');
@@ -14,28 +27,27 @@ export default function CalculadoraCorrientePage() {
   const [cosPhi, setCosPhi] = useState<string>('1');
   const [resultado, setResultado] = useState<{ valor: number; unidad: string; etiqueta: string } | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [history, setHistory] = useState<HistoryItem[]>([]);
 
-  // Efecto para actualizar campos dinámicos cuando cambia el tipo de sistema
   useEffect(() => {
     if (tipoSistema === 'monofasico') {
       setCosPhi('1');
-    } else { // trifasico
+    } else {
       setCosPhi('0.93');
     }
-    // Reseteamos el resultado al cambiar de sistema
     setResultado(null);
     setError(null);
   }, [tipoSistema, calculoObjetivo]);
 
   const handleSubmit = (e: FormEvent) => {
-    e.preventDefault(); // Prevenimos el comportamiento por defecto del formulario
+    e.preventDefault();
     setError(null);
     setResultado(null);
 
     const V = parseFloat(voltaje);
     const cosPhiValue = parseFloat(cosPhi);
     let P: number, I: number;
-    let resultadoCalculado = 0;
+    let resultadoCalculado: { valor: number; unidad: string; etiqueta: string } | null = null;
 
     if (calculoObjetivo === 'corriente') {
       P = parseFloat(potencia);
@@ -47,26 +59,42 @@ export default function CalculadoraCorrientePage() {
         setError("El Voltaje y el Factor de Potencia no pueden ser cero para calcular la corriente.");
         return;
       }
+      let valor = 0;
       if (tipoSistema === 'monofasico') {
-        resultadoCalculado = P / (V * cosPhiValue);
-      } else { // trifasico
-        resultadoCalculado = P / (V * Math.sqrt(3) * cosPhiValue);
+        valor = P / (V * cosPhiValue);
+      } else {
+        valor = P / (V * Math.sqrt(3) * cosPhiValue);
       }
-      setResultado({ valor: resultadoCalculado, unidad: 'A', etiqueta: 'Corriente (I)' });
+      resultadoCalculado = { valor, unidad: 'A', etiqueta: 'Corriente (I)' };
 
-    } else { // calculoObjetivo === 'potencia'
+    } else {
       I = parseFloat(corriente);
       if (isNaN(I) || isNaN(V) || isNaN(cosPhiValue)) {
         setError("Por favor, ingrese todos los valores numéricos.");
         return;
       }
+      let valor = 0;
       if (tipoSistema === 'monofasico') {
-        resultadoCalculado = I * V * cosPhiValue;
-      } else { // trifasico
-        resultadoCalculado = I * V * Math.sqrt(3) * cosPhiValue;
+        valor = I * V * cosPhiValue;
+      } else {
+        valor = I * V * Math.sqrt(3) * cosPhiValue;
       }
-      setResultado({ valor: resultadoCalculado, unidad: 'W', etiqueta: 'Potencia Activa (P)' });
+      resultadoCalculado = { valor, unidad: 'W', etiqueta: 'Potencia Activa (P)' };
     }
+
+    if (resultadoCalculado) {
+      setResultado(resultadoCalculado);
+      const newHistoryItem: HistoryItem = {
+        id: Date.now(),
+        inputs: { calculoObjetivo, tipoSistema, potencia, voltaje, corriente, cosPhi },
+        resultado: resultadoCalculado,
+      };
+      setHistory([newHistoryItem, ...history]);
+    }
+  };
+
+  const clearHistory = () => {
+    setHistory([]);
   };
 
   const labelPotencia = tipoSistema === 'monofasico' ? 'Potencia (P):' : 'Potencia Activa (P):';
@@ -84,6 +112,7 @@ export default function CalculadoraCorrientePage() {
           <div className="card">
             <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Datos de entrada</h2>
             <form onSubmit={handleSubmit} className="space-y-4">
+              {/* ... (formulario sin cambios) ... */}
               <div>
                 <label className="form-label">1. ¿Qué desea calcular?</label>
                 <select value={calculoObjetivo} onChange={(e) => setCalculoObjetivo(e.target.value as 'corriente' | 'potencia')} className="form-select">
@@ -133,11 +162,11 @@ export default function CalculadoraCorrientePage() {
           </div>
         </div>
 
-        {/* Columna de Resultados */}
+        {/* Columna de Resultados e Historial */}
         <div className="space-y-6">
           <div className="card">
             <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Resultados</h2>
-
+            {/* ... (lógica de resultados sin cambios) ... */}
             {!resultado && !error && (
               <div className="text-center py-8">
                 <p className="text-gray-500 dark:text-gray-400">Complete el formulario y haga clic en &quot;Calcular&quot; para ver los resultados.</p>
@@ -153,6 +182,40 @@ export default function CalculadoraCorrientePage() {
 
             {error && <div className="mt-4 text-center text-red-500 bg-red-100 dark:bg-red-900/30 p-3 rounded-md">{error}</div>}
           </div>
+
+          {/* Historial */}
+          <div className="card">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Historial</h2>
+              {history.length > 0 && (
+                <button onClick={clearHistory} className="text-sm text-blue-500 hover:underline">
+                  Limpiar
+                </button>
+              )}
+            </div>
+            <div className="space-y-4 max-h-96 overflow-y-auto pr-2">
+              {history.length === 0 ? (
+                <p className="text-gray-500 dark:text-gray-400 text-center py-4">No hay cálculos guardados.</p>
+              ) : (
+                history.map((item) => (
+                  <div key={item.id} className="p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg border dark:border-gray-700">
+                    <p className="font-semibold text-md text-blue-600 dark:text-blue-400">
+                      {item.resultado.valor.toFixed(2)} {item.resultado.unidad}
+                    </p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      Calculado: {item.inputs.calculoObjetivo === 'corriente' ? 'Corriente' : 'Potencia'} ({item.inputs.tipoSistema})
+                    </p>
+                    <p className="text-xs text-gray-500 dark:text-gray-500">
+                      {item.inputs.calculoObjetivo === 'corriente' 
+                        ? `P: ${item.inputs.potencia}W, V: ${item.inputs.voltaje}V` 
+                        : `I: ${item.inputs.corriente}A, V: ${item.inputs.voltaje}V`}
+                    </p>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+
           <div className="mt-6">
             <Link href="/calculadoras" className="text-amber-500 hover:text-amber-600 inline-flex items-center">
               <svg className="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">

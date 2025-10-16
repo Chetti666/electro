@@ -30,6 +30,16 @@ ChartJS.register(
   annotationPlugin
 );
 
+// Definición del tipo para el historial
+type HistoryItem = {
+  id: number;
+  tipoSistema: string;
+  seccion: string;
+  longitudMaxima: string;
+  corriente: string;
+  resultadoValor: string;
+};
+
 export default function CalculoVpPage() {
   // Estados para los campos del formulario
   const [tipoSistema, setTipoSistema] = useState('monofasico');
@@ -37,14 +47,15 @@ export default function CalculoVpPage() {
   const [longitudMaxima, setLongitudMaxima] = useState('');
   const [corriente, setCorriente] = useState('');
   
-  // Estados para los resultados
+  // Estados para los resultados y el historial
   const [resultadoValor, setResultadoValor] = useState<string | null>(null);
   const [longitudFinal, setLongitudFinal] = useState<string | null>(null);
   const [advertenciaCruce, setAdvertenciaCruce] = useState<string | null>(null);
   const [chartData, setChartData] = useState<ChartData<"line"> | null>(null);
   const [chartOptions, setChartOptions] = useState<ChartOptions<"line">>();
-  
-  // Función para calcular
+  const [history, setHistory] = useState<HistoryItem[]>([]);
+
+  // Función para calcular y graficar
   const calcularYGraficarVp = (e: FormEvent) => {
     e.preventDefault();
 
@@ -62,9 +73,21 @@ export default function CalculoVpPage() {
     const constanteK = (tipoSistema === 'monofasico') ? 2 * 0.018 : Math.sqrt(3) * 0.018;
 
     const vp_final = (constanteK * L_max * I) / S;
+    const resultadoFinalStr = `${vp_final.toFixed(2)} Volts`;
 
     setLongitudFinal(L_max.toString());
-    setResultadoValor(`${vp_final.toFixed(2)} Volts`);
+    setResultadoValor(resultadoFinalStr);
+
+    // Guardar en el historial
+    const newHistoryItem: HistoryItem = {
+      id: Date.now(),
+      tipoSistema,
+      seccion,
+      longitudMaxima,
+      corriente,
+      resultadoValor: resultadoFinalStr,
+    };
+    setHistory([newHistoryItem, ...history]);
 
     let longitudCruce: number | null = null;
     if (vp_final > limiteVp) {
@@ -74,6 +97,7 @@ export default function CalculoVpPage() {
       setAdvertenciaCruce(null);
     }
 
+    // ... (resto de la lógica de la gráfica sin cambios) ...
     const dataPoints: {x: number, y: number}[] = [];
     const numeroDePuntos = Math.min(L_max, 100);
     for (let i = 0; i <= numeroDePuntos; i++) {
@@ -196,6 +220,10 @@ export default function CalculoVpPage() {
     });
   };
 
+  const clearHistory = () => {
+    setHistory([]);
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
@@ -206,11 +234,11 @@ export default function CalculoVpPage() {
       </div>
       
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Formulario */}
-        <div className="lg:col-span-1">
+        {/* Columna Izquierda: Formulario e Historial */}
+        <div className="lg:col-span-1 space-y-8">
+          {/* Formulario */}
           <div className="card">
             <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Datos de entrada</h2>
-            
             <form onSubmit={calcularYGraficarVp} className="space-y-4">
               <div>
                 <label htmlFor="tipoCalculo" className="form-label">Tipo de Sistema:</label>
@@ -242,9 +270,35 @@ export default function CalculoVpPage() {
               </div>
             </form>
           </div>
+
+          {/* Historial de Cálculos */}
+          <div className="card">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Historial</h2>
+              {history.length > 0 && (
+                <button onClick={clearHistory} className="text-sm text-blue-500 hover:underline">
+                  Limpiar
+                </button>
+              )}
+            </div>
+            <div className="space-y-4 max-h-96 overflow-y-auto pr-2">
+              {history.length === 0 ? (
+                <p className="text-gray-500 dark:text-gray-400 text-center py-4">No hay cálculos guardados.</p>
+              ) : (
+                history.map((item) => (
+                  <div key={item.id} className="p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg border dark:border-gray-700">
+                    <p className="font-semibold text-lg text-blue-600 dark:text-blue-400">{item.resultadoValor}</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      S: {item.seccion}mm², L: {item.longitudMaxima}m, I: {item.corriente}A ({item.tipoSistema})
+                    </p>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
         </div>
         
-        {/* Resultados */}
+        {/* Columna Derecha: Resultados y Gráfico */}
         <div className="lg:col-span-2">
           <div className="card">
             <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Resultados</h2>

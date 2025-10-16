@@ -3,6 +3,16 @@
 import { useState, FormEvent } from 'react';
 import Link from 'next/link';
 
+// Definición del tipo para cada entrada en el historial
+type HistoryItem = {
+  longitud: string;
+  corriente: string;
+  caidaTension: string;
+  tipoSistema: string;
+  resultado: number;
+  id: number;
+};
+
 export default function CalculoSeccionPage() {
   // Estados para los campos del formulario
   const [longitud, setLongitud] = useState('');
@@ -10,9 +20,10 @@ export default function CalculoSeccionPage() {
   const [caidaTension, setCaidaTension] = useState('');
   const [tipoSistema, setTipoSistema] = useState('monofasico');
 
-  // Estados para los resultados
+  // Estados para los resultados y el historial
   const [resultado, setResultado] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [history, setHistory] = useState<HistoryItem[]>([]);
 
   // Función para calcular
   const handleCalcular = (e: FormEvent) => {
@@ -36,24 +47,28 @@ export default function CalculoSeccionPage() {
 
     let calculo = 0;
     if (tipoSistema === 'monofasico') {
-      // Fórmula S1 (Monofásica)
       calculo = (2 * 0.018 * L * I) / Vp;
     } else {
-      // Fórmula S3 (Trifásica)
       calculo = (Math.sqrt(3) * 0.018 * L * I) / Vp;
     }
 
     setResultado(calculo);
+
+    // Añadir al historial
+    const newHistoryItem: HistoryItem = {
+      longitud,
+      corriente,
+      caidaTension,
+      tipoSistema,
+      resultado: calculo,
+      id: Date.now(), // ID simple basado en el tiempo
+    };
+    setHistory([newHistoryItem, ...history]);
   };
 
-  // Función para generar reporte
-  const generarReporte = () => {
-    alert('Funcionalidad de reporte en desarrollo');
-  };
-
-  // Función para guardar proyecto
-  const guardarProyecto = () => {
-    alert('Funcionalidad de guardar proyecto en desarrollo');
+  // Función para limpiar el historial
+  const clearHistory = () => {
+    setHistory([]);
   };
 
   return (
@@ -70,9 +85,8 @@ export default function CalculoSeccionPage() {
         <div className="lg:col-span-2">
           <div className="card">
             <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Datos de entrada</h2>
-
             <form onSubmit={handleCalcular} className="space-y-4">
-              {/* Tipo de Sistema */}
+              {/* ... (campos del formulario sin cambios) ... */}
               <div>
                 <label className="form-label">Tipo de Sistema</label>
                 <div className="flex space-x-4">
@@ -101,7 +115,6 @@ export default function CalculoSeccionPage() {
                 </div>
               </div>
 
-              {/* Longitud */}
               <div>
                 <label htmlFor="L" className="form-label">Longitud (L) en metros</label>
                 <input
@@ -114,7 +127,6 @@ export default function CalculoSeccionPage() {
                 />
               </div>
 
-              {/* Corriente */}
               <div>
                 <label htmlFor="I" className="form-label">Corriente (I) en Amperios</label>
                 <input
@@ -127,7 +139,6 @@ export default function CalculoSeccionPage() {
                 />
               </div>
 
-              {/* Caída de Tensión */}
               <div>
                 <label htmlFor="Vp" className="form-label">Caída de Tensión (Vp) en Voltios</label>
                 <input
@@ -144,38 +155,54 @@ export default function CalculoSeccionPage() {
                 <button type="submit" className="btn btn-primary">
                   Calcular Sección
                 </button>
-                <button type="button" onClick={generarReporte} className="btn btn-secondary">
-                  Generar reporte
-                </button>
-                <button type="button" onClick={guardarProyecto} className="btn btn-outline">
-                  Guardar proyecto
-                </button>
               </div>
             </form>
           </div>
         </div>
         
-        {/* Resultados */}
+        {/* Resultados e Historial */}
         <div className="space-y-6">
+          {/* Resultados */}
           <div className="card">
             <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Resultados</h2>
-
-            {/* Mensaje inicial */}
             {!resultado && !error && (
               <div className="text-center py-8">
                 <p className="text-gray-500 dark:text-gray-400">Complete el formulario y haga clic en &quot;Calcular&quot; para ver los resultados.</p>
               </div>
             )}
-
-            {/* Muestra de resultado */}
             {resultado !== null && (
               <div className="mt-6 text-center bg-green-100 dark:bg-green-900/30 p-4 rounded-lg border border-green-200 dark:border-green-700">
                 <p className="text-lg text-gray-800 dark:text-gray-200">La sección del conductor requerida es:</p>
                 <p className="text-3xl font-bold text-green-700 dark:text-green-400">{resultado.toFixed(4)} mm²</p>
               </div>
             )}
-            {/* Muestra de error */}
             {error && <div className="mt-4 text-center text-red-500 bg-red-100 dark:bg-red-900/30 p-3 rounded-md">{error}</div>}
+          </div>
+
+          {/* Historial de Cálculos */}
+          <div className="card">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Historial</h2>
+              {history.length > 0 && (
+                <button onClick={clearHistory} className="text-sm text-blue-500 hover:underline">
+                  Limpiar
+                </button>
+              )}
+            </div>
+            <div className="space-y-4 max-h-96 overflow-y-auto pr-2">
+              {history.length === 0 ? (
+                <p className="text-gray-500 dark:text-gray-400 text-center py-4">No hay cálculos guardados.</p>
+              ) : (
+                history.map((item) => (
+                  <div key={item.id} className="p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg border dark:border-gray-700">
+                    <p className="font-semibold text-lg text-blue-600 dark:text-blue-400">{item.resultado.toFixed(4)} mm²</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      L: {item.longitud}m, I: {item.corriente}A, Vp: {item.caidaTension}V ({item.tipoSistema})
+                    </p>
+                  </div>
+                ))
+              )}
+            </div>
           </div>
 
           <div className="mt-6">
