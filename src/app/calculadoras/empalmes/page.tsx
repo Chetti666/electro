@@ -1,19 +1,28 @@
-"use client"; // Directiva necesaria para componentes con interactividad
+"use client";
 
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { empalmesData, type Empalme, type TipoInstalacion } from './data';
 
+// --- Tipos ---
+type HistoryItem = {
+    id: number;
+    inputs: {
+        tipoInstalacion: TipoInstalacion;
+        metodoCalculo: 'potencia' | 'corriente';
+        valorBuscado: string;
+    };
+    resultado: Empalme;
+};
+
 // --- Lógica de la Aplicación ---
 function seleccionarEmpalmePorPotencia(tipoInstalacion: TipoInstalacion, potenciaRequeridaKW: number): Empalme | null {
     const tabla = tipoInstalacion === 'monofasica' ? empalmesData.empalmes_monofasicos : empalmesData.empalmes_trifasicos;
-    // Usamos >= para encontrar el primer empalme que cumpla o exceda la potencia requerida.
     return tabla.find(emp => emp.pot_nominal_kw >= potenciaRequeridaKW) || null;
 }
 
 function seleccionarEmpalmePorCorriente(tipoInstalacion: TipoInstalacion, corrienteRequeridaA: number): Empalme | null {
     const tabla = tipoInstalacion === 'monofasica' ? empalmesData.empalmes_monofasicos : empalmesData.empalmes_trifasicos;
-    // Usamos >= para encontrar el primer interruptor que cumpla o exceda la corriente requerida.
     return tabla.find(emp => emp.interruptor_termomagnetico_A >= corrienteRequeridaA) || null;
 }
 
@@ -26,15 +35,16 @@ export default function EmpalmesPage() {
     const [resultado, setResultado] = useState<Empalme | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [valorBuscado, setValorBuscado] = useState<string | null>(null);
+    const [history, setHistory] = useState<HistoryItem[]>([]);
 
     const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-        // Limpiamos estados anteriores
         setError(null);
         setResultado(null);
         setValorBuscado(null);
 
         let empalme: Empalme | null = null;
+        let valorInput: string = '';
 
         if (metodoCalculo === 'potencia') {
             const potenciaValue = potencia.replace(',', '.');
@@ -45,9 +55,9 @@ export default function EmpalmesPage() {
                 return;
             }
             empalme = seleccionarEmpalmePorPotencia(tipoInstalacion, potenciaNum);
-            setValorBuscado(`${potenciaNum.toLocaleString('es-CL')} kW`);
+            valorInput = `${potenciaNum.toLocaleString('es-CL')} kW`;
 
-        } else { // metodoCalculo === 'corriente'
+        } else {
             const corrienteNum = parseFloat(corriente.replace(',', '.'));
 
             if (isNaN(corrienteNum) || corrienteNum <= 0) {
@@ -55,24 +65,40 @@ export default function EmpalmesPage() {
                 return;
             }
             empalme = seleccionarEmpalmePorCorriente(tipoInstalacion, corrienteNum);
-            setValorBuscado(`${corrienteNum.toLocaleString('es-CL')} A`);
+            valorInput = `${corrienteNum.toLocaleString('es-CL')} A`;
         }
+        
+        setValorBuscado(valorInput);
 
         if (empalme) {
             setResultado(empalme);
+            // Guardar en el historial
+            const newHistoryItem: HistoryItem = {
+                id: Date.now(),
+                inputs: {
+                    tipoInstalacion,
+                    metodoCalculo,
+                    valorBuscado: valorInput,
+                },
+                resultado: empalme,
+            };
+            setHistory([newHistoryItem, ...history]);
         } else {
             const unidad = metodoCalculo === 'potencia' ? 'la potencia' : 'la corriente';
             setError(`No se encontró un empalme estandarizado para ${unidad} solicitada. Es posible que el valor sea demasiado alto para las opciones disponibles.`);
         }
     };
 
+    const clearHistory = () => {
+        setHistory([]);
+    };
 
     return (
         <div className="container mx-auto px-4 py-8">
             <div className="mb-8">
                 <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Calculadora de Empalme Eléctrico</h1>
                 <p className="text-gray-600 dark:text-gray-400">
-                    Encuentra el tipo de empalme normalizado según la potencia que necesites.
+                    Encuentra el tipo de empalme normalizado según la potencia o corriente que necesites.
                 </p>
             </div>
 
@@ -82,6 +108,7 @@ export default function EmpalmesPage() {
                     <div className="card">
                         <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Datos de Entrada</h2>
                         <form onSubmit={handleSubmit} className="space-y-6">
+                            {/* ... (controles del formulario sin cambios) ... */}
                             <div>
                                 <label className="form-label">Calcular por</label>
                                 <div className="flex space-x-4">
@@ -173,11 +200,11 @@ export default function EmpalmesPage() {
                     </div>
                 </div>
 
-                {/* Columna de Resultados */}
+                {/* Columna de Resultados e Historial */}
                 <div className="space-y-6">
                     <div className="card">
                         <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Resultados</h2>
-
+                        {/* ... (lógica de resultados sin cambios) ... */}
                         {!resultado && !error && (
                             <div className="text-center py-8">
                                 <p className="text-gray-500 dark:text-gray-400">Complete el formulario para ver el empalme recomendado.</p>
@@ -203,6 +230,36 @@ export default function EmpalmesPage() {
                             </div>
                         )}
                     </div>
+
+                    {/* Historial */}
+                    <div className="card">
+                        <div className="flex justify-between items-center mb-4">
+                            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Historial</h2>
+                            {history.length > 0 && (
+                                <button onClick={clearHistory} className="text-sm text-blue-500 hover:underline">
+                                    Limpiar
+                                </button>
+                            )}
+                        </div>
+                        <div className="space-y-4 max-h-96 overflow-y-auto pr-2">
+                            {history.length === 0 ? (
+                                <p className="text-gray-500 dark:text-gray-400 text-center py-4">No hay selecciones guardadas.</p>
+                            ) : (
+                                history.map((item) => (
+                                    <div key={item.id} className="p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg border dark:border-gray-700">
+                                        <p className="font-semibold text-md text-blue-600 dark:text-blue-400">{item.resultado.tipo_empalme}</p>
+                                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                                            Buscado: {item.inputs.valorBuscado} ({item.inputs.tipoInstalacion})
+                                        </p>
+                                        <p className="text-xs text-gray-500 dark:text-gray-500">
+                                            Pot: {item.resultado.pot_nominal_kw} kW, Int: {item.resultado.interruptor_termomagnetico_A} A
+                                        </p>
+                                    </div>
+                                ))
+                            )}
+                        </div>
+                    </div>
+
                     <div className="mt-6">
                         <Link href="/calculadoras" className="text-amber-500 hover:text-amber-600 inline-flex items-center">
                             <svg className="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
