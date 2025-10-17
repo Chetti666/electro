@@ -1,5 +1,6 @@
 "use client";
 import { Label } from "@/components/ui/label";
+import Link from 'next/link';
 import { useState, SVGProps } from "react";
 
 export default function LoginPage() {
@@ -68,6 +69,14 @@ export default function LoginPage() {
             </button>
           </div>
         </form>
+
+        <div className="text-center text-sm">
+          <p className="text-gray-600 dark:text-gray-400">
+            ¿No tienes una cuenta?{' '}
+            <Link href="/signup" className="font-medium text-blue-500 hover:underline">Regístrate</Link>
+          </p>
+        </div>
+
       </div>
     </div>
   );
