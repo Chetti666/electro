@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { Prisma } from '@prisma/client';
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 
 export async function GET() {
   try {
@@ -44,7 +44,7 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("Error creating user:", error);
 
-    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+    if (error instanceof PrismaClientKnownRequestError) {
       // P2002 is the code for unique constraint violation
       if (error.code === 'P2002') {
         return new NextResponse(

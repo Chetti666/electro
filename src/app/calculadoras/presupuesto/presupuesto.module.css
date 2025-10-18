@@ -1,0 +1,153 @@
+
+:root {
+    --primary-color: #0d6efd; 
+    --secondary-color: #f8f9fa; 
+    --border-color: #dee2e6;
+    --text-color: #212529; 
+    --font-family: 'Segoe UI', sans-serif;
+}
+
+.container { 
+    max-width: 1000px; 
+    margin: auto; 
+    background: #fff; 
+    padding: 30px; 
+    border-radius: 10px; 
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
+}
+
+.h1, .h2 { 
+    color: var(--primary-color); 
+    text-align: center; 
+    border-bottom: 2px solid var(--border-color); 
+    padding-bottom: 10px; 
+    margin-bottom: 20px; 
+}
+
+.infoGrid { 
+    display: grid; 
+    grid-template-columns: 1fr 1fr; 
+    gap: 40px; 
+    margin-bottom: 30px; 
+}
+
+.formSection { 
+    display: flex; 
+    flex-direction: column; 
+    gap: 10px; 
+}
+
+.formGroup { 
+    display: flex; 
+    flex-direction: column; 
+}
+
+.label { 
+    font-weight: bold; 
+    margin-bottom: 5px; 
+    font-size: 0.9rem; 
+}
+
+.input, .textarea { 
+    padding: 10px; 
+    border: 1px solid var(--border-color); 
+    border-radius: 5px; 
+    font-size: 1rem; 
+    width: 100%; 
+    box-sizing: border-box; 
+}
+
+.itemForm { 
+    display: grid; 
+    grid-template-columns: 3fr 1fr 1fr; 
+    gap: 10px; 
+    align-items: flex-end; 
+    margin-bottom: 20px; 
+}
+
+.itemForm button { 
+    padding: 10px; 
+    font-size: 1rem; 
+    color: #fff; 
+    background-color: var(--primary-color); 
+    border: none; 
+    border-radius: 5px; 
+    cursor: pointer; 
+    height: 42px; 
+}
+
+.table { 
+    width: 100%; 
+    border-collapse: collapse; 
+    margin-bottom: 20px; 
+}
+
+.th, .td { 
+    border: 1px solid var(--border-color); 
+    padding: 12px; 
+    text-align: left; 
+}
+
+.thead { 
+    background-color: #f2f2f2; 
+}
+
+.td input { 
+    padding: 8px; 
+}
+
+.textRight { 
+    text-align: right; 
+}
+
+.deleteBtn { 
+    background: #dc3545; 
+    color: white; 
+    border: none; 
+    border-radius: 5px; 
+    cursor: pointer; 
+    padding: 5px 10px; 
+}
+
+.totalsSection { 
+    width: 40%; 
+    margin-left: auto; 
+    background-color: #f8f9fa; 
+    padding: 15px; 
+    border-radius: 5px; 
+}
+
+.totalsSection div { 
+    display: flex; 
+    justify-content: space-between; 
+    padding: 8px 0; 
+    font-size: 1.1rem; 
+}
+
+.totalsSection .total { 
+    font-weight: bold; 
+    font-size: 1.3rem; 
+    border-top: 2px solid #333; 
+    margin-top: 5px; 
+    padding-top: 10px; 
+}
+
+.btnGenerate { 
+    display: block; 
+    width: 100%; 
+    padding: 15px; 
+    font-size: 1.2rem; 
+    font-weight: bold; 
+    color: #fff; 
+    background-color: #198754; 
+    border: none; 
+    border-radius: 5px; 
+    cursor: pointer; 
+    margin-top: 30px; 
+}
+
+.loader { 
+    text-align: center; 
+    padding: 20px; 
+    font-size: 1.1rem; 
+}

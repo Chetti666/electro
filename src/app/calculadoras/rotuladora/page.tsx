@@ -33,7 +33,7 @@ export default function ElectricalPanelLabelGenerator() {
   const [formData, setFormData] = useState<LabelData>({
     fabricante: '',
     nombre: '',
-    servicio: 'Norma',
+    servicio: 'Normal',
     tension: '',
     corriente: '',
     fases: '',
