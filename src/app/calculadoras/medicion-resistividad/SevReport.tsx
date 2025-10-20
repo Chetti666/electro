@@ -8,6 +8,7 @@ import autoTable from 'jspdf-autotable';
 
 // --- Definición de Tipos ---
 interface Measurement {
+  id: number;
   a: number;
   L: number;
   R: number;
@@ -25,6 +26,10 @@ interface AnnexImage {
 interface DocWithLastTable extends jsPDF {
   lastAutoTable: { finalY: number };
 }
+
+type DocInternal = {
+  getNumberOfPages: () => number;
+};
 
 // --- Componente Principal ---
 export default function SevReport() {
@@ -45,7 +50,7 @@ export default function SevReport() {
   const [lVal, setLVal] = useState<number | '' > ('');
   const [rVal, setRVal] = useState<number | '' > ('');
   const [measurements, setMeasurements] = useState<Measurement[]>([]);
-  const [editIndex, setEditIndex] = useState<number | null>(null);
+  const [editId, setEditId] = useState<number | null>(null);
 
   // Estado para el anexo de imágenes
   const [annexImages, setAnnexImages] = useState<AnnexImage[]>([]);
@@ -79,7 +84,7 @@ export default function SevReport() {
   };
 
   // --- Lógica de Mediciones ---
-  const calculateMeasurement = (a: number, L: number, R: number): Measurement => {
+  const calculateMeasurement = (a: number, L: number, R: number): Omit<Measurement, 'id'> => {
     const n = (L - (a / 2)) / a;
     const rho_sch = Math.PI * R * n * a * (n + 1);
     return { a, L, R, n, rho_sch, xPlot: L };
@@ -93,13 +98,16 @@ export default function SevReport() {
       alert("Verifique los valores: a > 0, L > a/2 y R ≥ 0.");
       return;
     }
-    const newMeasurement = calculateMeasurement(a, L, R);
+    const newMeasurement: Measurement = {
+      id: Date.now(),
+      ...calculateMeasurement(a, L, R)
+    };
     setMeasurements(prev => [...prev, newMeasurement]);
     setAVal(''); setLVal(''); setRVal('');
   };
 
   const handleUpdateMeasurement = () => {
-    if (editIndex === null) return;
+    if (editId === null) return;
     const a = parseFloat(String(aVal));
     const L = parseFloat(String(lVal));
     const R = parseFloat(String(rVal));
@@ -107,23 +115,18 @@ export default function SevReport() {
       alert("Verifique los valores: a > 0, L > a/2 y R ≥ 0.");
       return;
     }
-    const updatedMeasurement = calculateMeasurement(a, L, R);
-    const newMeasurements = [...measurements];
-    newMeasurements[editIndex] = updatedMeasurement;
-    setMeasurements(newMeasurements);
+    setMeasurements(prev => prev.map(m => m.id === editId ? { ...m, ...calculateMeasurement(a, L, R) } : m));
     cancelEdit();
   };
 
-  const editRow = (index: number) => {
-    const sortedMeasurements = [...measurements].sort((a, b) => a.xPlot - b.xPlot);
-    const originalIndex = measurements.findIndex(m => m === sortedMeasurements[index]);
-    if (originalIndex === -1) return;
+  const editRow = (id: number) => {
+    const measurementToEdit = measurements.find(m => m.id === id);
+    if (!measurementToEdit) return;
 
-    setEditIndex(originalIndex);
-    const m = measurements[originalIndex];
-    setAVal(m.a);
-    setLVal(m.L);
-    setRVal(m.R);
+    setEditId(id);
+    setAVal(measurementToEdit.a);
+    setLVal(measurementToEdit.L);
+    setRVal(measurementToEdit.R);
 
     formCardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     setHighlightEdit(true);
@@ -132,18 +135,16 @@ export default function SevReport() {
     }, 1200); // Duración de la animación
   };
 
-  const deleteRow = (index: number) => {
+  const deleteRow = (id: number) => {
     if (!confirm("¿Eliminar esta medición?")) return;
-    const sortedMeasurements = [...measurements].sort((a, b) => a.xPlot - b.xPlot);
-    const itemToDelete = sortedMeasurements[index];
-    setMeasurements(prev => prev.filter(m => m !== itemToDelete));
-    if (editIndex !== null) {
+    setMeasurements(prev => prev.filter(m => m.id !== id));
+    if (editId === id) {
         cancelEdit();
     }
   };
 
   const cancelEdit = () => {
-    setEditIndex(null);
+    setEditId(null);
     setAVal(''); setLVal(''); setRVal('');
   };
 
@@ -168,6 +169,9 @@ export default function SevReport() {
 
     const deleteAnnexImage = (index: number) => {
         setAnnexImages(prev => prev.filter((_, i) => i !== index));
+        if (uploadImagesRef.current) {
+            uploadImagesRef.current.value = '';
+        }
     };
 
     const handleEnterEditMode = (index: number, currentDescription: string) => {
@@ -207,6 +211,9 @@ export default function SevReport() {
   const clearImages = () => {
     if (!annexImages.length || !confirm("¿Eliminar todas las imágenes del anexo?")) return;
     setAnnexImages([]);
+    if (uploadImagesRef.current) {
+        uploadImagesRef.current.value = '';
+    }
   };
 
   // --- Lógica de Gráfico y UI ---
@@ -367,17 +374,17 @@ export default function SevReport() {
       doc.text('Método Schlumberger', doc.internal.pageSize.width / 2, 72, { align: 'center' });
       
       const detailsBody = [
-          [{ content: 'Interesado:', styles: { fontStyle: 'bold' } }, interesadoVal],
-          [{ content: 'Proyecto:', styles: { fontStyle: 'bold' } }, proj],
-          [{ content: 'Ubicación:', styles: { fontStyle: 'bold' } }, loc],
-          [{ content: 'Operador:', styles: { fontStyle: 'bold' } }, oper],
-          [{ content: 'Fecha de Medición:', styles: { fontStyle: 'bold' } }, fechaVal],
-          [{ content: 'Hora de Medición:', styles: { fontStyle: 'bold' } }, horaVal],
-          [{ content: 'Fecha de Emisión:', styles: { fontStyle: 'bold' } }, date],
-          [{ content: 'Marca del equipo:', styles: { fontStyle: 'bold' } }, brand],
-          [{ content: 'Modelo:', styles: { fontStyle: 'bold' } }, model],
-          [{ content: 'N° Serie:', styles: { fontStyle: 'bold' } }, serial],
-          [{ content: 'Última calibración:', styles: { fontStyle: 'bold' } }, calib],
+          [{ content: 'Interesado:', styles: { fontStyle: 'bold' as const } }, interesadoVal],
+          [{ content: 'Proyecto:', styles: { fontStyle: 'bold' as const } }, proj],
+          [{ content: 'Ubicación:', styles: { fontStyle: 'bold' as const } }, loc],
+          [{ content: 'Operador:', styles: { fontStyle: 'bold' as const } }, oper],
+          [{ content: 'Fecha de Medición:', styles: { fontStyle: 'bold' as const } }, fechaVal],
+          [{ content: 'Hora de Medición:', styles: { fontStyle: 'bold' as const } }, horaVal],
+          [{ content: 'Fecha de Emisión:', styles: { fontStyle: 'bold' as const } }, date],
+          [{ content: 'Marca del equipo:', styles: { fontStyle: 'bold' as const } }, brand],
+          [{ content: 'Modelo:', styles: { fontStyle: 'bold' as const } }, model],
+          [{ content: 'N° Serie:', styles: { fontStyle: 'bold' as const } }, serial],
+          [{ content: 'Última calibración:', styles: { fontStyle: 'bold' as const } }, calib],
       ];
 
       autoTable(doc, {
@@ -428,7 +435,7 @@ export default function SevReport() {
         body: tableBody,
         startY: yPosition,
         margin: { left: pageMargin, right: pageMargin },
-        headStyles: { fillColor: [224, 224, 224], textColor: 20, fontStyle: 'bold', font: 'helvetica' },
+        headStyles: { fillColor: [224, 224, 224], textColor: 20, fontStyle: 'bold' as const, font: 'helvetica' },
         alternateRowStyles: { fillColor: [245, 245, 245] },
         styles: { halign: 'center', font: 'helvetica' },
       });
@@ -467,7 +474,7 @@ export default function SevReport() {
       }
       
       // Encabezados y Pies de Página
-      const totalPages = (doc.internal as any).getNumberOfPages();
+      const totalPages = (doc.internal as unknown as DocInternal).getNumberOfPages();
       for (let i = 2; i <= totalPages; i++) {
           doc.setPage(i);
           doc.setFontSize(9); doc.setTextColor(150);
@@ -547,7 +554,7 @@ export default function SevReport() {
                 <input id="operator" type="text" value={operator} onChange={e => setOperator(e.target.value)} placeholder="Operador" className="form-input" />
               </div>
               <div>
-                <label className="form-label" htmlFor="fecha">Fecha</label>
+                <label className="form-label" htmlFor="fecha">Fecha Medición</label>
                 <input id="fecha" type="date" value={fecha} onChange={e => setFecha(e.target.value)} className="form-input" />
               </div>
               <div>
@@ -589,7 +596,7 @@ export default function SevReport() {
                   <input type="number" value={rVal} onChange={e => setRVal(e.target.value === '' ? '' : Number(e.target.value))} step="any" placeholder="R (Ω)" className={`form-input ${highlightEdit ? 'highlight-animation' : ''}`} />
                 </div>
                 <div className="flex gap-2 flex-wrap">
-                  {editIndex === null ? (
+                  {editId === null ? (
                     <button className="btn btn-primary" onClick={handleAddMeasurement}>Agregar medición</button>
                   ) : (
                     <>
@@ -628,8 +635,8 @@ export default function SevReport() {
                                 <div className="relative h-40 w-full group">
                                     <Image src={image.dataUrl} alt={`Preview ${index}`} layout="fill" objectFit="cover" />
                                     <div className="absolute top-1 right-1">
-                                        <button className="btn btn-sm color-red hover:bg-red-600 cursor-pointer h-7 w-7 opacity-70 group-hover:opacity-100" onClick={() => deleteAnnexImage(index)}>
-                                            <span className="text-lg">×</span>
+                                        <button className="btn  btn-sm bg-red-500 hover:bg-red-600 cursor-pointer h-7 w-7 opacity-70 group-hover:opacity-100 flex items-center justify-center" onClick={() => deleteAnnexImage(index)}>
+                                            <span className="text-lg ">×</span>
                                         </button>
                                     </div>
                                 </div>
@@ -666,7 +673,7 @@ export default function SevReport() {
                             </div>
                         ))}
                     </div>
-                     <button type="button" className="btn btn-secondary" onClick={clearImages}>Limpiar Anexo</button>
+                     <button type="button" className="btn btn-primary hover:bg-red-600" onClick={clearImages}>Borrar todas las fotos</button>
                 </div>
             </div>
           </div>
@@ -709,7 +716,7 @@ export default function SevReport() {
                   .slice()
                   .sort((a, b) => a.xPlot - b.xPlot)
                   .map((m, i) => (
-                    <tr key={`${m.xPlot}-${m.rho_sch}-${i}`} className="border-b dark:border-gray-700">
+                    <tr key={m.id} className="border-b dark:border-gray-700">
                       <td className="px-4 py-2 text-center">{i + 1}</td>
                       <td className="px-4 py-2 text-center">{m.a.toFixed(2)}</td>
                       <td className="px-4 py-2 text-center">{m.n.toFixed(2)}</td>
@@ -718,8 +725,8 @@ export default function SevReport() {
                       <td className="px-4 py-2 text-center">{m.rho_sch.toFixed(2)}</td>
                       <td className="px-4 py-2 text-center">
                         <div className="flex justify-center gap-2">
-                          <button type="button" className="btn btn-warning p-2 text-s text-amber-600 hover:text-amber-700 cursor-pointer" onClick={() => editRow(i)}>✎</button>
-                          <button type="button" className="btn btn-danger p-2 text-s text-red-600 hover:text-red-700 cursor-pointer" onClick={() => deleteRow(i)}>×</button>
+                          <button type="button" className="btn bg-amber-600 p-2 text-s  hover:bg-amber-800 cursor-pointer text-white" onClick={() => editRow(m.id)}>✎</button>
+                          <button type="button" className="btn bg-red-600 p-2 text-s text-white hover:bg-red-800 cursor-pointer" onClick={() => deleteRow(m.id)}>×</button>
                         </div>
                       </td>
                     </tr>

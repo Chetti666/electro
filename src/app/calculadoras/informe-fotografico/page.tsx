@@ -2,6 +2,7 @@
 import { useState, useEffect, DragEvent } from 'react';
 import jsPDF from 'jspdf';
 import Link from 'next/link';
+import Image from 'next/image';
 
 // --- Interfaces y Datos --- 
 interface Image {
@@ -333,10 +334,10 @@ const InformeFotograficoSECPage = () => {
                                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 mt-4">
                                         {section.images.map((image, index) => (
                                             <div key={index} className="card overflow-hidden p-0">
-                                                <div className="relative group">
-                                                    <img src={image.src} alt={`Preview ${index}`} className="object-cover h-32 w-full" />
+                                                <div className="relative h-40 w-full group">
+                                                    <Image src={image.src} alt={`Preview ${index}`} layout="fill" objectFit="cover" />
                                                     <div className="absolute top-1 right-1">
-                                                        <button className="btn btn-sm color-red hover:bg-red-600 cursor-pointer h-7 w-7 opacity-70 group-hover:opacity-100" onClick={() => deleteImage(section.id, index)}>
+                                                        <button className="btn btn-sm bg-red-400 hover:bg-red-600 cursor-pointer h-7 w-7 opacity-70 group-hover:opacity-100 flex items-center justify-center" onClick={() => deleteImage(section.id, index)}>
                                                             <span className="text-lg">×</span>
                                                         </button>
                                                     </div>
@@ -362,12 +363,12 @@ const InformeFotograficoSECPage = () => {
                                                                 <div className="flex flex-col h-full justify-between flex-grow">
                                                                     <div className="form-input text-sm min-h-[70px] flex-grow p-2">{image.description}</div>
                                                                     <div className="flex justify-end gap-2 pt-2 border-t dark:border-gray-700">
-                                                                        <button className="btn btn-secondary btn-sm" onClick={() => handleEnterEditMode(section.id, index, image.description)}>Editar</button>
-                                                                        <button className="btn btn-primary btn-sm color-red hover:bg-red-600" onClick={() => handleDeleteDescription(section.id, index)}>Eliminar</button>
+                                                                        <button className="btn bg-amber-500 hover:bg-amber-600 btn-sm cursor-pointer" onClick={() => handleEnterEditMode(section.id, index, image.description)}>Editar</button>
+                                                                        <button className="btn  btn-sm bg-red-600 hover:bg-red-800 cursor-pointer" onClick={() => handleDeleteDescription(section.id, index)}>Eliminar</button>
                                                                     </div>
                                                                 </div>
                                                             ) : (
-                                                                <button className="btn btn-secondary w-full mt-auto" onClick={() => handleEnterEditMode(section.id, index, image.description)}>Agregar descripción</button>
+                                                                <button className="btn btn-secondary w-full mt-auto cursor-pointer" onClick={() => handleEnterEditMode(section.id, index, image.description)}>Agregar descripción</button>
                                                             )}
                                                         </div>
                                                     )}
