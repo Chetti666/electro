@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, DragEvent } from 'react';
 import Image from 'next/image';
 import Chart, { type Chart as ChartType } from 'chart.js/auto';
 import jsPDF from 'jspdf';
@@ -32,6 +32,13 @@ export default function SevReport() {
   const [projectName, setProjectName] = useState('');
   const [location, setLocation] = useState('');
   const [operator, setOperator] = useState('');
+  const [equipmentBrand, setEquipmentBrand] = useState('');
+  const [equipmentModel, setEquipmentModel] = useState('');
+  const [serialNumber, setSerialNumber] = useState('');
+  const [lastCalibration, setLastCalibration] = useState('');
+  const [interesado, setInteresado] = useState('');
+  const [fecha, setFecha] = useState(new Date().toISOString().split('T')[0]);
+  const [hora, setHora] = useState(new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }));
 
   // Estado para las mediciones de campo
   const [aVal, setAVal] = useState<number | '' > ('');
@@ -41,10 +48,9 @@ export default function SevReport() {
   const [editIndex, setEditIndex] = useState<number | null>(null);
 
   // Estado para el anexo de imágenes
-  const [pendingFiles, setPendingFiles] = useState<File[]>([]);
-  const [imageDescription, setImageDescription] = useState('');
   const [annexImages, setAnnexImages] = useState<AnnexImage[]>([]);
-  const captureCameraRef = useRef<HTMLInputElement>(null);
+  const [editingImage, setEditingImage] = useState<{ index: number; description: string } | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
   const uploadImagesRef = useRef<HTMLInputElement>(null);
   const [highlightEdit, setHighlightEdit] = useState(false);
 
@@ -142,31 +148,61 @@ export default function SevReport() {
   };
 
   // --- Lógica de Imágenes ---
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files || e.target.files.length === 0) return;
-    setPendingFiles(Array.from(e.target.files));
-  };
+    const handleImageChange = (files: FileList | null) => {
+        if (!files) return;
 
-  const handleAddImage = async () => {
-    if (!pendingFiles.length) {
-      alert("Selecciona al menos una imagen (cámara o archivos) antes de agregar.");
-      return;
-    }
-    const newImages: AnnexImage[] = [];
-    for (const file of pendingFiles) {
-      const dataUrl = await fileToDataURL(file);
-      newImages.push({ dataUrl, name: file.name || "captura", desc: imageDescription });
-    }
-    setAnnexImages(prev => [...prev, ...newImages]);
-    setPendingFiles([]);
-    setImageDescription('');
-    if (captureCameraRef.current) captureCameraRef.current.value = "";
-    if (uploadImagesRef.current) uploadImagesRef.current.value = "";
-  };
+        const newImagePromises = Array.from(files).map(file => {
+            return fileToDataURL(file).then(dataUrl => ({ dataUrl, name: file.name, desc: '' }));
+        });
 
-  const deleteAnnexImage = (index: number) => {
-    setAnnexImages(prev => prev.filter((_, i) => i !== index));
-  };
+        Promise.all(newImagePromises).then(newImages => {
+            setAnnexImages(prev => [...prev, ...newImages]);
+        });
+    };
+
+    const updateImageDescription = (imageIndex: number, description: string) => {
+        setAnnexImages(prev => prev.map((img, idx) => 
+            idx === imageIndex ? { ...img, desc: description } : img
+        ));
+    };
+
+    const deleteAnnexImage = (index: number) => {
+        setAnnexImages(prev => prev.filter((_, i) => i !== index));
+    };
+
+    const handleEnterEditMode = (index: number, currentDescription: string) => {
+        setEditingImage({ index, description: currentDescription });
+    };
+
+    const handleSaveDescription = () => {
+        if (editingImage) {
+            updateImageDescription(editingImage.index, editingImage.description);
+            setEditingImage(null);
+        }
+    };
+
+    const handleCancelEdit = () => {
+        setEditingImage(null);
+    };
+
+    const handleDragOver = (e: DragEvent<HTMLLabelElement>) => {
+        e.preventDefault();
+        setIsDragging(true);
+    };
+
+    const handleDragLeave = (e: DragEvent<HTMLLabelElement>) => {
+        e.preventDefault();
+        setIsDragging(false);
+    };
+
+    const handleDrop = (e: DragEvent<HTMLLabelElement>) => {
+        e.preventDefault();
+        setIsDragging(false);
+        const files = e.dataTransfer.files;
+        if (files && files.length > 0) {
+            handleImageChange(files);
+        }
+    };
 
   const clearImages = () => {
     if (!annexImages.length || !confirm("¿Eliminar todas las imágenes del anexo?")) return;
@@ -275,9 +311,16 @@ export default function SevReport() {
       return;
     }
 
+    const interesadoVal = interesado || "No especificado";
     const proj = projectName || "No especificado";
     const loc = location || "No especificada";
     const oper = operator || "No especificado";
+    const fechaVal = fecha ? new Date(fecha + 'T00:00:00').toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' }) : "No especificada";
+    const horaVal = hora || "No especificada";
+    const brand = equipmentBrand || "No especificada";
+    const model = equipmentModel || "No especificado";
+    const serial = serialNumber || "No especificado";
+    const calib = lastCalibration ? new Date(lastCalibration + 'T00:00:00').toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' }) : "No especificada";
     const date = new Date().toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' });
 
     const offscreenCanvas = document.createElement('canvas');
@@ -309,50 +352,60 @@ export default function SevReport() {
       const chartImage = offscreenCanvas.toDataURL('image/png', 1.0);
 
       const doc = new jsPDF('p', 'mm', 'a4');
-      // Establecer la fuente para todo el documento para asegurar el soporte de caracteres Unicode
-      doc.setFont('helvetica');
       const pageMargin = 15;
       const pageWidth = doc.internal.pageSize.getWidth() - pageMargin * 2;
+      const pageHeight = doc.internal.pageSize.height;
 
-      // --- Encabezado ---
-      doc.setFontSize(22);
-      doc.text("Informe de Sondeo Eléctrico Vertical (SEV)", doc.internal.pageSize.getWidth() / 2, pageMargin + 5, { align: 'center' });
-      doc.setFontSize(16);
-      doc.setTextColor(100);
-      doc.text("Método Schlumberger", doc.internal.pageSize.getWidth() / 2, pageMargin + 12, { align: 'center' });
-      doc.setDrawColor(50);
-      doc.line(pageMargin, pageMargin + 18, pageWidth + pageMargin, pageMargin + 18);
-
-      // --- Datos del Proyecto ---
-      doc.setFontSize(16);
-      doc.setTextColor(50);
-      doc.text("1. Datos del Proyecto", pageMargin, pageMargin + 30);
-      autoTable(doc, {
-        startY: pageMargin + 32,
-        body: [
+      // --- Portada ---
+      doc.setDrawColor(0, 86, 179); 
+      doc.setLineWidth(1.5);
+      doc.rect(5, 5, doc.internal.pageSize.width - 10, pageHeight - 10);
+      doc.setFont('helvetica', 'bold'); 
+      doc.setFontSize(24);
+      doc.text('Informe de Sondeo Eléctrico Vertical (SEV)', doc.internal.pageSize.width / 2, 60, { align: 'center' });
+      doc.setFontSize(18); 
+      doc.text('Método Schlumberger', doc.internal.pageSize.width / 2, 72, { align: 'center' });
+      
+      const detailsBody = [
+          [{ content: 'Interesado:', styles: { fontStyle: 'bold' } }, interesadoVal],
           [{ content: 'Proyecto:', styles: { fontStyle: 'bold' } }, proj],
           [{ content: 'Ubicación:', styles: { fontStyle: 'bold' } }, loc],
           [{ content: 'Operador:', styles: { fontStyle: 'bold' } }, oper],
+          [{ content: 'Fecha de Medición:', styles: { fontStyle: 'bold' } }, fechaVal],
+          [{ content: 'Hora de Medición:', styles: { fontStyle: 'bold' } }, horaVal],
           [{ content: 'Fecha de Emisión:', styles: { fontStyle: 'bold' } }, date],
-        ],
+          [{ content: 'Marca del equipo:', styles: { fontStyle: 'bold' } }, brand],
+          [{ content: 'Modelo:', styles: { fontStyle: 'bold' } }, model],
+          [{ content: 'N° Serie:', styles: { fontStyle: 'bold' } }, serial],
+          [{ content: 'Última calibración:', styles: { fontStyle: 'bold' } }, calib],
+      ];
+
+      autoTable(doc, {
+        startY: 100,
+        body: detailsBody,
         theme: 'plain',
-        styles: { fontSize: 11, cellPadding: 1.5 },
-        columnStyles: { 0: { cellWidth: 40 } },
+        styles: { fontSize: 12, cellPadding: 2 },
+        columnStyles: { 0: { cellWidth: 50 } },
+        margin: { left: pageMargin, right: pageMargin }
       });
 
+      // --- Contenido ---
+      doc.addPage();
+      let yPosition = pageMargin + 10;
+
       // --- Gráfico ---
-      const chartY = (doc as DocWithLastTable).lastAutoTable.finalY + 10;
       doc.setFontSize(16);
       doc.setTextColor(50);
-      doc.text("2. Curva de Campo", pageMargin, chartY);
+      doc.text("2. Curva de Campo", pageMargin, yPosition);
+      yPosition += 2;
       const chartHeight = (pageWidth * offscreenCanvas.height) / offscreenCanvas.width;
-      // Añadir borde al gráfico
       doc.setDrawColor(200); // Gris claro
-      doc.rect(pageMargin, chartY + 2, pageWidth, chartHeight);
-      doc.addImage(chartImage, 'PNG', pageMargin, chartY + 2, pageWidth, chartHeight);
+      doc.rect(pageMargin, yPosition, pageWidth, chartHeight);
+      doc.addImage(chartImage, 'PNG', pageMargin, yPosition, pageWidth, chartHeight);
+      yPosition += chartHeight + 10;
 
       // --- Tabla de Datos ---
-      const tableHeaders = [["N°", "a (m)", "n", "L (m)", "R (ohm)", "Resistividad Sch (ohm-m)"]]; // ρ y Ω
+      const tableHeaders = [["N°", "a (m)", "n", "L (m)", "R (ohm)", "Resistividad Sch (ohm-m)"]];
       const tableBody = measurements
         .slice()
         .sort((a, b) => a.xPlot - b.xPlot)
@@ -365,60 +418,71 @@ export default function SevReport() {
           m.rho_sch.toFixed(2),
         ]);
 
-      const tableStartY = chartY + chartHeight + 20; // Aumentar espacio después del gráfico
       doc.setFontSize(16);
       doc.setTextColor(50);
-      doc.text("3. Tabla de Datos y Resultados", pageMargin, tableStartY - 10);
+      doc.text("3. Tabla de Datos y Resultados", pageMargin, yPosition);
+      yPosition += 2;
 
       autoTable(doc, {
         head: tableHeaders,
         body: tableBody,
-        startY: tableStartY, // Iniciar la tabla después del título
+        startY: yPosition,
         margin: { left: pageMargin, right: pageMargin },
-        didDrawPage: (data) => {
-          if (data.pageNumber === 1) return;
-          // En páginas nuevas, dibujar el título con un margen superior
-          doc.setFontSize(16);
-          doc.setTextColor(50);
-          
-        },
-        headStyles: { fillColor: [224, 224, 224], textColor: 20, fontStyle: 'bold', font: 'helvetica' }, // Mantenemos esto por si acaso
+        headStyles: { fillColor: [224, 224, 224], textColor: 20, fontStyle: 'bold', font: 'helvetica' },
         alternateRowStyles: { fillColor: [245, 245, 245] },
-        styles: { halign: 'center', font: 'helvetica' }, // Y esto también
+        styles: { halign: 'center', font: 'helvetica' },
       });
+      yPosition = (doc as DocWithLastTable).lastAutoTable.finalY + 10;
 
       // --- Anexo de Imágenes ---
       if (annexImages.length > 0) {
-        doc.addPage();
+        if (yPosition + 20 > pageHeight - pageMargin) {
+            doc.addPage();
+            yPosition = pageMargin + 10;
+        }
         doc.setFontSize(16);
         doc.setTextColor(50);
-        doc.text("4. Anexo de Imágenes", pageMargin, pageMargin);
-        let yPos = pageMargin + 10;
+        doc.text("4. Anexo de Imágenes", pageMargin, yPosition);
+        yPosition += 10;
+        
         annexImages.forEach((img, idx) => {
           const imgWidth = 80;
           const imgHeight = (imgWidth * 3) / 4; // Aspect ratio 4:3
           const xPos = (idx % 2 === 0) ? pageMargin : pageMargin + imgWidth + 10;
 
-          if (yPos + imgHeight + 20 > doc.internal.pageSize.getHeight()) {
+          if (yPosition + imgHeight + 20 > pageHeight - pageMargin) {
             doc.addPage();
-            yPos = pageMargin;
+            yPosition = pageMargin + 10;
           }
 
-          doc.addImage(img.dataUrl, 'PNG', xPos, yPos, imgWidth, imgHeight);
+          doc.addImage(img.dataUrl, 'PNG', xPos, yPosition, imgWidth, imgHeight);
           doc.setFontSize(10);
           doc.setTextColor(80);
-          doc.text(`Figura ${idx + 1}: ${escapeHtml(img.desc || "(sin descripción)")}`, xPos, yPos + imgHeight + 5, { maxWidth: imgWidth });
+          doc.text(`Figura ${idx + 1}: ${escapeHtml(img.desc || "(sin descripción)")}`, xPos, yPosition + imgHeight + 5, { maxWidth: imgWidth });
 
           if (idx % 2 !== 0) {
-            yPos += imgHeight + 20;
+            yPosition += imgHeight + 20;
           }
         });
+      }
+      
+      // Encabezados y Pies de Página
+      const totalPages = (doc.internal as any).getNumberOfPages();
+      for (let i = 2; i <= totalPages; i++) {
+          doc.setPage(i);
+          doc.setFontSize(9); doc.setTextColor(150);
+          doc.text(`Informe de Sondeo Eléctrico Vertical (SEV) - ${proj}`, pageMargin, 10);
+          doc.line(pageMargin, 12, pageWidth + pageMargin, 12);
+          const footerText = `Página ${i} de ${totalPages}`;
+          doc.line(pageMargin, pageHeight - 12, pageWidth + pageMargin, pageHeight - 12);
+          doc.text(footerText, doc.internal.pageSize.width / 2, pageHeight - 8, { align: 'center' });
+          doc.setTextColor(0);
       }
 
       doc.save(`Informe_SEV_${proj.replace(/ /g, '_')}.pdf`);
 
     }, 400);
-  }, [measurements, projectName, location, operator, annexImages]);
+  }, [measurements, projectName, location, operator, annexImages, equipmentBrand, equipmentModel, serialNumber, lastCalibration, interesado, fecha, hora]);
 
   const handleClearAll = () => {
     if (!confirm("¿Eliminar todos los datos del proyecto?")) return;
@@ -427,8 +491,14 @@ export default function SevReport() {
     setProjectName('');
     setLocation('');
     setOperator('');
+    setEquipmentBrand('');
+    setEquipmentModel('');
+    setSerialNumber('');
+    setLastCalibration('');
+    setInteresado('');
+    setFecha(new Date().toISOString().split('T')[0]);
+    setHora(new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }));
     setAnnexImages([]);
-    setPendingFiles([]);
     if (chartInstance.current) {
         chartInstance.current.data.datasets[0].data = [];
         chartInstance.current.update();
@@ -454,10 +524,56 @@ export default function SevReport() {
       <div className="space-y-8">
         <div className="card">
           <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Datos del Proyecto</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <input type="text" value={projectName} onChange={e => setProjectName(e.target.value)} placeholder="Nombre del Proyecto" className="form-input" />
-            <input type="text" value={location} onChange={e => setLocation(e.target.value)} placeholder="Ubicación" className="form-input" />
-            <input type="text" value={operator} onChange={e => setOperator(e.target.value)} placeholder="Operador" className="form-input" />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-4">
+            {/* Columna 1: Info Proyecto */}
+            <div className="space-y-4">
+              <div>
+                <label className="form-label" htmlFor="interesado">Interesado</label>
+                <input id="interesado" type="text" value={interesado} onChange={e => setInteresado(e.target.value)} placeholder="Nombre del interesado" className="form-input" />
+              </div>
+              <div>
+                <label className="form-label" htmlFor="projectName">Proyecto</label>
+                <input id="projectName" type="text" value={projectName} onChange={e => setProjectName(e.target.value)} placeholder="Nombre del Proyecto" className="form-input" />
+              </div>
+              <div>
+                <label className="form-label" htmlFor="location">Ubicación</label>
+                <input id="location" type="text" value={location} onChange={e => setLocation(e.target.value)} placeholder="Ubicación" className="form-input" />
+              </div>
+            </div>
+            {/* Columna 2: Info Ejecución */}
+            <div className="space-y-4">
+              <div>
+                <label className="form-label" htmlFor="operator">Operador</label>
+                <input id="operator" type="text" value={operator} onChange={e => setOperator(e.target.value)} placeholder="Operador" className="form-input" />
+              </div>
+              <div>
+                <label className="form-label" htmlFor="fecha">Fecha</label>
+                <input id="fecha" type="date" value={fecha} onChange={e => setFecha(e.target.value)} className="form-input" />
+              </div>
+              <div>
+                <label className="form-label" htmlFor="hora">Hora</label>
+                <input id="hora" type="time" value={hora} onChange={e => setHora(e.target.value)} className="form-input" />
+              </div>
+            </div>
+            {/* Columna 3: Info Equipo */}
+            <div className="space-y-4">
+              <div>
+                <label className="form-label" htmlFor="equipmentBrand">Marca del equipo</label>
+                <input id="equipmentBrand" type="text" value={equipmentBrand} onChange={e => setEquipmentBrand(e.target.value)} placeholder="Marca del equipo" className="form-input" />
+              </div>
+              <div>
+                <label className="form-label" htmlFor="equipmentModel">Modelo</label>
+                <input id="equipmentModel" type="text" value={equipmentModel} onChange={e => setEquipmentModel(e.target.value)} placeholder="Modelo" className="form-input" />
+              </div>
+              <div>
+                <label className="form-label" htmlFor="serialNumber">N° Serie</label>
+                <input id="serialNumber" type="text" value={serialNumber} onChange={e => setSerialNumber(e.target.value)} placeholder="N° Serie" className="form-input" />
+              </div>
+              <div>
+                <label className="form-label" htmlFor="lastCalibration">Última calibración</label>
+                <input id="lastCalibration" type="date" value={lastCalibration} onChange={e => setLastCalibration(e.target.value)} className="form-input" />
+              </div>
+            </div>
           </div>
         </div>
 
@@ -488,27 +604,70 @@ export default function SevReport() {
 
             <div className="card">
               <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Anexo de Imágenes</h2>
-              <div className="space-y-4">
-                <p className="text-sm text-gray-600 dark:text-gray-400">Puedes tomar una foto con la cámara o cargarla desde archivos. Agrega una descripción opcional.</p>
-                <input type="file" ref={captureCameraRef} onChange={handleFileChange} accept="image/*" capture="environment" className="file-input" />
-                <input type="file" ref={uploadImagesRef} onChange={handleFileChange} accept="image/*" multiple className="file-input" />
-                <input type="text" value={imageDescription} onChange={e => setImageDescription(e.target.value)} placeholder="Descripción de la imagen (opcional)" className="form-input" />
-                <div className="flex gap-2 flex-wrap">
-                  <button type="button" className="btn btn-primary" onClick={handleAddImage}>Agregar Imagen</button>
-                  <button type="button" className="btn btn-secondary" onClick={clearImages}>Limpiar Anexo</button>
-                </div>
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mt-4">
-                  {annexImages.map((img, i) => (
-                    <div key={i} className="relative group border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
-                      <Image src={img.dataUrl} alt="anexo" layout="fill" objectFit="cover" />
-                      <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-2 text-xs truncate">
-                        {escapeHtml(img.desc || "(sin descripción)")}
-                      </div>
-                      <button type="button" className="absolute top-1 right-1 btn btn-danger p-1 h-6 w-6 text-xs" onClick={() => deleteAnnexImage(i)}>×</button>
+                <div className="space-y-4">
+                    <label 
+                        htmlFor="file-upload-sev"
+                        className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer transition-colors ${isDragging ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' : 'border-gray-300 bg-gray-50 hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:hover:bg-gray-600'}`}
+                        onDragOver={handleDragOver}
+                        onDragLeave={handleDragLeave}
+                        onDrop={handleDrop}
+                    >
+                        <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                            <svg className="w-8 h-8 mb-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
+                                <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"/>
+                            </svg>
+                            <p className="mb-2 text-sm text-gray-500 dark:text-gray-400"><span className="font-semibold">Haz clic para cargar</span> o arrastra y suelta</p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">SVG, PNG, JPG or GIF</p>
+                        </div>
+                        <input id="file-upload-sev" ref={uploadImagesRef} type="file" className="hidden" multiple accept="image/*" onChange={e => handleImageChange(e.target.files)} />
+                    </label>
+
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mt-4">
+                        {annexImages.map((image, index) => (
+                            <div key={index} className="card overflow-hidden p-0">
+                                <div className="relative h-40 w-full group">
+                                    <Image src={image.dataUrl} alt={`Preview ${index}`} layout="fill" objectFit="cover" />
+                                    <div className="absolute top-1 right-1">
+                                        <button className="btn btn-sm color-red hover:bg-red-600 cursor-pointer h-7 w-7 opacity-70 group-hover:opacity-100" onClick={() => deleteAnnexImage(index)}>
+                                            <span className="text-lg">×</span>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div className="p-2 flex-grow flex flex-col justify-between">
+                                    {editingImage?.index === index ? (
+                                        <div className="space-y-2">
+                                            <textarea
+                                                autoFocus
+                                                value={editingImage.description}
+                                                onChange={(e) => setEditingImage({ ...editingImage, description: e.target.value })}
+                                                className="form-input text-sm"
+                                                rows={3}
+                                            />
+                                            <div className="flex justify-end gap-2">
+                                                <button className="btn btn-primary btn-sm hover:bg-amber-600" onClick={handleCancelEdit}>Cancelar</button>
+                                                <button className="btn btn-secondary btn-sm" onClick={handleSaveDescription}>Guardar</button>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div className="space-y-2 flex flex-col h-full">
+                                            {image.desc ? (
+                                                <div className="flex flex-col h-full justify-between flex-grow">
+                                                    <div className="form-input text-sm min-h-[70px] flex-grow p-2">{image.desc}</div>
+                                                    <div className="flex justify-end gap-2 pt-2 border-t dark:border-gray-700">
+                                                        <button className="btn btn-secondary btn-sm" onClick={() => handleEnterEditMode(index, image.desc)}>Editar</button>
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <button className="btn btn-secondary w-full mt-auto" onClick={() => handleEnterEditMode(index, image.desc)}>Agregar descripción</button>
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        ))}
                     </div>
-                  ))}
+                     <button type="button" className="btn btn-secondary" onClick={clearImages}>Limpiar Anexo</button>
                 </div>
-              </div>
             </div>
           </div>
 
