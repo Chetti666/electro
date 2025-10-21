@@ -106,77 +106,73 @@ export default function CalculadoraCorrientePage() {
         <p className="text-gray-600 dark:text-gray-400">Calcula la corriente (A) o la potencia (W) para sistemas monofásicos y trifásicos.</p>
       </div>
       
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {/* Columna del Formulario */}
-        <div className="lg:col-span-2">
-          <div className="card">
-            <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Datos de entrada</h2>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              {/* ... (formulario sin cambios) ... */}
-              <div>
-                <label className="form-label">1. ¿Qué desea calcular?</label>
-                <select value={calculoObjetivo} onChange={(e) => setCalculoObjetivo(e.target.value as 'corriente' | 'potencia')} className="form-select">
-                  <option value="corriente">Corriente (Amperes)</option>
-                  <option value="potencia">Potencia (Watts)</option>
-                </select>
-              </div>
-              <div>
-                <label htmlFor="tipoSistema" className="form-label">2. Tipo de Sistema</label>
-                <select
-                  id="tipoSistema"
-                  value={tipoSistema}
-                  onChange={(e) => setTipoSistema(e.target.value as TipoSistema)}
-                  className="form-select"
-                >
-                  <option value="monofasico">Monofásico</option>
-                  <option value="trifasico">Trifásico</option>
-                </select>
-              </div>
+        <div className="card">
+          <h2 className="text-lg sm:text-xl font-semibold mb-4 text-gray-900 dark:text-white">Datos de entrada</h2>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label className="form-label">1. ¿Qué desea calcular?</label>
+              <select value={calculoObjetivo} onChange={(e) => setCalculoObjetivo(e.target.value as 'corriente' | 'potencia')} className="form-select">
+                <option value="corriente">Corriente (Amperes)</option>
+                <option value="potencia">Potencia (Watts)</option>
+              </select>
+            </div>
+            <div>
+              <label htmlFor="tipoSistema" className="form-label">2. Tipo de Sistema</label>
+              <select
+                id="tipoSistema"
+                value={tipoSistema}
+                onChange={(e) => setTipoSistema(e.target.value as TipoSistema)}
+                className="form-select"
+              >
+                <option value="monofasico">Monofásico</option>
+                <option value="trifasico">Trifásico</option>
+              </select>
+            </div>
 
-              {calculoObjetivo === 'corriente' ? (
-                <div>
-                  <label htmlFor="P" className="form-label">3. {labelPotencia}</label>
-                  <input type="number" id="P" placeholder="Watts" value={potencia} onChange={(e) => setPotencia(e.target.value)} className="form-input" required />
-                </div>
-              ) : (
-                <div>
-                  <label htmlFor="I" className="form-label">3. Corriente (I)</label>
-                  <input type="number" id="I" placeholder="Amperes" value={corriente} onChange={(e) => setCorriente(e.target.value)} className="form-input" required />
-                </div>
-              )}
-
+            {calculoObjetivo === 'corriente' ? (
               <div>
-                <label htmlFor="V" className="form-label">4. Voltaje (V)</label>
-                <input type="number" id="V" placeholder="Volts" value={voltaje} onChange={(e) => setVoltaje(e.target.value)} className="form-input" required />
+                <label htmlFor="P" className="form-label">3. {labelPotencia}</label>
+                <input type="number" id="P" placeholder="Watts" value={potencia} onChange={(e) => setPotencia(e.target.value)} className="form-input" required />
               </div>
-
+            ) : (
               <div>
-                <label htmlFor="cosPhi" className="form-label">5. Factor de Potencia (cosφ)</label>
-                <input type="number" id="cosPhi" step="0.01" min="0" max="1" value={cosPhi} onChange={(e) => setCosPhi(e.target.value)} className="form-input" required />
+                <label htmlFor="I" className="form-label">3. Corriente (I)</label>
+                <input type="number" id="I" placeholder="Amperes" value={corriente} onChange={(e) => setCorriente(e.target.value)} className="form-input" required />
               </div>
+            )}
 
-              <div className="flex space-x-4 pt-4">
-                <button type="submit" className="btn btn-primary">Calcular</button>
-              </div>
-            </form>
-          </div>
+            <div>
+              <label htmlFor="V" className="form-label">4. Voltaje (V)</label>
+              <input type="number" id="V" placeholder="Volts" value={voltaje} onChange={(e) => setVoltaje(e.target.value)} className="form-input" required />
+            </div>
+
+            <div>
+              <label htmlFor="cosPhi" className="form-label">5. Factor de Potencia (cosφ)</label>
+              <input type="number" id="cosPhi" step="0.01" min="0" max="1" value={cosPhi} onChange={(e) => setCosPhi(e.target.value)} className="form-input" required />
+            </div>
+
+            <div className="pt-4">
+              <button type="submit" className="btn btn-primary w-full sm:w-auto">Calcular</button>
+            </div>
+          </form>
         </div>
 
         {/* Columna de Resultados e Historial */}
         <div className="space-y-6">
           <div className="card">
-            <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Resultados</h2>
-            {/* ... (lógica de resultados sin cambios) ... */}
+            <h2 className="text-lg sm:text-xl font-semibold mb-4 text-gray-900 dark:text-white">Resultados</h2>
             {!resultado && !error && (
               <div className="text-center py-8">
-                <p className="text-gray-500 dark:text-gray-400">Complete el formulario y haga clic en &quot;Calcular&quot; para ver los resultados.</p>
+                <p className="text-gray-500 dark:text-gray-400">Complete el formulario para ver los resultados.</p>
               </div>
             )}
 
             {resultado !== null && (
               <div className="mt-6 text-center bg-emerald-100 dark:bg-emerald-900/50 p-4 rounded-lg border border-emerald-200 dark:border-emerald-700">
-                <p className="text-lg text-gray-800 dark:text-gray-200">El resultado para {resultado.etiqueta} es:</p>
-                <p className="text-3xl font-bold text-emerald-700 dark:text-emerald-400">{resultado.valor.toFixed(2)} {resultado.unidad}</p>
+                <p className="text-base sm:text-lg text-gray-800 dark:text-gray-200">El resultado para {resultado.etiqueta} es:</p>
+                <p className="text-2xl sm:text-3xl font-bold text-emerald-700 dark:text-emerald-400">{resultado.valor.toFixed(2)} {resultado.unidad}</p>
               </div>
             )}
 
@@ -186,7 +182,7 @@ export default function CalculadoraCorrientePage() {
           {/* Historial */}
           <div className="card">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Historial</h2>
+              <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">Historial</h2>
               {history.length > 0 && (
                 <button onClick={clearHistory} className="text-sm text-blue-500 hover:underline">
                   Limpiar
@@ -199,10 +195,10 @@ export default function CalculadoraCorrientePage() {
               ) : (
                 history.map((item) => (
                   <div key={item.id} className="p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg border dark:border-gray-700">
-                    <p className="font-semibold text-md text-blue-600 dark:text-blue-400">
+                    <p className="font-semibold text-base sm:text-md text-blue-600 dark:text-blue-400">
                       {item.resultado.valor.toFixed(2)} {item.resultado.unidad}
                     </p>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                    <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
                       Calculado: {item.inputs.calculoObjetivo === 'corriente' ? 'Corriente' : 'Potencia'} ({item.inputs.tipoSistema})
                     </p>
                     <p className="text-xs text-gray-500 dark:text-gray-500">

@@ -524,215 +524,217 @@ export default function SevReport() {
         }
         .dark .highlight-animation {
           --input-border-color: #4B5563;
-          /* Un color de fondo sutil para el modo oscuro */
           --highlight-bg: rgba(245, 158, 11, 0.15);
         }
       `}</style>
-      <div className="space-y-8">
-        <div className="card">
-          <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Datos del Proyecto</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-4">
-            {/* Columna 1: Info Proyecto */}
-            <div className="space-y-4">
-              <div>
-                <label className="form-label" htmlFor="interesado">Interesado</label>
-                <input id="interesado" type="text" value={interesado} onChange={e => setInteresado(e.target.value)} placeholder="Nombre del interesado" className="form-input" />
+      <div className="grid grid-cols-1 gap-8">
+        <div className="space-y-8">
+          <div className="card">
+            <h2 className="text-lg sm:text-xl font-semibold mb-4 text-gray-900 dark:text-white">Datos del Proyecto</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-x-6 gap-y-4">
+              <div className="space-y-4">
+                <div>
+                  <label className="form-label" htmlFor="interesado">Interesado</label>
+                  <input id="interesado" type="text" value={interesado} onChange={e => setInteresado(e.target.value)} placeholder="Nombre del interesado" className="form-input" />
+                </div>
+                <div>
+                  <label className="form-label" htmlFor="projectName">Proyecto</label>
+                  <input id="projectName" type="text" value={projectName} onChange={e => setProjectName(e.target.value)} placeholder="Nombre del Proyecto" className="form-input" />
+                </div>
+                <div>
+                  <label className="form-label" htmlFor="location">Ubicación</label>
+                  <input id="location" type="text" value={location} onChange={e => setLocation(e.target.value)} placeholder="Ubicación" className="form-input" />
+                </div>
               </div>
-              <div>
-                <label className="form-label" htmlFor="projectName">Proyecto</label>
-                <input id="projectName" type="text" value={projectName} onChange={e => setProjectName(e.target.value)} placeholder="Nombre del Proyecto" className="form-input" />
+              <div className="space-y-4">
+                <div>
+                  <label className="form-label" htmlFor="operator">Operador</label>
+                  <input id="operator" type="text" value={operator} onChange={e => setOperator(e.target.value)} placeholder="Operador" className="form-input" />
+                </div>
+                <div>
+                  <label className="form-label" htmlFor="fecha">Fecha Medición</label>
+                  <input id="fecha" type="date" value={fecha} onChange={e => setFecha(e.target.value)} className="form-input" />
+                </div>
+                <div>
+                  <label className="form-label" htmlFor="hora">Hora</label>
+                  <input id="hora" type="time" value={hora} onChange={e => setHora(e.target.value)} className="form-input" />
+                </div>
               </div>
-              <div>
-                <label className="form-label" htmlFor="location">Ubicación</label>
-                <input id="location" type="text" value={location} onChange={e => setLocation(e.target.value)} placeholder="Ubicación" className="form-input" />
+              <div className="space-y-4">
+                <div>
+                  <label className="form-label" htmlFor="equipmentBrand">Marca del equipo</label>
+                  <input id="equipmentBrand" type="text" value={equipmentBrand} onChange={e => setEquipmentBrand(e.target.value)} placeholder="Marca del equipo" className="form-input" />
+                </div>
+                <div>
+                  <label className="form-label" htmlFor="equipmentModel">Modelo</label>
+                  <input id="equipmentModel" type="text" value={equipmentModel} onChange={e => setEquipmentModel(e.target.value)} placeholder="Modelo" className="form-input" />
+                </div>
+                <div>
+                  <label className="form-label" htmlFor="serialNumber">N° Serie</label>
+                  <input id="serialNumber" type="text" value={serialNumber} onChange={e => setSerialNumber(e.target.value)} placeholder="N° Serie" className="form-input" />
+                </div>
+                <div>
+                  <label className="form-label" htmlFor="lastCalibration">Última calibración</label>
+                  <input id="lastCalibration" type="date" value={lastCalibration} onChange={e => setLastCalibration(e.target.value)} className="form-input" />
+                </div>
               </div>
             </div>
-            {/* Columna 2: Info Ejecución */}
+          </div>
+
+          <div id="medidas-form" ref={formCardRef} className="card">
+            <h2 className="text-lg sm:text-xl font-semibold mb-4 text-gray-900 dark:text-white">Medidas de Campo</h2>
             <div className="space-y-4">
-              <div>
-                <label className="form-label" htmlFor="operator">Operador</label>
-                <input id="operator" type="text" value={operator} onChange={e => setOperator(e.target.value)} placeholder="Operador" className="form-input" />
+              <p className="text-sm text-gray-600 dark:text-gray-400">Ingrese a, L y R según el esquema del documento.</p>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <input type="number" value={aVal} onChange={e => setAVal(e.target.value === '' ? '' : Number(e.target.value))} step="any" placeholder="a (m)" className={`form-input ${highlightEdit ? 'highlight-animation' : ''}`} />
+                <input type="number" value={lVal} onChange={e => setLVal(e.target.value === '' ? '' : Number(e.target.value))} step="any" placeholder="L (m)" className={`form-input ${highlightEdit ? 'highlight-animation' : ''}`} />
+                <input type="number" value={rVal} onChange={e => setRVal(e.target.value === '' ? '' : Number(e.target.value))} step="any" placeholder="R (Ω)" className={`form-input ${highlightEdit ? 'highlight-animation' : ''}`} />
               </div>
-              <div>
-                <label className="form-label" htmlFor="fecha">Fecha Medición</label>
-                <input id="fecha" type="date" value={fecha} onChange={e => setFecha(e.target.value)} className="form-input" />
+              <div className="flex gap-2 flex-wrap">
+                {editId === null ? (
+                  <button className="btn btn-primary w-full sm:w-auto" onClick={handleAddMeasurement}>Agregar medición</button>
+                ) : (
+                  <>
+                    <button className="btn btn-primary w-full sm:w-auto" onClick={handleUpdateMeasurement}>Actualizar</button>
+                    <button className="btn btn-accent w-full sm:w-auto" onClick={cancelEdit}>Cancelar</button>
+                  </>
+                )}
               </div>
-              <div>
-                <label className="form-label" htmlFor="hora">Hora</label>
-                <input id="hora" type="time" value={hora} onChange={e => setHora(e.target.value)} className="form-input" />
-              </div>
+              <div className="formula text-sm text-center" dangerouslySetInnerHTML={{ __html: 'ρsch = π · R · n · a · (n + 1)<br />con n = (L − a/2) / a' }} />
             </div>
-            {/* Columna 3: Info Equipo */}
-            <div className="space-y-4">
-              <div>
-                <label className="form-label" htmlFor="equipmentBrand">Marca del equipo</label>
-                <input id="equipmentBrand" type="text" value={equipmentBrand} onChange={e => setEquipmentBrand(e.target.value)} placeholder="Marca del equipo" className="form-input" />
-              </div>
-              <div>
-                <label className="form-label" htmlFor="equipmentModel">Modelo</label>
-                <input id="equipmentModel" type="text" value={equipmentModel} onChange={e => setEquipmentModel(e.target.value)} placeholder="Modelo" className="form-input" />
-              </div>
-              <div>
-                <label className="form-label" htmlFor="serialNumber">N° Serie</label>
-                <input id="serialNumber" type="text" value={serialNumber} onChange={e => setSerialNumber(e.target.value)} placeholder="N° Serie" className="form-input" />
-              </div>
-              <div>
-                <label className="form-label" htmlFor="lastCalibration">Última calibración</label>
-                <input id="lastCalibration" type="date" value={lastCalibration} onChange={e => setLastCalibration(e.target.value)} className="form-input" />
-              </div>
+          </div>
+
+          <div className="card">
+            <h2 className="text-lg sm:text-xl font-semibold mb-4 text-gray-900 dark:text-white">Gráfico SEV (Log-Log)</h2>
+            <div className="relative w-full h-[400px] sm:h-[500px] md:h-[600px]">
+              <canvas ref={chartContainer}></canvas>
+            </div>
+          </div>
+
+          <div className="card">
+            <h2 className="text-lg sm:text-xl font-semibold mb-4 text-gray-900 dark:text-white">Tabla de Resultados</h2>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm text-left">
+                <thead>
+                  <tr className="bg-gray-100 dark:bg-gray-700">
+                    <th className="px-4 py-2 text-center">N° </th>
+                    <th className="px-4 py-2 text-center">a (m)</th>
+                    <th className="px-4 py-2 text-center">n</th>
+                    <th className="px-4 py-2 text-center">L (m)</th>
+                    <th className="px-4 py-2 text-center">R (Ω)</th>
+                    <th className="px-4 py-2 text-center">ρ Sch (Ω·m)</th>
+                    <th className="px-4 py-2 text-center">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {measurements
+                    .slice()
+                    .sort((a, b) => a.xPlot - b.xPlot)
+                    .map((m, i) => (
+                      <tr key={m.id} className="border-b dark:border-gray-700">
+                        <td className="px-4 py-2 text-center">{i + 1}</td>
+                        <td className="px-4 py-2 text-center">{m.a.toFixed(2)}</td>
+                        <td className="px-4 py-2 text-center">{m.n.toFixed(2)}</td>
+                        <td className="px-4 py-2 text-center">{m.L.toFixed(2)}</td>
+                        <td className="px-4 py-2 text-center">{m.R.toFixed(2)}</td>
+                        <td className="px-4 py-2 text-center">{m.rho_sch.toFixed(2)}</td>
+                        <td className="px-4 py-2 text-center">
+                          <div className="flex justify-center gap-2">
+                            <button type="button" className="btn bg-amber-600 p-2 text-s  hover:bg-amber-800 cursor-pointer text-white" onClick={() => editRow(m.id)}>✎</button>
+                            <button type="button" className="btn bg-red-600 p-2 text-s text-white hover:bg-red-800 cursor-pointer" onClick={() => deleteRow(m.id)}>×</button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div id="medidas-form" ref={formCardRef} className="lg:col-span-2 space-y-8">
-            <div className="card">
-              <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Medidas de Campo</h2>
-              <div className="space-y-4">
-                <p className="text-sm text-gray-600 dark:text-gray-400">Ingrese a, L y R según el esquema del documento.</p>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <input type="number" value={aVal} onChange={e => setAVal(e.target.value === '' ? '' : Number(e.target.value))} step="any" placeholder="a (m)" className={`form-input ${highlightEdit ? 'highlight-animation' : ''}`} />
-                  <input type="number" value={lVal} onChange={e => setLVal(e.target.value === '' ? '' : Number(e.target.value))} step="any" placeholder="L (m)" className={`form-input ${highlightEdit ? 'highlight-animation' : ''}`} />
-                  <input type="number" value={rVal} onChange={e => setRVal(e.target.value === '' ? '' : Number(e.target.value))} step="any" placeholder="R (Ω)" className={`form-input ${highlightEdit ? 'highlight-animation' : ''}`} />
-                </div>
-                <div className="flex gap-2 flex-wrap">
-                  {editId === null ? (
-                    <button className="btn btn-primary" onClick={handleAddMeasurement}>Agregar medición</button>
-                  ) : (
-                    <>
-                      <button className="btn btn-primary" onClick={handleUpdateMeasurement}>Actualizar</button>
-                      <button className="btn btn-accent" onClick={cancelEdit}>Cancelar</button>
-                    </>
-                  )}
-                </div>
-                <div className="formula" dangerouslySetInnerHTML={{ __html: 'ρsch = π · R · n · a · (n + 1)<br />con n = (L − a/2) / a' }} />
+        {/* Columna Derecha Principal (Gráfico y Acciones) */}
+        <div className="lg:col-span-2 space-y-8">
+          <div className="card">
+            <h2 className="text-lg sm:text-xl font-semibold mb-4 text-gray-900 dark:text-white">Anexo de Imágenes</h2>
+            <div className="space-y-4">
+              {/* --- Vista para Móviles: Botones explícitos --- */}
+              <div className="flex flex-col sm:hidden gap-4">
+                  <label htmlFor="camera-upload-sev" className="btn btn-secondary flex-1 cursor-pointer flex items-center justify-center">
+                      <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l1.416-2.356A2 2 0 0111 3h2a2 2 0 011.664.89l1.416 2.356A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                      Tomar Foto
+                  </label>
+                  <input id="camera-upload-sev" type="file" className="hidden" multiple accept="image/*" capture="environment" onChange={e => handleImageChange(e.target.files)} />
+                  <label htmlFor="gallery-upload-sev" className="btn btn-outline flex-1 cursor-pointer flex items-center justify-center">
+                      <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                      Elegir de Galería
+                  </label>
+                  <input id="gallery-upload-sev" ref={uploadImagesRef} type="file" className="hidden" multiple accept="image/*" onChange={e => handleImageChange(e.target.files)} />
               </div>
-            </div>
 
-            <div className="card">
-              <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Anexo de Imágenes</h2>
-                <div className="space-y-4">
-                    <label 
-                        htmlFor="file-upload-sev"
-                        className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer transition-colors ${isDragging ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' : 'border-gray-300 bg-gray-50 hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:hover:bg-gray-600'}`}
-                        onDragOver={handleDragOver}
-                        onDragLeave={handleDragLeave}
-                        onDrop={handleDrop}
-                    >
-                        <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                            <svg className="w-8 h-8 mb-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
-                                <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"/>
-                            </svg>
-                            <p className="mb-2 text-sm text-gray-500 dark:text-gray-400"><span className="font-semibold">Haz clic para cargar</span> o arrastra y suelta</p>
-                            <p className="text-xs text-gray-500 dark:text-gray-400">SVG, PNG, JPG or GIF</p>
-                        </div>
-                        <input id="file-upload-sev" ref={uploadImagesRef} type="file" className="hidden" multiple accept="image/*" onChange={e => handleImageChange(e.target.files)} />
-                    </label>
+              {/* --- Vista para Escritorio: Arrastrar y Soltar --- */}
+              <label htmlFor="file-upload-sev-desktop" className={`hidden sm:flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer transition-colors ${isDragging ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' : 'border-gray-300 bg-gray-50 hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:hover:bg-gray-600'}`} onDragOver={handleDragOver} onDragLeave={handleDragLeave} onDrop={handleDrop}>
+                  <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                      <svg className="w-8 h-8 mb-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16"><path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"/></svg>
+                      <p className="mb-2 text-sm text-gray-500 dark:text-gray-400"><span className="font-semibold">Haz clic para cargar</span> o arrastra y suelta</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">SVG, PNG, JPG or GIF</p>
+                  </div>
+                  <input id="file-upload-sev-desktop" ref={uploadImagesRef} type="file" className="hidden" multiple accept="image/*" onChange={e => handleImageChange(e.target.files)} />
+              </label>
 
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mt-4">
-                        {annexImages.map((image, index) => (
-                            <div key={index} className="card overflow-hidden p-0">
-                                <div className="relative h-40 w-full group">
-                                    <Image src={image.dataUrl} alt={`Preview ${index}`} layout="fill" objectFit="cover" />
-                                    <div className="absolute top-1 right-1">
-                                        <button className="btn  btn-sm bg-red-500 hover:bg-red-600 cursor-pointer h-7 w-7 opacity-70 group-hover:opacity-100 flex items-center justify-center" onClick={() => deleteAnnexImage(index)}>
-                                            <span className="text-lg ">×</span>
-                                        </button>
-                                    </div>
-                                </div>
-                                <div className="p-2 flex-grow flex flex-col justify-between">
-                                    {editingImage?.index === index ? (
-                                        <div className="space-y-2">
-                                            <textarea
-                                                autoFocus
-                                                value={editingImage.description}
-                                                onChange={(e) => setEditingImage({ ...editingImage, description: e.target.value })}
-                                                className="form-input text-sm"
-                                                rows={3}
-                                            />
-                                            <div className="flex justify-end gap-2">
-                                                <button className="btn btn-primary btn-sm hover:bg-amber-600" onClick={handleCancelEdit}>Cancelar</button>
-                                                <button className="btn btn-secondary btn-sm" onClick={handleSaveDescription}>Guardar</button>
-                                            </div>
-                                        </div>
-                                    ) : (
-                                        <div className="space-y-2 flex flex-col h-full">
-                                            {image.desc ? (
-                                                <div className="flex flex-col h-full justify-between flex-grow">
-                                                    <div className="form-input text-sm min-h-[70px] flex-grow p-2">{image.desc}</div>
-                                                    <div className="flex justify-end gap-2 pt-2 border-t dark:border-gray-700">
-                                                        <button className="btn btn-secondary btn-sm" onClick={() => handleEnterEditMode(index, image.desc)}>Editar</button>
-                                                    </div>
-                                                </div>
-                                            ) : (
-                                                <button className="btn btn-secondary w-full mt-auto" onClick={() => handleEnterEditMode(index, image.desc)}>Agregar descripción</button>
-                                            )}
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                     <button type="button" className="btn btn-primary hover:bg-red-600" onClick={clearImages}>Borrar todas las fotos</button>
-                </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 mt-4">
+                  {annexImages.map((image, index) => (
+                      <div key={index} className="card overflow-hidden p-0">
+                          <div className="relative h-40 w-full group">
+                              <Image src={image.dataUrl} alt={`Preview ${index}`} layout="fill" objectFit="cover" />
+                              <div className="absolute top-1 right-1">
+                                  <button className="btn btn-sm bg-red-500 hover:bg-red-600 cursor-pointer h-7 w-7 opacity-70 group-hover:opacity-100 flex items-center justify-center" onClick={() => deleteAnnexImage(index)}>
+                                      <span className="text-lg ">×</span>
+                                  </button>
+                              </div>
+                          </div>
+                          <div className="p-2 flex-grow flex flex-col justify-between">
+                              {editingImage?.index === index ? (
+                                  <div className="space-y-2">
+                                      <textarea
+                                          autoFocus
+                                          value={editingImage.description}
+                                          onChange={(e) => setEditingImage({ ...editingImage, description: e.target.value })}
+                                          className="form-input text-sm"
+                                          rows={3}
+                                      />
+                                      <div className="flex justify-end gap-2">
+                                          <button className="btn btn-primary btn-sm hover:bg-amber-600" onClick={handleCancelEdit}>Cancelar</button>
+                                          <button className="btn btn-secondary btn-sm" onClick={handleSaveDescription}>Guardar</button>
+                                      </div>
+                                  </div>
+                              ) : (
+                                  <div className="space-y-2 flex flex-col h-full">
+                                      {image.desc ? (
+                                          <div className="flex flex-col h-full justify-between flex-grow">
+                                              <div className="form-input text-sm min-h-[70px] flex-grow p-2">{image.desc}</div>
+                                              <div className="flex flex-col sm:flex-row justify-end gap-2 pt-2 mt-2 border-t dark:border-gray-700">
+                                                  <button className="btn btn-secondary btn-sm" onClick={() => handleEnterEditMode(index, image.desc)}>Editar</button>                                                  
+                                              </div>
+                                          </div>
+                                      ) : (
+                                          <button className="btn btn-secondary w-full mt-auto cursor-pointer" onClick={() => handleEnterEditMode(index, image.desc)}>Agregar descripción</button>
+                                      )}
+                                  </div>
+                              )}
+                          </div>
+                      </div>
+                  ))}
+              </div>
+               <button type="button" className="btn btn-primary hover:bg-red-600 w-full sm:w-auto" onClick={clearImages}>Borrar todas las fotos</button>
             </div>
           </div>
 
-          <div className="space-y-6">
-            <div className="card">
-              <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Acciones</h2>
-              <div className="flex flex-col space-y-3">
+          <div className="card">
+            <h2 className="text-lg sm:text-xl font-semibold mb-4 text-gray-900 dark:text-white">Acciones</h2>
+            <div className="flex flex-col space-y-3">
               <button type="button" className="btn btn-primary w-full justify-center" onClick={handleGenerateReport}>Generar Informe (PDF)</button>
               <button type="button" className="btn btn-accent w-full justify-center" onClick={handleClearAll}>Limpiar Todo</button>
             </div>
-          </div>
-        </div>
-        </div>
-
-        <div className="card">
-          <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Gráfico SEV (Log-Log)</h2>
-          <div className="relative w-full h-[700px] md:h-[800px]">
-            <canvas ref={chartContainer}></canvas>
-          </div>
-        </div>
-
-        <div className="card">
-          <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Tabla de Resultados</h2>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm text-left">
-              <thead>
-                <tr className="bg-gray-100 dark:bg-gray-700">
-                  <th className="px-4 py-2 text-center">N° </th>
-                  <th className="px-4 py-2 text-center">a (m)</th>
-                  <th className="px-4 py-2 text-center">n</th>
-                  <th className="px-4 py-2 text-center">L (m)</th>
-                  <th className="px-4 py-2 text-center">R (Ω)</th>
-                  <th className="px-4 py-2 text-center">ρ Sch (Ω·m)</th>
-                  <th className="px-4 py-2 text-center">Acciones</th>
-                </tr>
-              </thead>
-              <tbody>
-                {measurements
-                  .slice()
-                  .sort((a, b) => a.xPlot - b.xPlot)
-                  .map((m, i) => (
-                    <tr key={m.id} className="border-b dark:border-gray-700">
-                      <td className="px-4 py-2 text-center">{i + 1}</td>
-                      <td className="px-4 py-2 text-center">{m.a.toFixed(2)}</td>
-                      <td className="px-4 py-2 text-center">{m.n.toFixed(2)}</td>
-                      <td className="px-4 py-2 text-center">{m.L.toFixed(2)}</td>
-                      <td className="px-4 py-2 text-center">{m.R.toFixed(2)}</td>
-                      <td className="px-4 py-2 text-center">{m.rho_sch.toFixed(2)}</td>
-                      <td className="px-4 py-2 text-center">
-                        <div className="flex justify-center gap-2">
-                          <button type="button" className="btn bg-amber-600 p-2 text-s  hover:bg-amber-800 cursor-pointer text-white" onClick={() => editRow(m.id)}>✎</button>
-                          <button type="button" className="btn bg-red-600 p-2 text-s text-white hover:bg-red-800 cursor-pointer" onClick={() => deleteRow(m.id)}>×</button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-              </tbody>
-            </table>
           </div>
         </div>
       </div>

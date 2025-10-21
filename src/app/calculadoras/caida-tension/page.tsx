@@ -233,12 +233,12 @@ export default function CalculoVpPage() {
         </p>
       </div>
       
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-8">
         {/* Columna Izquierda: Formulario e Historial */}
-        <div className="lg:col-span-1 space-y-8">
+        <div className="md:col-span-2 space-y-8">
           {/* Formulario */}
           <div className="card">
-            <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Datos de entrada</h2>
+            <h2 className="text-lg sm:text-xl font-semibold mb-4 text-gray-900 dark:text-white">Datos de entrada</h2>
             <form onSubmit={calcularYGraficarVp} className="space-y-4">
               <div>
                 <label htmlFor="tipoCalculo" className="form-label">Tipo de Sistema:</label>
@@ -264,7 +264,7 @@ export default function CalculoVpPage() {
               </div>
               
               <div className="pt-4">
-                <button type="submit" className="btn btn-primary">
+                <button type="submit" className="btn btn-primary w-full sm:w-auto">
                   Calcular y Graficar
                 </button>
               </div>
@@ -274,7 +274,7 @@ export default function CalculoVpPage() {
           {/* Historial de Cálculos */}
           <div className="card">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Historial</h2>
+              <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">Historial</h2>
               {history.length > 0 && (
                 <button onClick={clearHistory} className="text-sm text-blue-500 hover:underline">
                   Limpiar
@@ -287,8 +287,8 @@ export default function CalculoVpPage() {
               ) : (
                 history.map((item) => (
                   <div key={item.id} className="p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg border dark:border-gray-700">
-                    <p className="font-semibold text-lg text-blue-600 dark:text-blue-400">{item.resultadoValor}</p>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                    <p className="font-semibold text-base sm:text-lg text-blue-600 dark:text-blue-400">{item.resultadoValor}</p>
+                    <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
                       S: {item.seccion}mm², L: {item.longitudMaxima}m, I: {item.corriente}A ({item.tipoSistema})
                     </p>
                   </div>
@@ -299,17 +299,17 @@ export default function CalculoVpPage() {
         </div>
         
         {/* Columna Derecha: Resultados y Gráfico */}
-        <div className="lg:col-span-2">
+        <div className="md:col-span-3">
           <div className="card">
-            <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Resultados</h2>
+            <h2 className="text-lg sm:text-xl font-semibold mb-4 text-gray-900 dark:text-white">Resultados</h2>
             
             {resultadoValor && (
               <div className="results text-center mb-4">
-                <p className="text-lg">Caída de Tensión (Vp) a <span className="font-bold text-emerald-500">{longitudFinal}</span> metros: <span className="font-bold text-emerald-500">{resultadoValor}</span></p>
+                <p className="text-base sm:text-lg">Caída de Tensión (Vp) a <span className="font-bold text-emerald-500">{longitudFinal}</span> metros: <span className="font-bold text-emerald-500">{resultadoValor}</span></p>
               </div>
             )}
             {advertenciaCruce && (
-              <div className="warning-message text-center mb-4" dangerouslySetInnerHTML={{ __html: advertenciaCruce }} />
+              <div className="warning-message text-center mb-4 text-sm sm:text-base" dangerouslySetInnerHTML={{ __html: advertenciaCruce }} />
             )}
             
             <div className="mt-4">

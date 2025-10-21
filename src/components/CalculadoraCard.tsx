@@ -49,14 +49,14 @@ export default function CalculadoraCard({ id, title, description, icon, color }:
   return (
     <Link 
       href={`/calculadoras/${id}`}
-      className={`card hover:shadow-lg transition-shadow border-t-4 ${colorClasses[color].border}`}
+      className={`card hover:shadow-lg transition-shadow border-t-4 ${colorClasses[color].border} text-center sm:text-left`}
     >
-      <div className={`h-12 w-12 ${colorClasses[color].bg} rounded-lg flex items-center justify-center mb-4`}>
+      <div className={`h-12 w-12 ${colorClasses[color].bg} rounded-lg flex items-center justify-center mb-4 mx-auto sm:mx-0`}>
         <div className={colorClasses[color].text}>
           {icon}
         </div>
       </div>
-      <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">{title}</h2>
+      <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white mb-2">{title}</h2>
       <p className="text-gray-600 dark:text-gray-400 mb-4">{description}</p>
       <div className={`${colorClasses[color].text} font-medium inline-flex items-center`}>
         Abrir calculadora

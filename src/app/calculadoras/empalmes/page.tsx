@@ -102,16 +102,15 @@ export default function EmpalmesPage() {
                 </p>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {/* Columna de Formulario y Detalles */}
-                <div className="lg:col-span-2 space-y-8">
+                <div className="space-y-8">
                     <div className="card">
-                        <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Datos de Entrada</h2>
+                        <h2 className="text-lg sm:text-xl font-semibold mb-4 text-gray-900 dark:text-white">Datos de Entrada</h2>
                         <form onSubmit={handleSubmit} className="space-y-6">
-                            {/* ... (controles del formulario sin cambios) ... */}
                             <div>
                                 <label className="form-label">Calcular por</label>
-                                <div className="flex space-x-4">
+                                <div className="flex flex-wrap gap-4">
                                     <label className="inline-flex items-center">
                                         <input
                                             type="radio"
@@ -179,12 +178,12 @@ export default function EmpalmesPage() {
                             )}
 
                             <div className="pt-2">
-                                <button type="submit" className="btn btn-primary">Calcular Empalme</button>
+                                <button type="submit" className="btn btn-primary w-full sm:w-auto">Calcular Empalme</button>
                             </div>
                         </form>
                     </div>
                     <div className="card">
-                        <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Notas Informativas</h2>
+                        <h2 className="text-lg sm:text-xl font-semibold mb-4 text-gray-900 dark:text-white">Notas Informativas</h2>
                         <ul className="space-y-3 text-sm list-disc list-inside text-gray-600 dark:text-gray-400">
                             <li>
                                 <strong>Abreviaturas de Tipo de Empalme:</strong>
@@ -203,8 +202,7 @@ export default function EmpalmesPage() {
                 {/* Columna de Resultados e Historial */}
                 <div className="space-y-6">
                     <div className="card">
-                        <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Resultados</h2>
-                        {/* ... (lógica de resultados sin cambios) ... */}
+                        <h2 className="text-lg sm:text-xl font-semibold mb-4 text-gray-900 dark:text-white">Resultados</h2>
                         {!resultado && !error && (
                             <div className="text-center py-8">
                                 <p className="text-gray-500 dark:text-gray-400">Complete el formulario para ver el empalme recomendado.</p>
@@ -221,7 +219,7 @@ export default function EmpalmesPage() {
 
                         {resultado && (
                             <div className="p-4 bg-emerald-100 dark:bg-emerald-900/50 rounded-md space-y-2">
-                                <h4 className="text-lg font-bold text-emerald-800 dark:text-emerald-200">Empalme Recomendado</h4>
+                                <h4 className="text-base sm:text-lg font-bold text-emerald-800 dark:text-emerald-200">Empalme Recomendado</h4>
                                 <p><strong>Tipo de Tarifa:</strong> {'tipo_tarifa' in resultado ? resultado.tipo_tarifa : 'No especificada'}</p>
                                 <p><strong>Potencia a contratar:</strong> {resultado.pot_nominal_kw.toLocaleString('es-CL')} kW</p>
                                 <p><strong>Interruptor termomagnético:</strong> {resultado.interruptor_termomagnetico_A} A</p>
@@ -234,7 +232,7 @@ export default function EmpalmesPage() {
                     {/* Historial */}
                     <div className="card">
                         <div className="flex justify-between items-center mb-4">
-                            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Historial</h2>
+                            <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">Historial</h2>
                             {history.length > 0 && (
                                 <button onClick={clearHistory} className="text-sm text-blue-500 hover:underline">
                                     Limpiar
@@ -247,8 +245,8 @@ export default function EmpalmesPage() {
                             ) : (
                                 history.map((item) => (
                                     <div key={item.id} className="p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg border dark:border-gray-700">
-                                        <p className="font-semibold text-md text-blue-600 dark:text-blue-400">{item.resultado.tipo_empalme}</p>
-                                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                                        <p className="font-semibold text-sm sm:text-md text-blue-600 dark:text-blue-400">{item.resultado.tipo_empalme}</p>
+                                        <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
                                             Buscado: {item.inputs.valorBuscado} ({item.inputs.tipoInstalacion})
                                         </p>
                                         <p className="text-xs text-gray-500 dark:text-gray-500">

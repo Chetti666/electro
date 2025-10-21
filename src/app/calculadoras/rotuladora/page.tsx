@@ -138,7 +138,7 @@ export default function ElectricalPanelLabelGenerator() {
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <div className="card">
-          <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Datos del Tablero</h2>
+          <h2 className="text-lg sm:text-xl font-semibold mb-4 text-gray-900 dark:text-white">Datos del Tablero</h2>
           <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label htmlFor="fabricante" className="form-label">Marca de Fabricación:</label>
@@ -188,50 +188,50 @@ export default function ElectricalPanelLabelGenerator() {
                 <label htmlFor="labelWidth" className="form-label">Ancho de Impresión (mm):</label>
                 <input id="labelWidth" type="number" value={formData.labelWidth} onChange={handleChange} className="form-input" required />
               </div>
-              <button type="submit" className="btn btn-primary w-full">
+              <button type="submit" className="btn btn-primary w-full sm:w-auto">
                 Generar Rótulo
               </button>
           </form>
         </div>
 
-        <div className="container  px-4 ">
-         <div className="card">
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+        <div className="card">
+          <h2 className="text-lg sm:text-xl font-semibold mb-4 text-gray-900 dark:text-white">
             Vista Previa del Rótulo
           </h2>
-          <br />
-          {generatedLabel && (
+          {generatedLabel ? (
             <>
-              <div className="space-y-4">
+              <div className="w-full overflow-x-auto p-2 bg-gray-100 dark:bg-gray-800 rounded">
                 <div
                   id="label-output-print"
                   ref={labelOutputRef}
-                  className="border-2 border-gray-600 p-4 bg-white font-mono shadow-md text-black"
+                  className="border-2 border-gray-600 p-4 bg-white font-mono shadow-md text-black d-inline-block"
                   style={{ width: `${widthInPx}px` }}
                 >
                   {generatedLabel}
                 </div>
-                <div className="flex flex-col sm:flex-row gap-4">
-                  <button onClick={handlePrint} className="btn btn-primary ">
-                    Imprimir Rótulo
-                  </button>
-                  <button onClick={handleDownload} className="btn btn-primary ">
-                    Descargar como Imagen
-                  </button>
-                </div>
+              </div>
+              <div className="flex flex-col sm:flex-row gap-4 mt-4">
+                <button onClick={handlePrint} className="btn btn-primary w-full">
+                  Imprimir Rótulo
+                </button>
+                <button onClick={handleDownload} className="btn btn-primary w-full">
+                  Descargar como Imagen
+                </button>
               </div>
               <div className="mt-6">
-                        <Link href="/calculadoras" className="text-amber-500 hover:text-amber-600 inline-flex items-center">
-                            <svg className="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                            </svg>
-                            Volver a calculadoras
-                        </Link>
-                    </div>
+                <Link href="/calculadoras" className="text-amber-500 hover:text-amber-600 inline-flex items-center">
+                    <svg className="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                    </svg>
+                    Volver a calculadoras
+                </Link>
+              </div>
             </>
+          ) : (
+            <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+              <p>La vista previa del rótulo aparecerá aquí.</p>
+            </div>
           )}
-        </div>
-        
         </div>
       </div>
     </div>

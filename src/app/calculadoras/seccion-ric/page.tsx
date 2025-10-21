@@ -95,7 +95,7 @@ export default function SeccionRicPage() {
         {/* Columna de Formulario y Detalles */}
         <div className="lg:col-span-2 space-y-8">
           <div className="card">
-            <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Calculadora</h2>
+            <h2 className="text-lg sm:text-xl font-semibold mb-4 text-gray-900 dark:text-white">Calculadora</h2>
             <form onSubmit={handleCalcular} className="space-y-6">
               <div>
                 <label htmlFor="conductorSelect" className="form-label">1. Seleccione el Conductor</label>
@@ -132,7 +132,7 @@ export default function SeccionRicPage() {
                   </div>
 
                   <div className="pt-2">
-                    <button type="submit" className="btn btn-primary">Calcular Sección</button>
+                    <button type="submit" className="btn btn-primary w-full sm:w-auto">Calcular Sección</button>
                   </div>
                 </>
               )}
@@ -141,7 +141,7 @@ export default function SeccionRicPage() {
 
           {selectedConductor && (
             <div className="card">
-              <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Detalles de {selectedConductor.nombre}</h2>
+              <h2 className="text-lg sm:text-xl font-semibold mb-4 text-gray-900 dark:text-white">Detalles de {selectedConductor.nombre}</h2>
               <ul className="space-y-2 text-sm">
                 <li><strong>Características:</strong> {selectedConductor.caracteristicas}</li>
                 <li><strong>Uso Principal:</strong> {selectedConductor.uso}</li>
@@ -160,13 +160,13 @@ export default function SeccionRicPage() {
 
           {(resultado || error) && (
             <div className="card">
-              <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Resultado del Cálculo</h2>
+              <h2 className="text-lg sm:text-xl font-semibold mb-4 text-gray-900 dark:text-white">Resultado del Cálculo</h2>
               {error && <div className="p-4 bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-200 rounded-md">{error}</div>}
               {resultado && (
                 <div className="p-4 bg-emerald-100 dark:bg-emerald-900/50 text-emerald-800 dark:text-emerald-200 rounded-md text-center">
                   <p className="text-sm">(Ref. Tabla N° {resultado.tablaRef} RIC N° 04)</p>
                   <p className="mt-2">Para una corriente de <strong>{corriente} A</strong>, la sección mínima es:</p>
-                  <p className="text-3xl font-bold my-2">{resultado.seccion} mm²<span className="text-xl">{resultado.equivalente}</span></p>
+                  <p className="text-2xl sm:text-3xl font-bold my-2">{resultado.seccion} mm²<span className="text-lg sm:text-xl">{resultado.equivalente}</span></p>
                   <p className="text-sm">Soportando una corriente máx. de: <strong>{resultado.corrienteMaxima} A</strong></p>
                   <em className="text-xs mt-4 block">Nota: Siempre verifique las condiciones específicas de instalación y normativas locales.</em>
                 </div>
@@ -176,9 +176,9 @@ export default function SeccionRicPage() {
         </div>
 
         {/* Columna de Información */}
-        <div className="space-y-8">
+        <div className="lg:col-span-1 space-y-8">
           <div className="card">
-            <h3 className="text-lg font-semibold mb-3 text-gray-900 dark:text-white">Secciones Mínimas (RIC N°4)</h3>
+            <h3 className="text-base sm:text-lg font-semibold mb-3 text-gray-900 dark:text-white">Secciones Mínimas (RIC N°4)</h3>
             <div className="overflow-x-auto">
               <table className="w-full text-sm text-left">
                 <thead className="bg-gray-100 dark:bg-gray-700">
@@ -214,7 +214,7 @@ export default function SeccionRicPage() {
           </div>
 
           <div className="card">
-            <h3 className="text-lg font-semibold mb-3 text-gray-900 dark:text-white">Métodos de Instalación</h3>
+            <h3 className="text-base sm:text-lg font-semibold mb-3 text-gray-900 dark:text-white">Métodos de Instalación</h3>
             <div className="overflow-x-auto">
               <table className="w-full text-sm text-left">
                 <thead className="bg-gray-100 dark:bg-gray-700">

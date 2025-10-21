@@ -164,8 +164,10 @@ const InformeFotograficoSECPage = () => {
     // --- Generación de PDF (sin cambios en la lógica interna) ---
     const generatePdf = async () => {
         setIsLoading(true);
-        await new Promise(resolve => setTimeout(resolve, 50));
-        // La lógica de jsPDF permanece igual...
+        
+        // Pequeña pausa para que el UI se actualice
+        await new Promise(resolve => setTimeout(resolve, 50)); 
+
         try {
             const doc = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
             const reportData = {
@@ -260,6 +262,7 @@ const InformeFotograficoSECPage = () => {
             }
 
             doc.save(`Informe_Fotografico_${reportData.projectName.replace(/ /g, '_')}.pdf`);
+
         } catch (error) {
             console.error("Error generando el PDF:", error);
             alert("Ocurrió un error al generar el PDF. Por favor, revise la consola.");
@@ -314,24 +317,31 @@ const InformeFotograficoSECPage = () => {
                             </div>
                             {section.isOpen && (
                                 <div className="p-4 border-t dark:border-gray-700">
-                                    <label 
-                                        htmlFor={`file-upload-${section.id}`}
-                                        className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer transition-colors ${isDragging ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' : 'border-gray-300 bg-gray-50 hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:hover:bg-gray-600'}`}
-                                        onDragOver={handleDragOver}
-                                        onDragLeave={handleDragLeave}
-                                        onDrop={(e) => handleDrop(e, section.id)}
-                                    >
+                                    {/* --- Vista para Móviles: Botones explícitos --- */}
+                                    <div className="flex flex-col sm:hidden gap-4">
+                                        <label htmlFor={`camera-upload-${section.id}`} className="btn btn-secondary flex-1 cursor-pointer flex items-center justify-center">
+                                            <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l1.416-2.356A2 2 0 0111 3h2a2 2 0 011.664.89l1.416 2.356A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                                            Tomar Foto
+                                        </label>
+                                        <input id={`camera-upload-${section.id}`} type="file" className="hidden" multiple accept="image/*" capture="environment" onChange={e => handleImageChange(section.id, e.target.files)} />
+                                        <label htmlFor={`gallery-upload-${section.id}`} className="btn btn-outline flex-1 cursor-pointer flex items-center justify-center">
+                                            <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                                            Elegir de Galería
+                                        </label>
+                                        <input id={`gallery-upload-${section.id}`} type="file" className="hidden" multiple accept="image/*" onChange={e => handleImageChange(section.id, e.target.files)} />
+                                    </div>
+
+                                    {/* --- Vista para Escritorio: Arrastrar y Soltar --- */}
+                                    <label htmlFor={`file-upload-${section.id}`} className={`hidden sm:flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer transition-colors ${isDragging ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' : 'border-gray-300 bg-gray-50 hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:hover:bg-gray-600'}`} onDragOver={handleDragOver} onDragLeave={handleDragLeave} onDrop={(e) => handleDrop(e, section.id)}>
                                         <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                                            <svg className="w-8 h-8 mb-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
-                                                <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"/>
-                                            </svg>
+                                            <svg className="w-8 h-8 mb-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16"><path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"/></svg>
                                             <p className="mb-2 text-sm text-gray-500 dark:text-gray-400"><span className="font-semibold">Haz clic para cargar</span> o arrastra y suelta</p>
                                             <p className="text-xs text-gray-500 dark:text-gray-400">SVG, PNG, JPG or GIF</p>
                                         </div>
                                         <input id={`file-upload-${section.id}`} type="file" className="hidden" multiple accept="image/*" onChange={e => handleImageChange(section.id, e.target.files)} />
                                     </label>
 
-                                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 mt-4">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mt-4">
                                         {section.images.map((image, index) => (
                                             <div key={index} className="card overflow-hidden p-0">
                                                 <div className="relative h-40 w-full group">
@@ -362,9 +372,9 @@ const InformeFotograficoSECPage = () => {
                                                             {image.description ? (
                                                                 <div className="flex flex-col h-full justify-between flex-grow">
                                                                     <div className="form-input text-sm min-h-[70px] flex-grow p-2">{image.description}</div>
-                                                                    <div className="flex justify-end gap-2 pt-2 border-t dark:border-gray-700">
-                                                                        <button className="btn bg-amber-500 hover:bg-amber-600 btn-sm cursor-pointer" onClick={() => handleEnterEditMode(section.id, index, image.description)}>Editar</button>
-                                                                        <button className="btn  btn-sm bg-red-600 hover:bg-red-800 cursor-pointer" onClick={() => handleDeleteDescription(section.id, index)}>Eliminar</button>
+                                                                    <div className="flex flex-col sm:flex-row justify-end gap-2 pt-2 mt-auto">
+                                                                        <button className="btn btn-secondary btn-sm" onClick={() => handleEnterEditMode(section.id, index, image.description)}>Editar</button>
+                                                                        <button className="btn btn-sm bg-red-600 hover:bg-red-800 cursor-pointer" onClick={() => handleDeleteDescription(section.id, index)}>Eliminar</button>
                                                                     </div>
                                                                 </div>
                                                             ) : (
@@ -383,9 +393,9 @@ const InformeFotograficoSECPage = () => {
                 </div>
 
                 <h2 className="text-xl font-semibold my-6 text-gray-900 dark:text-white">3. Nueva Categoría</h2>
-                <div className="flex items-center gap-4">
+                <div className="flex flex-col sm:flex-row items-center gap-4">
                     <input value={customSectionName} onChange={e => setCustomSectionName(e.target.value)} placeholder="Nombre de la nueva categoría..." className="form-input flex-grow" />
-                    <button onClick={addCustomSection} className="btn btn-secondary">Agregar Categoría</button>
+                    <button onClick={addCustomSection} className="btn btn-secondary w-full sm:w-auto">Agregar Categoría</button>
                 </div>
 
                 <div className="mt-8">
