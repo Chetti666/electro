@@ -907,7 +907,12 @@ const DatabaseView = ({ activeSubTab, setActiveSubTab, dbMateriales, setDbMateri
     </div>
 );
 
-const PresupuestoPageContent = (props: any) => {
+interface PresupuestoPageContentProps extends PresupuestoViewProps, ApuAnalizadorViewProps, DatabaseViewProps {
+    activeTab: string;
+    setActiveTab: React.Dispatch<React.SetStateAction<string>>;
+}
+
+const PresupuestoPageContent = (props: PresupuestoPageContentProps) => {
     return (
          <div className="container mx-auto px-4 py-8">
             <div className="mb-8">
