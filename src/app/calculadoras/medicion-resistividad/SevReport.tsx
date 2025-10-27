@@ -330,35 +330,62 @@ export default function SevReport() {
     const calib = lastCalibration ? new Date(lastCalibration + 'T00:00:00').toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' }) : "No especificada";
     const date = new Date().toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' });
 
-    const offscreenCanvas = document.createElement('canvas');
-    offscreenCanvas.width = 1400;
-    offscreenCanvas.height = 900;
-    const offCtx = offscreenCanvas.getContext('2d');
+    // --- Generación del Gráfico para el PDF ---
+    if (!chartInstance.current) return;
 
-    if (!offCtx || !chartInstance.current) return;
+    // 1. Primer renderizado para medir el área del gráfico (chartArea)
+    const initialCanvas = document.createElement('canvas');
+    initialCanvas.width = 1200; // Tamaño de referencia
+    initialCanvas.height = 1600;
+    const initialCtx = initialCanvas.getContext('2d');
+    if (!initialCtx) return;
 
     const reportOptions = JSON.parse(JSON.stringify(chartInstance.current.options));
     reportOptions.animation = false;
     reportOptions.responsive = false;
-    // Force light theme for PDF report
     reportOptions.color = "rgba(0, 0, 0, 0.92)";
     reportOptions.scales.x.ticks.color = "rgba(0, 0, 0, 0.92)";
     reportOptions.scales.y.ticks.color = "rgba(0, 0, 0, 0.92)";
     reportOptions.scales.x.title.color = "rgba(0, 0, 0, 0.92)";
     reportOptions.scales.y.title.color = "rgba(0, 0, 0, 0.92)";
-    reportOptions.scales.x.grid.color = "rgba(0, 0, 0, 0.92)"; // Forzar grilla visible en PDF
-    reportOptions.scales.y.grid.color = "rgba(0, 0, 0, 0.92)"; // Forzar grilla visible en PDF
+    reportOptions.scales.x.grid.color = "rgba(0, 0, 0, 0.92)";
+    reportOptions.scales.y.grid.color = "rgba(0, 0, 0, 0.92)";
+
+    const tempChart = new Chart(initialCtx, {
+        type: 'line',
+        data: chartInstance.current.data,
+        options: reportOptions
+    });
+    
+    const { width: chartAreaWidth, height: chartAreaHeight } = tempChart.chartArea;
+    tempChart.destroy();
+
+    // 2. Calcular dimensiones finales basadas en la escala y el chartArea medido
+    const mmPerDecade = 62.5;
+    const xDecades = Math.log10(reportOptions.scales.x.max / reportOptions.scales.x.min);
+    const yDecades = Math.log10(reportOptions.scales.y.max / reportOptions.scales.y.min);
+    const correctionFactor = 62.5 / 60.5; // Ajuste empírico
+
+    const chartWidthMM = (xDecades * mmPerDecade) * (initialCanvas.width / chartAreaWidth) * correctionFactor;
+    const chartHeightMM = (yDecades * mmPerDecade) * (initialCanvas.height / chartAreaHeight) * correctionFactor;
+
+    // 3. Segundo renderizado con las dimensiones correctas
+    const offscreenCanvas = document.createElement('canvas');
+    offscreenCanvas.width = Math.round(chartWidthMM * 6); // Multiplicador para alta resolución
+    offscreenCanvas.height = Math.round(chartHeightMM * 6);
+    const offCtx = offscreenCanvas.getContext('2d');
+    if (!offCtx) return;
     
     new Chart(offCtx, {
       type: 'line',
       data: chartInstance.current.data,
-      options: reportOptions
+      options: { ...reportOptions, responsive: false, maintainAspectRatio: false },
     });
 
     setTimeout(() => {
       const chartImage = offscreenCanvas.toDataURL('image/png', 1.0);
 
-      const doc = new jsPDF('p', 'mm', 'a4');
+      const doc = new jsPDF('p', 'mm', [210, 279]);
       const pageMargin = 15;
       const pageWidth = doc.internal.pageSize.getWidth() - pageMargin * 2;
       const pageHeight = doc.internal.pageSize.height;
@@ -366,7 +393,7 @@ export default function SevReport() {
       // --- Portada ---
       doc.setDrawColor(0, 86, 179); 
       doc.setLineWidth(1.5);
-      doc.rect(5, 5, doc.internal.pageSize.width - 10, pageHeight - 10);
+      doc.rect(pageMargin, pageMargin - 6, pageWidth, pageHeight - (pageMargin - 6) - pageMargin);
       doc.setFont('helvetica', 'bold'); 
       doc.setFontSize(24);
       doc.text('Informe de Sondeo Eléctrico Vertical (SEV)', doc.internal.pageSize.width / 2, 60, { align: 'center' });
@@ -396,22 +423,23 @@ export default function SevReport() {
         margin: { left: pageMargin, right: pageMargin }
       });
 
-      // --- Contenido ---
+      // --- Página del Gráfico ---
+      doc.addPage();
+      
+      // Posicionar el gráfico para dejar espacio para el pie de página
+      const chartX = (doc.internal.pageSize.getWidth() - chartWidthMM) / 2;
+      const chartY = pageMargin; // Iniciar más arriba
+
+      // Asegurarse de que el gráfico no se salga de la página
+      if (chartWidthMM > pageWidth || chartHeightMM > pageHeight - (pageMargin * 2)) {
+        console.warn("El tamaño del gráfico excede el área de la página. Puede que se vea cortado.");
+      }
+      doc.addImage(chartImage, 'PNG', chartX, chartY, chartWidthMM, chartHeightMM);
+
+      // --- Tabla de Datos ---
       doc.addPage();
       let yPosition = pageMargin + 10;
 
-      // --- Gráfico ---
-      doc.setFontSize(16);
-      doc.setTextColor(50);
-      doc.text("2. Curva de Campo", pageMargin, yPosition);
-      yPosition += 2;
-      const chartHeight = (pageWidth * offscreenCanvas.height) / offscreenCanvas.width;
-      doc.setDrawColor(200); // Gris claro
-      doc.rect(pageMargin, yPosition, pageWidth, chartHeight);
-      doc.addImage(chartImage, 'PNG', pageMargin, yPosition, pageWidth, chartHeight);
-      yPosition += chartHeight + 10;
-
-      // --- Tabla de Datos ---
       const tableHeaders = [["N°", "a (m)", "n", "L (m)", "R (ohm)", "Resistividad Sch (ohm-m)"]];
       const tableBody = measurements
         .slice()
@@ -427,13 +455,13 @@ export default function SevReport() {
 
       doc.setFontSize(16);
       doc.setTextColor(50);
-      doc.text("3. Tabla de Datos y Resultados", pageMargin, yPosition);
+      doc.text("3. Tabla de Datos y Resultados", pageMargin, yPosition, {align: 'left'});
       yPosition += 2;
 
       autoTable(doc, {
         head: tableHeaders,
         body: tableBody,
-        startY: yPosition,
+        startY: yPosition, // Dejar espacio para el pie de página
         margin: { left: pageMargin, right: pageMargin },
         headStyles: { fillColor: [224, 224, 224], textColor: 20, fontStyle: 'bold' as const, font: 'helvetica' },
         alternateRowStyles: { fillColor: [245, 245, 245] },
@@ -443,7 +471,7 @@ export default function SevReport() {
 
       // --- Anexo de Imágenes ---
       if (annexImages.length > 0) {
-        if (yPosition + 20 > pageHeight - pageMargin) {
+        if (yPosition + 20 > pageHeight - (pageMargin + 10)) { // Dejar espacio para el pie de página
             doc.addPage();
             yPosition = pageMargin + 10;
         }
@@ -457,7 +485,7 @@ export default function SevReport() {
           const imgHeight = (imgWidth * 3) / 4; // Aspect ratio 4:3
           const xPos = (idx % 2 === 0) ? pageMargin : pageMargin + imgWidth + 10;
 
-          if (yPosition + imgHeight + 20 > pageHeight - pageMargin) {
+          if (yPosition + imgHeight + 20 > pageHeight - (pageMargin + 10)) { // Dejar espacio para el pie de página
             doc.addPage();
             yPosition = pageMargin + 10;
           }
@@ -478,11 +506,11 @@ export default function SevReport() {
       for (let i = 2; i <= totalPages; i++) {
           doc.setPage(i);
           doc.setFontSize(9); doc.setTextColor(150);
-          doc.text(`Informe de Sondeo Eléctrico Vertical (SEV) - ${proj}`, pageMargin, 10);
-          doc.line(pageMargin, 12, pageWidth + pageMargin, 12);
+          doc.text(`Informe de Sondeo Eléctrico Vertical (SEV) - ${proj}`, pageMargin, pageMargin - 8);
+          doc.line(pageMargin, pageMargin - 6, pageWidth + pageMargin, pageMargin - 6);
           const footerText = `Página ${i} de ${totalPages}`;
-          doc.line(pageMargin, pageHeight - 12, pageWidth + pageMargin, pageHeight - 12);
-          doc.text(footerText, doc.internal.pageSize.width / 2, pageHeight - 8, { align: 'center' });
+          doc.line(pageMargin, pageHeight - pageMargin, pageWidth + pageMargin, pageHeight - pageMargin);
+          doc.text(footerText, doc.internal.pageSize.width / 2, pageHeight - pageMargin + 4, { align: 'center' });
           doc.setTextColor(0);
       }
 
