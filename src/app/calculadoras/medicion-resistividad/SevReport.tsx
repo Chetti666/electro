@@ -390,6 +390,19 @@ export default function SevReport() {
       const pageWidth = doc.internal.pageSize.getWidth() - pageMargin * 2;
       const pageHeight = doc.internal.pageSize.height;
 
+      // Función para aplicar estilo de título
+      const applyTitleStyle = (text: string, y: number) => {
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(50);
+        doc.text(text, pageMargin, y);
+        const textWidth = doc.getStringUnitWidth(text) * doc.getFontSize() / doc.internal.scaleFactor;
+        doc.setDrawColor(0, 86, 179); // Azul
+        doc.setLineWidth(0.3);
+        doc.line(pageMargin, y + 1, pageMargin + textWidth, y + 1);
+        return y + 10; // Devuelve la nueva posición Y
+      };
+
       // --- Portada ---
       doc.setDrawColor(0, 86, 179); 
       doc.setLineWidth(1.5);
@@ -425,15 +438,19 @@ export default function SevReport() {
 
       // --- Página del Gráfico ---
       doc.addPage();
+      let yPositionChartPage = pageMargin + 10;
       
+      yPositionChartPage = applyTitleStyle("2. Curva de Campo", yPositionChartPage - 10);
+
       // Posicionar el gráfico para dejar espacio para el pie de página
       const chartX = (doc.internal.pageSize.getWidth() - chartWidthMM) / 2;
-      const chartY = pageMargin; // Iniciar más arriba
+      const chartY = yPositionChartPage;
 
       // Asegurarse de que el gráfico no se salga de la página
-      if (chartWidthMM > pageWidth || chartHeightMM > pageHeight - (pageMargin * 2)) {
+      if (chartWidthMM > pageWidth || chartHeightMM > pageHeight - chartY - pageMargin) {
         console.warn("El tamaño del gráfico excede el área de la página. Puede que se vea cortado.");
       }
+
       doc.addImage(chartImage, 'PNG', chartX, chartY, chartWidthMM, chartHeightMM);
 
       // --- Tabla de Datos ---
@@ -453,11 +470,8 @@ export default function SevReport() {
           m.rho_sch.toFixed(2),
         ]);
 
-      doc.setFontSize(16);
-      doc.setTextColor(50);
-      doc.text("3. Tabla de Datos y Resultados", pageMargin, yPosition, {align: 'left'});
-      yPosition += 2;
-
+      yPosition = applyTitleStyle("3. Tabla de Datos y Resultados", yPosition);
+      
       autoTable(doc, {
         head: tableHeaders,
         body: tableBody,
@@ -475,10 +489,8 @@ export default function SevReport() {
             doc.addPage();
             yPosition = pageMargin + 10;
         }
-        doc.setFontSize(16);
-        doc.setTextColor(50);
-        doc.text("4. Anexo de Imágenes", pageMargin, yPosition);
-        yPosition += 10;
+        
+        yPosition = applyTitleStyle("4. Anexo de Imágenes", yPosition);
         
         annexImages.forEach((img, idx) => {
           const imgWidth = 80;
@@ -493,7 +505,9 @@ export default function SevReport() {
           doc.addImage(img.dataUrl, 'PNG', xPos, yPosition, imgWidth, imgHeight);
           doc.setFontSize(10);
           doc.setTextColor(80);
-          doc.text(`Figura ${idx + 1}: ${escapeHtml(img.desc || "(sin descripción)")}`, xPos, yPosition + imgHeight + 5, { maxWidth: imgWidth });
+          const figureText = `Figura ${idx + 1}`;
+          const descriptionText = img.desc ? `: ${escapeHtml(img.desc)}` : '';
+          doc.text(figureText + descriptionText, xPos, yPosition + imgHeight + 5, { maxWidth: imgWidth });
 
           if (idx % 2 !== 0) {
             yPosition += imgHeight + 20;
@@ -634,7 +648,7 @@ export default function SevReport() {
 
           <div className="card">
             <h2 className="text-lg sm:text-xl font-semibold mb-4 text-gray-900 dark:text-white">Gráfico SEV (Log-Log)</h2>
-            <div className="relative w-full h-[400px] sm:h-[500px] md:h-[600px]">
+            <div className="relative mx-auto w-full max-w-4xl h-[600px]">
               <canvas ref={chartContainer}></canvas>
             </div>
           </div>

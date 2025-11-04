@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect, DragEvent } from 'react';
+import autoTable from 'jspdf-autotable';
 import jsPDF from 'jspdf';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -73,8 +74,9 @@ const InformeFotograficoSECPage = () => {
         }
     };
 
-    const handleImageChange = (sectionId: string, files: FileList | null) => {
-        if (!files) return;
+    const handleImageChange = (sectionId: string, e: React.ChangeEvent<HTMLInputElement>) => {
+        const files = e.target.files;
+        if (!files || files.length === 0) return;
         const section = sections.find(s => s.id === sectionId);
         if (!section) return;
 
@@ -94,6 +96,8 @@ const InformeFotograficoSECPage = () => {
             setSections(sections.map(s => 
                 s.id === sectionId ? { ...s, images: [...s.images, ...newImages] } : s
             ));
+            // Resetear el valor del input para permitir volver a seleccionar el mismo archivo
+            e.target.value = '';
         });
     };
 
@@ -157,7 +161,7 @@ const InformeFotograficoSECPage = () => {
         setIsDragging(false);
         const files = e.dataTransfer.files;
         if (files && files.length > 0) {
-            handleImageChange(sectionId, files);
+            handleImageChange(sectionId, { target: { files } } as unknown as React.ChangeEvent<HTMLInputElement>);
         }
     };
 
@@ -169,80 +173,133 @@ const InformeFotograficoSECPage = () => {
         await new Promise(resolve => setTimeout(resolve, 50)); 
 
         try {
-            const doc = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
+            const doc = new jsPDF('p', 'mm', [210, 279]);
             const reportData = {
                 projectName: projectName || 'No especificado',
                 projectAddress: projectAddress || 'No especificada',
                 installerName: installerName || 'No especificado',
-                reportDate,
+                reportDate: reportDate ? new Date(reportDate + 'T00:00:00').toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' }) : "No especificada",
                 sections: sections.filter(s => s.images.length > 0)
             };
 
             const pageWidth = doc.internal.pageSize.width;
             const pageHeight = doc.internal.pageSize.height;
             const margin = 15;
+            const contentWidth = pageWidth - margin * 2;
 
             // Portada
             doc.setDrawColor(0, 86, 179); doc.setLineWidth(1.5);
-            doc.rect(5, 5, pageWidth - 10, pageHeight - 10);
+            doc.rect(margin, margin - 6, contentWidth, pageHeight - (margin - 6) - margin);
             doc.setFont('helvetica', 'bold'); doc.setFontSize(24);
             doc.text('Informe Fotográfico', pageWidth / 2, 60, { align: 'center' });
             doc.setFontSize(18); doc.text('Instalación Eléctrica', pageWidth / 2, 72, { align: 'center' });
             doc.setFont('helvetica', 'normal'); doc.setFontSize(12);
             doc.text('En conformidad al punto 6.4 del Pliego Técnico Normativo RIC N°18', pageWidth / 2, 90, { align: 'center' });
-            const boxY = 130, boxHeight = 60;
-            doc.setLineWidth(0.5); doc.rect(margin, boxY, pageWidth - (margin * 2), boxHeight);
+            
             const details = [
-                { label: 'Proyecto:', value: reportData.projectName }, { label: 'Dirección:', value: reportData.projectAddress },
-                { label: 'Instalador:', value: reportData.installerName }, { label: 'Fecha:', value: reportData.reportDate }
+                [{ content: 'Proyecto:', styles: { fontStyle: 'bold' as const } }, reportData.projectName],
+                [{ content: 'Dirección:', styles: { fontStyle: 'bold' as const } }, reportData.projectAddress],
+                [{ content: 'Instalador:', styles: { fontStyle: 'bold' as const } }, reportData.installerName],
+                [{ content: 'Fecha de Emisión:', styles: { fontStyle: 'bold' as const } }, reportData.reportDate],
             ];
-            let textY = boxY + 15;
-            details.forEach(detail => {
-                doc.setFont('helvetica', 'bold'); doc.text(detail.label, margin + 10, textY);
-                doc.setFont('helvetica', 'normal'); doc.text(detail.value, margin + 40, textY);
-                textY += 12;
+
+            autoTable(doc, {
+                startY: 120,
+                body: details,
+                theme: 'plain',
+                styles: { fontSize: 12, cellPadding: 2 },
+                columnStyles: { 0: { cellWidth: 50 } },
+                margin: { left: margin, right: margin }
             });
 
             // Contenido
             if (reportData.sections.length > 0) {
                 let yPosition = 0;
-                const newPage = () => { doc.addPage(); yPosition = margin + 10; };
+                const applyTitleStyle = () => {
+                    doc.setFontSize(12);
+                    doc.setFont('helvetica', 'bold');
+                    doc.setDrawColor(0, 86, 179); // Azul para el subrayado
+                };
+                const newPage = () => { 
+                    doc.addPage(); 
+                    yPosition = margin + 1;
+                    applyTitleStyle(); // Re-aplicar estilo en cada nueva página
+                };
                 newPage();
 
                 reportData.sections.forEach(section => {
-                    if (yPosition + 15 > pageHeight - margin) newPage();
-                    doc.setFillColor(230, 230, 230);
-                    doc.rect(margin, yPosition, pageWidth - (margin * 2), 10, 'F');
-                    doc.setFontSize(12); doc.setFont('helvetica', 'bold');
-                    doc.text(section.title, margin + 2, yPosition + 7);
-                    yPosition += 15;
+                    // Estimar la altura de la primera fila de imágenes para evitar títulos huérfanos
+                    let requiredHeight = 15; // Altura del título + un pequeño margen
+                    if (section.images.length > 0) {
+                        const firstImage = section.images[0];
+                        const imgWidth = 80;
+                        const imgProps = doc.getImageProperties(firstImage.src);
+                        const imgHeight = (imgProps.height * imgWidth) / imgProps.width;
+                        const descLines = firstImage.description ? doc.splitTextToSize(`Figura 1: ${firstImage.description}`, imgWidth) : [];
+                        const descHeight = descLines.length * (doc.getFontSize() * 0.35);
+                        const firstImageBlockHeight = imgHeight + (firstImage.description ? descHeight + 10 : 5);
+                        requiredHeight += firstImageBlockHeight;
+                    }
+
+                    if (yPosition + requiredHeight > pageHeight - margin) {
+                        newPage();
+                    }
+                    applyTitleStyle(); // Usar la función de estilo
+                    doc.text(section.title, margin, yPosition);
+                    const textWidth = doc.getStringUnitWidth(section.title) * doc.getFontSize() / doc.internal.scaleFactor;
+                    doc.setLineWidth(0.3);
+                    doc.line(margin, yPosition + 1, margin + textWidth, yPosition + 1);
+                    yPosition += 10;
                     doc.setFont('helvetica', 'normal');
+    
+                    let currentRowMaxHeight = 0;
 
                     section.images.forEach((image, index) => {
                         const imgWidth = 80;
                         const imgProps = doc.getImageProperties(image.src);
                         const imgHeight = (imgProps.height * imgWidth) / imgProps.width;
-                        doc.setFontSize(9);
-                        const descLines = image.description ? doc.splitTextToSize(image.description, pageWidth - margin * 2 - imgWidth - 5) : [''];
-                        const descHeight = (descLines.length * doc.getLineHeight()) / doc.internal.scaleFactor;
-                        const blockHeight = Math.max(imgHeight, descHeight) + 10;
-                        
-                        if (yPosition + blockHeight > pageHeight - margin) newPage();
 
-                        doc.addImage(image.src, 'JPEG', margin, yPosition, imgWidth, imgHeight);
-                        if (image.description) {
-                            doc.setTextColor(80);
-                            doc.text(descLines, margin + imgWidth + 5, yPosition);
-                            doc.setTextColor(0);
+                        // Calcular la altura total del bloque (imagen + descripción) para el borde
+                        const descLines = image.description ? doc.splitTextToSize(`Figura ${index + 1}: ${image.description}`, imgWidth) : [];
+                        const descHeight = descLines.length * (doc.getFontSize() * 0.35); // Aproximación de la altura del texto
+                        const blockHeight = imgHeight + (image.description ? descHeight + 10 : 5);
+
+                        currentRowMaxHeight = Math.max(currentRowMaxHeight, blockHeight);
+
+                        // Comprobación de salto de página ANTES de dibujar
+                        if (yPosition + blockHeight > pageHeight - margin) {
+                            newPage();
                         }
+
+                        const xPos = (index % 2 === 0) ? margin : margin + imgWidth + 10;
+
+                        doc.addImage(image.src, 'JPEG', xPos, yPosition, imgWidth, imgHeight);
+                        doc.setFontSize(10);
+                        doc.setTextColor(80);
                         
-                        if (index < section.images.length - 1) {
-                            const lineY = yPosition + blockHeight - 5;
-                            doc.setDrawColor(220); doc.setLineWidth(0.2);
-                            doc.line(margin, lineY, pageWidth - margin, lineY);
-                            doc.setDrawColor(0);
+                        const figureText = `Figura ${index + 1}`;
+                        doc.setFont('helvetica', 'bold');
+
+                        if (image.description) {
+                            const figureTextWithColon = `${figureText}:`;
+                            const descText = image.description;
+                            doc.text(figureTextWithColon, xPos, yPosition + imgHeight + 5);
+                            const figureTextWidth = doc.getStringUnitWidth(figureTextWithColon) * doc.getFontSize() / doc.internal.scaleFactor;
+                            doc.setFont('helvetica', 'normal');
+                            doc.text(descText, xPos + figureTextWidth + 1, yPosition + imgHeight + 5, { maxWidth: imgWidth - figureTextWidth - 1 });
+                        } else {
+                            doc.text(figureText, xPos, yPosition + imgHeight + 5);
                         }
-                        yPosition += blockHeight;
+
+                        if (index % 2 !== 0 || index === section.images.length - 1) {
+                            yPosition += currentRowMaxHeight + 10;
+                            // Dibuja una línea separadora entre filas, pero no después de la última imagen de la sección
+                            if (index < section.images.length - 1) {
+                                doc.setDrawColor(220, 220, 220); doc.setLineWidth(0.2);
+                                doc.line(margin, yPosition - 5, pageWidth - margin, yPosition - 5);
+                            }
+                            currentRowMaxHeight = 0; // Reset for the next row
+                        }
                     });
                 });
             }
@@ -253,11 +310,11 @@ const InformeFotograficoSECPage = () => {
             for (let i = 2; i <= totalPages; i++) {
                 doc.setPage(i);
                 doc.setFontSize(9); doc.setTextColor(150);
-                doc.text(reportData.projectName, margin, 10);
-                doc.line(margin, 12, pageWidth - margin, 12);
+                doc.text(`Informe Fotográfico - ${reportData.projectName}`, margin, margin - 8);
+                doc.line(margin, margin - 6, contentWidth + margin, margin - 6);
                 const footerText = `Página ${i} de ${totalPages}`;
-                doc.line(margin, pageHeight - 12, pageWidth - margin, pageHeight - 12);
-                doc.text(footerText, pageWidth / 2, pageHeight - 8, { align: 'center' });
+                doc.line(margin, pageHeight - margin, contentWidth + margin, pageHeight - margin);
+                doc.text(footerText, pageWidth / 2, pageHeight - margin + 4, { align: 'center' });
                 doc.setTextColor(0);
             }
 
@@ -323,12 +380,12 @@ const InformeFotograficoSECPage = () => {
                                             <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l1.416-2.356A2 2 0 0111 3h2a2 2 0 011.664.89l1.416 2.356A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
                                             Tomar Foto
                                         </label>
-                                        <input id={`camera-upload-${section.id}`} type="file" className="hidden" multiple accept="image/*" capture="environment" onChange={e => handleImageChange(section.id, e.target.files)} />
+                                        <input id={`camera-upload-${section.id}`} type="file" className="hidden" multiple accept="image/*" capture="environment" onChange={e => handleImageChange(section.id, e)} />
                                         <label htmlFor={`gallery-upload-${section.id}`} className="btn btn-outline flex-1 cursor-pointer flex items-center justify-center">
                                             <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                                             Elegir de Galería
                                         </label>
-                                        <input id={`gallery-upload-${section.id}`} type="file" className="hidden" multiple accept="image/*" onChange={e => handleImageChange(section.id, e.target.files)} />
+                                        <input id={`gallery-upload-${section.id}`} type="file" className="hidden" multiple accept="image/*" onChange={e => handleImageChange(section.id, e)} />
                                     </div>
 
                                     {/* --- Vista para Escritorio: Arrastrar y Soltar --- */}
@@ -338,7 +395,7 @@ const InformeFotograficoSECPage = () => {
                                             <p className="mb-2 text-sm text-gray-500 dark:text-gray-400"><span className="font-semibold">Haz clic para cargar</span> o arrastra y suelta</p>
                                             <p className="text-xs text-gray-500 dark:text-gray-400">SVG, PNG, JPG or GIF</p>
                                         </div>
-                                        <input id={`file-upload-${section.id}`} type="file" className="hidden" multiple accept="image/*" onChange={e => handleImageChange(section.id, e.target.files)} />
+                                        <input id={`file-upload-${section.id}`} type="file" className="hidden" multiple accept="image/*" onChange={e => handleImageChange(section.id, e)} />
                                     </label>
 
                                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mt-4">
