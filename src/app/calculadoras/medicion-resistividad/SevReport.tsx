@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef, useCallback, DragEvent } from 'react';
 import Image from 'next/image';
 import Chart, { type Chart as ChartType } from 'chart.js/auto';
+import imageCompression from 'browser-image-compression';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
@@ -21,6 +22,8 @@ interface AnnexImage {
   dataUrl: string;
   name: string;
   desc: string;
+  width: number;
+  height: number;
 }
 
 interface DocWithLastTable extends jsPDF {
@@ -64,16 +67,6 @@ export default function SevReport() {
   const chartInstance = useRef<ChartType | null>(null);
   // Referencia para el formulario de medidas
   const formCardRef = useRef<HTMLDivElement>(null);
-
-  // --- Utilidades ---
-  const fileToDataURL = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-    });
-  };
 
   const escapeHtml = (str: string): string => {
     return (str || "").replace(/[&<>]/g, s => ({
@@ -149,16 +142,47 @@ export default function SevReport() {
   };
 
   // --- Lógica de Imágenes ---
-    const handleImageChange = (files: FileList | null) => {
+    const handleImageChange = async (files: FileList | null) => {
         if (!files) return;
 
-        const newImagePromises = Array.from(files).map(file => {
-            return fileToDataURL(file).then(dataUrl => ({ dataUrl, name: file.name, desc: '' }));
+        const imageProcessingOptions = {
+            maxSizeMB: 1,
+            maxWidthOrHeight: 1024,
+            useWebWorker: true,
+        };
+
+        const newImagePromises = Array.from(files).map(async (file) => {
+            try {
+                const compressedFile = await imageCompression(file, imageProcessingOptions);
+                const dataUrl = await imageCompression.getDataUrlFromFile(compressedFile);
+                
+                // Obtener dimensiones de la imagen corregida
+                const dimensions = await new Promise<{width: number, height: number}>(resolve => {
+                    const img = document.createElement('img');
+                    img.onload = () => resolve({ width: img.width, height: img.height });
+                    img.src = dataUrl;
+                });
+
+                return { dataUrl, name: file.name, desc: '', ...dimensions };
+            } catch (error) {
+                console.error("Error al procesar la imagen:", error);
+                return new Promise<AnnexImage | null>(resolve => {
+                    const reader = new FileReader();
+                    reader.onload = event => {
+                        const dataUrl = event.target?.result as string;
+                        const img = document.createElement('img');
+                        img.onload = () => resolve({ dataUrl, name: file.name, desc: '', width: img.width, height: img.height });
+                        img.src = dataUrl;
+                    };
+                    reader.onerror = () => resolve(null);
+                    reader.readAsDataURL(file);
+                });
+            }
         });
 
-        Promise.all(newImagePromises).then(newImages => {
-            setAnnexImages(prev => [...prev, ...newImages]);
-        });
+        const newImages = await Promise.all(newImagePromises);
+        const validImages = newImages.filter((img): img is AnnexImage => img !== null);
+        setAnnexImages(prev => [...prev, ...validImages]);
     };
 
     const updateImageDescription = (imageIndex: number, description: string) => {
@@ -330,61 +354,7 @@ export default function SevReport() {
     const calib = lastCalibration ? new Date(lastCalibration + 'T00:00:00').toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' }) : "No especificada";
     const date = new Date().toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' });
 
-    // --- Generación del Gráfico para el PDF ---
-    if (!chartInstance.current) return;
-
-    // 1. Primer renderizado para medir el área del gráfico (chartArea)
-    const initialCanvas = document.createElement('canvas');
-    initialCanvas.width = 1200; // Tamaño de referencia
-    initialCanvas.height = 1600;
-    const initialCtx = initialCanvas.getContext('2d');
-    if (!initialCtx) return;
-
-    const reportOptions = JSON.parse(JSON.stringify(chartInstance.current.options));
-    reportOptions.animation = false;
-    reportOptions.responsive = false;
-    reportOptions.color = "rgba(0, 0, 0, 0.92)";
-    reportOptions.scales.x.ticks.color = "rgba(0, 0, 0, 0.92)";
-    reportOptions.scales.y.ticks.color = "rgba(0, 0, 0, 0.92)";
-    reportOptions.scales.x.title.color = "rgba(0, 0, 0, 0.92)";
-    reportOptions.scales.y.title.color = "rgba(0, 0, 0, 0.92)";
-    reportOptions.scales.x.grid.color = "rgba(0, 0, 0, 0.92)";
-    reportOptions.scales.y.grid.color = "rgba(0, 0, 0, 0.92)";
-
-    const tempChart = new Chart(initialCtx, {
-        type: 'line',
-        data: chartInstance.current.data,
-        options: reportOptions
-    });
-    
-    const { width: chartAreaWidth, height: chartAreaHeight } = tempChart.chartArea;
-    tempChart.destroy();
-
-    // 2. Calcular dimensiones finales basadas en la escala y el chartArea medido
-    const mmPerDecade = 62.5;
-    const xDecades = Math.log10(reportOptions.scales.x.max / reportOptions.scales.x.min);
-    const yDecades = Math.log10(reportOptions.scales.y.max / reportOptions.scales.y.min);
-    const correctionFactor = 62.5 / 60.5; // Ajuste empírico
-
-    const chartWidthMM = (xDecades * mmPerDecade) * (initialCanvas.width / chartAreaWidth) * correctionFactor;
-    const chartHeightMM = (yDecades * mmPerDecade) * (initialCanvas.height / chartAreaHeight) * correctionFactor;
-
-    // 3. Segundo renderizado con las dimensiones correctas
-    const offscreenCanvas = document.createElement('canvas');
-    offscreenCanvas.width = Math.round(chartWidthMM * 6); // Multiplicador para alta resolución
-    offscreenCanvas.height = Math.round(chartHeightMM * 6);
-    const offCtx = offscreenCanvas.getContext('2d');
-    if (!offCtx) return;
-    
-    new Chart(offCtx, {
-      type: 'line',
-      data: chartInstance.current.data,
-      options: { ...reportOptions, responsive: false, maintainAspectRatio: false },
-    });
-
-    setTimeout(() => {
-      const chartImage = offscreenCanvas.toDataURL('image/png', 1.0);
-
+    const generatePdfWithChart = (chartImage: string, chartWidthMM: number, chartHeightMM: number) => {
       const doc = new jsPDF('p', 'mm', [210, 279]);
       const pageMargin = 15;
       const pageWidth = doc.internal.pageSize.getWidth() - pageMargin * 2;
@@ -492,25 +462,31 @@ export default function SevReport() {
         
         yPosition = applyTitleStyle("4. Anexo de Imágenes", yPosition);
         
+        let currentRowMaxHeight = 0;
         annexImages.forEach((img, idx) => {
-          const imgWidth = 80;
-          const imgHeight = (imgWidth * 3) / 4; // Aspect ratio 4:3
-          const xPos = (idx % 2 === 0) ? pageMargin : pageMargin + imgWidth + 10;
+          const fixedWidth = 80;
+          const aspectRatio = img.height / img.width;
+          const calculatedHeight = fixedWidth * aspectRatio;
+          const xPos = (idx % 2 === 0) ? pageMargin : pageMargin + fixedWidth + 10;
 
-          if (yPosition + imgHeight + 20 > pageHeight - (pageMargin + 10)) { // Dejar espacio para el pie de página
+          currentRowMaxHeight = Math.max(currentRowMaxHeight, calculatedHeight);
+
+          if (yPosition + currentRowMaxHeight + 20 > pageHeight - (pageMargin + 10)) { // Dejar espacio para el pie de página
             doc.addPage();
             yPosition = pageMargin + 10;
+            currentRowMaxHeight = calculatedHeight; // Reiniciar para la nueva página
           }
 
-          doc.addImage(img.dataUrl, 'PNG', xPos, yPosition, imgWidth, imgHeight);
+          doc.addImage(img.dataUrl, 'PNG', xPos, yPosition, fixedWidth, calculatedHeight);
           doc.setFontSize(10);
           doc.setTextColor(80);
           const figureText = `Figura ${idx + 1}`;
           const descriptionText = img.desc ? `: ${escapeHtml(img.desc)}` : '';
-          doc.text(figureText + descriptionText, xPos, yPosition + imgHeight + 5, { maxWidth: imgWidth });
+          doc.text(figureText + descriptionText, xPos, yPosition + calculatedHeight + 5, { maxWidth: fixedWidth }); // Usar la altura de la imagen actual para su propio texto
 
-          if (idx % 2 !== 0) {
-            yPosition += imgHeight + 20;
+          if (idx % 2 !== 0 || idx === annexImages.length - 1) {
+            yPosition += currentRowMaxHeight + 20;
+            currentRowMaxHeight = 0; // Reiniciar para la siguiente fila
           }
         });
       }
@@ -530,7 +506,61 @@ export default function SevReport() {
 
       doc.save(`Informe_SEV_${proj.replace(/ /g, '_')}.pdf`);
 
-    }, 400);
+    }
+
+    // --- Generación del Gráfico para el PDF (Método Mejorado) ---
+    if (!chartInstance.current) return;
+
+    const chart = chartInstance.current;
+    
+    // 1. Calcular dimensiones deseadas en mm
+    const xMin = chart.options.scales?.x?.min ?? 0.1;
+    const xMax = chart.options.scales?.x?.max ?? 50;
+    const yMin = chart.options.scales?.y?.min ?? 1;
+    const yMax = chart.options.scales?.y?.max ?? 3000;
+    const mmPerDecade = 62.5;
+    const xDecades = Math.log10(Number(xMax) / Number(xMin));
+    const yDecades = Math.log10(Number(yMax) / Number(yMin));
+    const chartWidthMM = xDecades * mmPerDecade;
+    const chartHeightMM = yDecades * mmPerDecade;
+
+    // 2. Crear un canvas fuera de pantalla con las proporciones correctas en píxeles
+    const offscreenCanvas = document.createElement('canvas');
+    const resolutionMultiplier = 6; // Para alta resolución
+    offscreenCanvas.width = Math.round(chartWidthMM * resolutionMultiplier);
+    offscreenCanvas.height = Math.round(chartHeightMM * resolutionMultiplier);
+    const offCtx = offscreenCanvas.getContext('2d');
+    if (!offCtx) return;
+
+    // 3. Clonar opciones y configurar para el renderizado del PDF
+    const reportOptions = JSON.parse(JSON.stringify(chart.options));
+    reportOptions.animation = false;
+    reportOptions.responsive = false;
+    reportOptions.maintainAspectRatio = false;
+    reportOptions.color = "rgba(0, 0, 0, 0.92)";
+    if (reportOptions.scales?.x) {
+        reportOptions.scales.x.ticks.color = "rgba(0, 0, 0, 0.92)";
+        if(reportOptions.scales.x.title) reportOptions.scales.x.title.color = "rgba(0, 0, 0, 0.92)";
+        if(reportOptions.scales.x.grid) reportOptions.scales.x.grid.color = "rgba(0, 0, 0, 0.92)";
+    }
+    if (reportOptions.scales?.y) {
+        reportOptions.scales.y.ticks.color = "rgba(0, 0, 0, 0.92)";
+        if(reportOptions.scales.y.title) reportOptions.scales.y.title.color = "rgba(0, 0, 0, 0.92)";
+        if(reportOptions.scales.y.grid) reportOptions.scales.y.grid.color = "rgba(0, 0, 0, 0.92)";
+    }
+
+    // 4. Renderizar el gráfico en el canvas fuera de pantalla
+    new Chart(offCtx, {
+        type: 'line',
+        data: chart.data,
+        options: reportOptions,
+    });
+
+    // 5. Obtener la imagen y generar el PDF
+    setTimeout(() => {
+        const chartImage = offscreenCanvas.toDataURL('image/png', 1.0);
+        generatePdfWithChart(chartImage, chartWidthMM, chartHeightMM);
+    }, 400); // Pequeña espera para asegurar que el gráfico se renderice completamente
   }, [measurements, projectName, location, operator, annexImages, equipmentBrand, equipmentModel, serialNumber, lastCalibration, interesado, fecha, hora]);
 
   const handleClearAll = () => {
@@ -726,7 +756,7 @@ export default function SevReport() {
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 mt-4">
                   {annexImages.map((image, index) => (
                       <div key={index} className="card overflow-hidden p-0">
-                          <div className="relative h-40 w-full group">
+                          <div className="relative w-full group" style={{ aspectRatio: `${image.width} / ${image.height}` }}>
                               <Image src={image.dataUrl} alt={`Preview ${index}`} layout="fill" objectFit="cover" />
                               <div className="absolute top-1 right-1">
                                   <button className="btn btn-sm bg-red-500 hover:bg-red-600 cursor-pointer h-7 w-7 opacity-70 group-hover:opacity-100 flex items-center justify-center" onClick={() => deleteAnnexImage(index)}>

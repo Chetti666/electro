@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, DragEvent } from 'react';
+import imageCompression from 'browser-image-compression';
 import autoTable from 'jspdf-autotable';
 import jsPDF from 'jspdf';
 import Link from 'next/link';
@@ -89,28 +90,36 @@ const InformeInspeccionPage: React.FC = () => {
         );
     };
 
-    const handleImageUpload = (pointId: string, files: FileList | null): void => {
+    const handleImageUpload = async (pointId: string, files: FileList | null): Promise<void> => {
         if (!files) return;
 
-        const filePromises = Array.from(files).map(file => {
-            return new Promise<ImageEvidence | null>(resolve => {
-                const reader = new FileReader();
-                reader.onload = event => {
-                    if (event.target && typeof event.target.result === 'string') {
-                        resolve({ src: event.target.result, description: '' });
-                    } else {
-                        resolve(null);
-                    }
-                };
-                reader.onerror = () => resolve(null);
-                reader.readAsDataURL(file);
-            });
+        const imageProcessingOptions = {
+            maxSizeMB: 1,
+            maxWidthOrHeight: 1024,
+            useWebWorker: true,
+            // La librería corrige la orientación por defecto al leer los metadatos EXIF.
+        };
+
+        const filePromises = Array.from(files).map(async (file) => {
+            try {
+                const compressedFile = await imageCompression(file, imageProcessingOptions);
+                const imageSrc = await imageCompression.getDataUrlFromFile(compressedFile);
+                return { src: imageSrc, description: '' };
+            } catch (error) {
+                console.error("Error al procesar la imagen:", error);
+                // Fallback: si la compresión falla, leer el archivo original.
+                return new Promise<ImageEvidence | null>(resolve => {
+                    const reader = new FileReader();
+                    reader.onload = event => resolve(event.target && typeof event.target.result === 'string' ? { src: event.target.result, description: '' } : null);
+                    reader.onerror = () => resolve(null);
+                    reader.readAsDataURL(file);
+                });
+            }
         });
 
-        Promise.all(filePromises).then((newImages) => {
-            const validImages = newImages.filter((img): img is ImageEvidence => img !== null);
-            setInspectionPoints(prev => prev.map(p => p.id === pointId ? { ...p, images: [...p.images, ...validImages] } : p));
-        });
+        const newImages = await Promise.all(filePromises);
+        const validImages = newImages.filter((img): img is ImageEvidence => img !== null);
+        setInspectionPoints(prev => prev.map(p => p.id === pointId ? { ...p, images: [...p.images, ...validImages] } : p));
     };
 
     const handleImageDescriptionChange = (pointId: string, imageIndex: number, description: string) => {

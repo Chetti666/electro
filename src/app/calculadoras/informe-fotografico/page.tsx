@@ -1,5 +1,6 @@
 'use client';
-import { useState, useEffect, DragEvent } from 'react';
+import React, { useState, useEffect, DragEvent } from 'react';
+import imageCompression from 'browser-image-compression';
 import autoTable from 'jspdf-autotable';
 import jsPDF from 'jspdf';
 import Link from 'next/link';
@@ -74,31 +75,38 @@ const InformeFotograficoSECPage = () => {
         }
     };
 
-    const handleImageChange = (sectionId: string, e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleImageChange = async (sectionId: string, e: React.ChangeEvent<HTMLInputElement>) => {
         const files = e.target.files;
         if (!files || files.length === 0) return;
-        const section = sections.find(s => s.id === sectionId);
-        if (!section) return;
 
-        const newImages: Image[] = [];
-        const filePromises = Array.from(files).map(file => {
-            return new Promise<void>(resolve => {
-                const reader = new FileReader();
-                reader.onload = (event) => {
-                    newImages.push({ src: event.target?.result as string, description: '' });
-                    resolve();
-                };
-                reader.readAsDataURL(file);
-            });
+        const imageProcessingOptions = {
+            maxSizeMB: 1,
+            maxWidthOrHeight: 1024,
+            useWebWorker: true,
+            // La librería corrige la orientación por defecto al leer los metadatos EXIF.
+        };
+
+        const filePromises = Array.from(files).map(async (file) => {
+            try {
+                const compressedFile = await imageCompression(file, imageProcessingOptions);
+                const imageSrc = await imageCompression.getDataUrlFromFile(compressedFile);
+                return { src: imageSrc, description: '' };
+            } catch (error) {
+                console.error("Error al procesar la imagen:", error);
+                // Fallback: si la compresión falla, leer el archivo original.
+                return new Promise<Image | null>(resolve => {
+                    const reader = new FileReader();
+                    reader.onload = event => resolve(event.target && typeof event.target.result === 'string' ? { src: event.target.result, description: '' } : null);
+                    reader.onerror = () => resolve(null);
+                    reader.readAsDataURL(file);
+                });
+            }
         });
 
-        Promise.all(filePromises).then(() => {
-            setSections(sections.map(s => 
-                s.id === sectionId ? { ...s, images: [...s.images, ...newImages] } : s
-            ));
-            // Resetear el valor del input para permitir volver a seleccionar el mismo archivo
-            e.target.value = '';
-        });
+        const newImages = await Promise.all(filePromises);
+        const validImages = newImages.filter((img): img is Image => img !== null);
+        setSections(prev => prev.map(s => s.id === sectionId ? { ...s, images: [...s.images, ...validImages] } : s));
+        e.target.value = ''; // Resetear el input
     };
 
     const updateImageDescription = (sectionId: string, imageIndex: number, description: string) => {
