@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import bcrypt from 'bcrypt';
 
 // Inicializa el Prisma Client
 const prisma = new PrismaClient();
@@ -6,15 +7,15 @@ const prisma = new PrismaClient();
 async function main() {
   // Crea un usuario Administrador para la configuración inicial
   console.log('Creando usuario administrador inicial...');
+  const hashedPassword = await bcrypt.hash('admin-password', 10);
+
   const adminUser = await prisma.user.upsert({
     where: { email: 'admin@example.com' },
     update: {},
     create: {
       email: 'admin@example.com',
       name: 'Admin',
-      // Asignamos el rol de ADMIN
-      // El campo password es obligatorio según el schema.prisma
-      password: 'admin-password', // En una app real, esto debería ser un hash
+      password: hashedPassword,
       // Asegúrate de que tu schema.prisma tenga el enum Role con los valores ADMIN y USER
       role: 'ADMIN',
     },

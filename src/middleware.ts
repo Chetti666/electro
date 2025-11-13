@@ -4,7 +4,7 @@ import type { NextRequest } from 'next/server';
 export function middleware(request: NextRequest) {
   const isAuthenticated = request.cookies.has('session_token'); // Asume que tienes una cookie de sesión
 
-  const protectedPaths = ['/calculadoras', '/informes', '/signup']; // Rutas que requieren autenticación
+  const protectedPaths = ['/signup']; // Rutas que requieren autenticación
 
   if (protectedPaths.some(path => request.nextUrl.pathname.startsWith(path))) {
     if (!isAuthenticated) {

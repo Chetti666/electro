@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
+import bcrypt from 'bcrypt';
 
 export async function GET() {
   try {
@@ -35,11 +36,13 @@ export async function POST(request: Request) {
       });
     }
 
+    const hashedPassword = await bcrypt.hash(password, 10);
+
     const newUser = await prisma.user.create({
       data: {
         email,
         name,
-        password, // En una app real, esto debería ser un hash
+        password: hashedPassword,
       },
     });
 
