@@ -10,10 +10,18 @@ generator client {
   
 }
 
+enum Role {
+  USER
+  ADMIN
+}
+
 // Example data model
 model User {
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
   email     String   @unique
   name      String?
+  password  String
+  role      Role     @default(USER)
 }

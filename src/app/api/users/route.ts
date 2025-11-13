@@ -20,7 +20,7 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const { email, name } = await request.json();
+    const { email, name, password } = await request.json();
 
     if (!email) {
       return new NextResponse(
@@ -29,10 +29,17 @@ export async function POST(request: Request) {
       );
     }
 
+    if (!password) {
+      return new NextResponse(JSON.stringify({ error: "Password is required" }), {
+        status: 400, headers: { "Content-Type": "application/json" },
+      });
+    }
+
     const newUser = await prisma.user.create({
       data: {
         email,
         name,
+        password, // En una app real, esto debería ser un hash
       },
     });
 

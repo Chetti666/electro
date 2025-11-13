@@ -1,34 +1,33 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Role } from '@prisma/client';
 
 // Inicializa el Prisma Client
 const prisma = new PrismaClient();
 
 async function main() {
-  // Crea dos usuarios de ejemplo
-  const user1 = await prisma.user.upsert({
-    where: { email: 'alice@prisma.io' },
+  // Crea un usuario Administrador para la configuración inicial
+  console.log('Creando usuario administrador inicial...');
+  const adminUser = await prisma.user.upsert({
+    where: { email: 'admin@example.com' },
     update: {},
     create: {
-      email: 'alice@prisma.io',
-      name: 'Alice',
+      email: 'admin@example.com',
+      name: 'Admin',
+      // Asignamos el rol de ADMIN
+      // El campo password es obligatorio según el schema.prisma
+      password: 'admin-password', // En una app real, esto debería ser un hash
+      // Asegúrate de que tu schema.prisma tenga el enum Role con los valores ADMIN y USER
+      role: Role.ADMIN,
     },
   });
 
-  const user2 = await prisma.user.upsert({
-    where: { email: 'bob@prisma.io' },
-    update: {},
-    create: {
-      email: 'bob@prisma.io',
-      name: 'Bob',
-    },
-  });
-
-  console.log({ user1, user2 });
+  console.log('Usuario administrador creado:');
+  console.log(adminUser);
 }
 
 // Ejecuta la función main y maneja los errores
 main()
   .then(async () => {
+    console.log('Seed completado exitosamente.');
     await prisma.$disconnect();
   })
   .catch(async (e: unknown) => {
