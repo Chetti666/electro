@@ -1,4 +1,4 @@
-import { PrismaClient, Role } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 
 // Inicializa el Prisma Client
 const prisma = new PrismaClient();
@@ -16,7 +16,7 @@ async function main() {
       // El campo password es obligatorio según el schema.prisma
       password: 'admin-password', // En una app real, esto debería ser un hash
       // Asegúrate de que tu schema.prisma tenga el enum Role con los valores ADMIN y USER
-      role: Role.ADMIN,
+      role: 'ADMIN',
     },
   });
 
