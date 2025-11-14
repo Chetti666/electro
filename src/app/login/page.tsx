@@ -25,7 +25,7 @@ export default function LoginPage() {
 
     setIsLoading(false);
     if (response.ok) {
-      router.push('/calculadoras'); // Redirige al usuario si el login es exitoso
+      router.push('/signup'); // Redirige al usuario a la página de registro
     } else {
       const data = await response.json();
       setError(data.error || 'Ocurrió un error al iniciar sesión.');
@@ -110,8 +110,8 @@ export default function LoginPage() {
 
         <div className="text-center text-sm">
           <p className="text-gray-600 dark:text-gray-400">
-            ¿No tienes una cuenta?{' '}
-            <Link href="/signup" className="font-medium text-blue-500 hover:underline">Regístrate</Link>
+            ¿Problemas para ingresar?{' '}
+            <Link href="/contacto" className="font-medium text-blue-500 hover:underline">Contáctanos</Link>
           </p>
         </div>
 
