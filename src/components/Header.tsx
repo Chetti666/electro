@@ -31,7 +31,7 @@ export default function Header() {
             Calculadoras
           </Link>
           <Link href="/informes" className="text-gray-700 hover:text-blue-500 dark:text-gray-300 dark:hover:text-blue-400">
-            Reportes
+            Generador de Informes
           </Link>
           <Link href="/acerca" className="text-gray-700 hover:text-blue-500 dark:text-gray-300 dark:hover:text-blue-400">
             Acerca de
