@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, FormEvent, useEffect } from 'react';
-import Link from 'next/link';
 
 type User = {
   id: number;
@@ -30,7 +29,7 @@ export default function SignupPage() {
         setUsers(data);
       }
     } catch (error) {
-      setError('No se pudo cargar la lista de usuarios.');
+      console.error('No se pudo cargar la lista de usuarios.');
     }
   };
 
@@ -57,7 +56,7 @@ export default function SignupPage() {
         resetForm();
         fetchUsers();
       } catch (err) {
-        setError('Error al actualizar el usuario.');
+        setError('Error al actualizar el usuario. Por favor, inténtelo de nuevo.');
       } finally {
         setIsLoading(false);
       }
@@ -94,7 +93,7 @@ export default function SignupPage() {
       if (err instanceof Error) {
         setError(err.message);
       } else {
-        setError('An unexpected error occurred');
+        setError('Ocurrió un error inesperado.');
       }
     } finally {
       setIsLoading(false);
@@ -121,7 +120,7 @@ export default function SignupPage() {
         setSuccess('Usuario eliminado con éxito.');
         fetchUsers();
       } catch (err) {
-        setError('Error al eliminar el usuario.');
+        setError('Error al eliminar el usuario. Por favor, inténtelo de nuevo.');
       }
     }
   };
