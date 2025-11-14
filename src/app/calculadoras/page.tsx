@@ -122,8 +122,8 @@ const calculadoras: Calculadora[] = [
   },
   {
     id: 'informe-inspeccion',
-    title: 'Generador de Informe Fotográfico RIC N°18',
-    description: 'Facilita la creación de tu informe fotográfico normativo. Genera el documento bajo los requisitos del Pliego Técnico Normativo RIC N°18 en formato PDF de forma ágil.',
+    title: 'Generador de Informe de inspección de Instalaciones',
+    description: 'Facilita la creación de tu informe fotográfico para el levantamiento de instalaciones existentes e inspección. Genera un reporte detallando los puntos criticos detectados, recomendaciones y evidencias de la inspección en formato PDF de forma ágil.',
     icon: (
       // Ícono de Cámara de fotos (Camera)
       <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
