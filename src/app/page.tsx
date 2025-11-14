@@ -18,7 +18,7 @@ export default function Home() {
                 <Link href="/calculadoras" className="btn btn-primary">
                   Ver herramientas
                 </Link>
-                <Link href="/acerca" className="btn btn-outline">
+                <Link href="/about" className="btn btn-outline">
                   Conocer más
                 </Link>
               </div>
