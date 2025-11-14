@@ -2,12 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcrypt';
 
-interface Context {
-  params: { id: string };
-}
-
 // Función para eliminar un usuario
-export async function DELETE(request: NextRequest, { params }: Context) {
+export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const userId = Number(params.id);
     const deletedUser = await prisma.user.delete({
@@ -27,7 +23,7 @@ export async function DELETE(request: NextRequest, { params }: Context) {
 }
 
 // Función para actualizar un usuario
-export async function PUT(request: NextRequest, { params }: Context) {
+export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const userId = Number(params.id);
     const { email, name, password, role } = await request.json();
