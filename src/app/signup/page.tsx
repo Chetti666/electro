@@ -17,6 +17,7 @@ export default function SignupPage() {
   const [password, setPassword] = useState('');
   const [role, setRole] = useState('USER');
   const [users, setUsers] = useState<User[]>([]);
+  const [editingUser, setEditingUser] = useState<User | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -43,6 +44,27 @@ export default function SignupPage() {
     setError(null);
     setSuccess(null);
 
+    // Si estamos editando, llamamos a la API de actualización (PUT)
+    if (editingUser) {
+      try {
+        const response = await fetch(`/api/users/${editingUser.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, name, password, role }),
+        });
+        if (!response.ok) throw new Error('Failed to update user');
+        setSuccess('¡Usuario actualizado con éxito!');
+        resetForm();
+        fetchUsers();
+      } catch (err) {
+        setError('Error al actualizar el usuario.');
+      } finally {
+        setIsLoading(false);
+      }
+      return;
+    }
+
+    // Lógica original para crear un nuevo usuario (POST)
     if (!password) {
       setError('La contraseña es obligatoria.');
       setIsLoading(false);
@@ -65,9 +87,7 @@ export default function SignupPage() {
       }
 
       setSuccess(`¡Usuario creado con éxito! Email: ${data.email}`);
-      setEmail('');
-      setName('');
-      setPassword('');
+      resetForm();
       fetchUsers(); // Recargar la lista de usuarios
 
     } catch (err: unknown) {
@@ -81,6 +101,39 @@ export default function SignupPage() {
     }
   };
 
+  const handleEdit = (user: User) => {
+    setEditingUser(user);
+    setName(user.name || '');
+    setEmail(user.email);
+    setRole(user.role);
+    setPassword(''); // Limpiamos el campo de contraseña por seguridad
+    setSuccess(null);
+    setError(null);
+  };
+
+  const handleDelete = async (userId: number) => {
+    if (window.confirm('¿Estás seguro de que quieres eliminar este usuario?')) {
+      try {
+        const response = await fetch(`/api/users/${userId}`, {
+          method: 'DELETE',
+        });
+        if (!response.ok) throw new Error('Failed to delete user');
+        setSuccess('Usuario eliminado con éxito.');
+        fetchUsers();
+      } catch (err) {
+        setError('Error al eliminar el usuario.');
+      }
+    }
+  };
+
+  const resetForm = () => {
+    setEditingUser(null);
+    setName('');
+    setEmail('');
+    setPassword('');
+    setRole('USER');
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-12">
@@ -88,8 +141,8 @@ export default function SignupPage() {
         <div className="lg:col-span-2">
           <div className="w-full p-8 space-y-6 bg-white rounded-lg shadow-md dark:bg-gray-800">
             <div className="text-center">
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Crear Usuario</h1>
-              <p className="text-gray-600 dark:text-gray-400">Ingresa los datos para registrar un nuevo usuario.</p>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{editingUser ? 'Editar Usuario' : 'Crear Usuario'}</h1>
+              <p className="text-gray-600 dark:text-gray-400">{editingUser ? 'Modifica los datos del usuario.' : 'Ingresa los datos para registrar un nuevo usuario.'}</p>
             </div>
             
             <form onSubmit={handleSubmit} className="space-y-6">
@@ -123,9 +176,9 @@ export default function SignupPage() {
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Crea una contraseña segura"
+              placeholder={editingUser ? '(Dejar en blanco para no cambiar)' : 'Crea una contraseña segura'}
                   className="form-input"
-                  required
+              required={!editingUser}
                 />
               </div>
               <div>
@@ -159,9 +212,14 @@ export default function SignupPage() {
                   disabled={isLoading}
                   className="w-full px-4 py-2 font-bold text-white bg-blue-500 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:bg-gray-400 dark:focus:ring-offset-gray-800"
                 >
-                  {isLoading ? 'Creando cuenta...' : 'Crear cuenta'}
+                  {isLoading ? (editingUser ? 'Guardando...' : 'Creando...') : (editingUser ? 'Guardar Cambios' : 'Crear Usuario')}
                 </button>
               </div>
+              {editingUser && (
+                <button type="button" onClick={resetForm} className="w-full text-center text-sm text-gray-500 hover:underline mt-2">
+                  Cancelar edición
+                </button>
+              )}
             </form>
           </div>
         </div>
@@ -178,6 +236,7 @@ export default function SignupPage() {
                     <th className="px-4 py-2">Email</th>
                     <th className="px-4 py-2">Rol</th>
                     <th className="px-4 py-2">Fecha Creación</th>
+                    <th className="px-4 py-2">Acciones</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -191,6 +250,10 @@ export default function SignupPage() {
                         </span>
                       </td>
                       <td className="px-4 py-2">{new Date(user.createdAt).toLocaleDateString()}</td>
+                      <td className="px-4 py-2 flex gap-2">
+                        <button onClick={() => handleEdit(user)} className="text-blue-500 hover:underline text-xs">Editar</button>
+                        <button onClick={() => handleDelete(user.id)} className="text-red-500 hover:underline text-xs">Eliminar</button>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
