@@ -3,9 +3,10 @@ import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcrypt';
 
 // Función para eliminar un usuario
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(request: NextRequest, context: { params: { id: string } }) {
   try {
-    const userId = Number(params.id);
+    const { id } = context.params;
+    const userId = Number(id);
     const deletedUser = await prisma.user.delete({
       where: { id: userId },
     });
@@ -23,9 +24,10 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
 }
 
 // Función para actualizar un usuario
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(request: NextRequest, context: { params: { id: string } }) {
   try {
-    const userId = Number(params.id);
+    const { id } = context.params;
+    const userId = Number(id);
     const { email, name, password, role } = await request.json();
 
     const dataToUpdate: {
