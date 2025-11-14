@@ -469,9 +469,9 @@ const InformeInspeccionPage: React.FC = () => {
               <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Generador de Informe de Inspección</h1>
               <p className="text-gray-600 dark:text-gray-400">Crea informes de inspección eléctrica detallados y profesionales.</p>
               <br />
-              <Link href="/calculadoras" className="text-amber-500 hover:text-amber-600 inline-flex items-center">
+              <Link href="/informes" className="text-amber-500 hover:text-amber-600 inline-flex items-center">
                   <svg className="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
-                  Volver a calculadoras
+                  Volver a informes
               </Link>
           </div>
 
