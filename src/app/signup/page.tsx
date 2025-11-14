@@ -6,6 +6,8 @@ import Link from 'next/link';
 export default function SignupPage() {
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
+  const [password, setPassword] = useState('');
+  const [role, setRole] = useState('USER');
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -16,13 +18,19 @@ export default function SignupPage() {
     setError(null);
     setSuccess(null);
 
+    if (!password) {
+      setError('La contraseña es obligatoria.');
+      setIsLoading(false);
+      return;
+    }
+
     try {
       const response = await fetch('/api/users', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email, name }),
+        body: JSON.stringify({ email, name, password, role }),
       });
 
       const data = await response.json();
@@ -34,6 +42,7 @@ export default function SignupPage() {
       setSuccess(`¡Usuario creado con éxito! Email: ${data.email}`);
       setEmail('');
       setName('');
+      setPassword('');
 
     } catch (err: unknown) {
       if (err instanceof Error) {
@@ -77,6 +86,30 @@ export default function SignupPage() {
               className="form-input"
               required
             />
+          </div>
+          <div>
+            <label htmlFor="password" className="form-label">Contraseña</label>
+            <input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Crea una contraseña"
+              className="form-input"
+              required
+            />
+          </div>
+          <div>
+            <label htmlFor="role" className="form-label">Rol</label>
+            <select
+              id="role"
+              value={role}
+              onChange={(e) => setRole(e.target.value)}
+              className="form-input"
+            >
+              <option value="USER">Usuario</option>
+              <option value="ADMIN">Administrador</option>
+            </select>
           </div>
           
           {error && (

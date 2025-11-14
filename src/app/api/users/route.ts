@@ -21,7 +21,7 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const { email, name, password } = await request.json();
+    const { email, name, password, role } = await request.json();
 
     if (!email) {
       return new NextResponse(
@@ -43,6 +43,7 @@ export async function POST(request: Request) {
         email,
         name,
         password: hashedPassword,
+        role, // Añadimos el rol al crear el usuario
       },
     });
 
