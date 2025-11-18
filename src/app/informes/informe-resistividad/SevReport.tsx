@@ -1,5 +1,6 @@
 'use client';
 
+/// <reference types="google.accounts" />
 import React, { useState, useEffect, useRef, useCallback, DragEvent, useMemo } from 'react';
 import Image from 'next/image';
 import Chart, { type Chart as ChartType } from 'chart.js/auto';
