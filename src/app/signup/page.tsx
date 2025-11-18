@@ -10,16 +10,21 @@ type User = {
   createdAt: string;
 };
 
+type EditingUser = User & {
+  password?: string;
+};
+
 export default function SignupPage() {
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
   const [password, setPassword] = useState('');
   const [role, setRole] = useState('USER');
   const [users, setUsers] = useState<User[]>([]);
-  const [editingUser, setEditingUser] = useState<User | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [editingUser, setEditingUser] = useState<EditingUser | null>(null);
+ const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const fetchUsers = async () => {
     try {
@@ -43,27 +48,7 @@ export default function SignupPage() {
     setError(null);
     setSuccess(null);
 
-    // Si estamos editando, llamamos a la API de actualización (PUT)
-    if (editingUser) {
-      try {
-        const response = await fetch(`/api/users/${editingUser.id}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, name, password, role }),
-        });
-        if (!response.ok) throw new Error('Failed to update user');
-        setSuccess('¡Usuario actualizado con éxito!');
-        resetForm();
-        fetchUsers();
-      } catch (err) {
-        setError('Error al actualizar el usuario. Por favor, inténtelo de nuevo.');
-      } finally {
-        setIsLoading(false);
-      }
-      return;
-    }
-
-    // Lógica original para crear un nuevo usuario (POST)
+    // Lógica para crear un nuevo usuario (POST)
     if (!password) {
       setError('La contraseña es obligatoria.');
       setIsLoading(false);
@@ -100,14 +85,36 @@ export default function SignupPage() {
     }
   };
 
+  const handleUpdate = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!editingUser) return;
+
+    setIsLoading(true);
+    setError(null);
+    setSuccess(null);
+
+    try {
+      const response = await fetch(`/api/users/${editingUser.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(editingUser),
+      });
+      if (!response.ok) throw new Error('Failed to update user');
+      setSuccess('¡Usuario actualizado con éxito!');
+      fetchUsers();
+      setIsModalOpen(false);
+    } catch (err) {
+      setError('Error al actualizar el usuario.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleEdit = (user: User) => {
     setEditingUser(user);
-    setName(user.name || '');
-    setEmail(user.email);
-    setRole(user.role);
-    setPassword(''); // Limpiamos el campo de contraseña por seguridad
     setSuccess(null);
     setError(null);
+    setIsModalOpen(true);
   };
 
   const handleDelete = async (userId: number) => {
@@ -140,8 +147,8 @@ export default function SignupPage() {
         <div className="lg:col-span-2">
           <div className="w-full p-8 space-y-6 bg-white rounded-lg shadow-md dark:bg-gray-800">
             <div className="text-center">
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{editingUser ? 'Editar Usuario' : 'Crear Usuario'}</h1>
-              <p className="text-gray-600 dark:text-gray-400">{editingUser ? 'Modifica los datos del usuario.' : 'Ingresa los datos para registrar un nuevo usuario.'}</p>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Crear Usuario</h1>
+              <p className="text-gray-600 dark:text-gray-400">Ingresa los datos para registrar un nuevo usuario.</p>
             </div>
             
             <form onSubmit={handleSubmit} className="space-y-6">
@@ -175,9 +182,9 @@ export default function SignupPage() {
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-              placeholder={editingUser ? '(Dejar en blanco para no cambiar)' : 'Crea una contraseña segura'}
+              placeholder='Crea una contraseña segura'
                   className="form-input"
-              required={!editingUser}
+              required
                 />
               </div>
               <div>
@@ -211,14 +218,9 @@ export default function SignupPage() {
                   disabled={isLoading}
                   className="w-full px-4 py-2 font-bold text-white bg-blue-500 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:bg-gray-400 dark:focus:ring-offset-gray-800"
                 >
-                  {isLoading ? (editingUser ? 'Guardando...' : 'Creando...') : (editingUser ? 'Guardar Cambios' : 'Crear Usuario')}
+                  {isLoading ? 'Creando...' : 'Crear Usuario'}
                 </button>
               </div>
-              {editingUser && (
-                <button type="button" onClick={resetForm} className="w-full text-center text-sm text-gray-500 hover:underline mt-2">
-                  Cancelar edición
-                </button>
-              )}
             </form>
           </div>
         </div>
@@ -261,6 +263,83 @@ export default function SignupPage() {
           </div>
         </div>
       </div>
+
+      {/* Modal de Edición */}
+      {isModalOpen && editingUser && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+          <div className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-xl w-full max-w-md">
+            <h2 className="text-2xl font-bold mb-4 dark:text-white">Editar Usuario</h2>
+            <form onSubmit={handleUpdate} className="space-y-4">
+              <div>
+                <label htmlFor="edit-name" className="form-label">Nombre</label>
+                <input
+                  id="edit-name"
+ type="text"
+                  value={editingUser.name || ''}
+                  onChange={(e) => setEditingUser({ ...editingUser, name: e.target.value })}
+                  className="form-input"
+                />
+              </div>
+              <div>
+                <label htmlFor="edit-email" className="form-label">Email</label>
+                <input
+                  id="edit-email"
+                  type="email"
+                  value={editingUser.email}
+                  onChange={(e) => setEditingUser({ ...editingUser, email: e.target.value })}
+                  className="form-input"
+                  required
+                />
+              </div>
+              <div>
+                <label htmlFor="edit-password" className="form-label">Nueva Contraseña</label>
+                <input
+                  id="edit-password"
+                  type="password"
+                  placeholder="(Dejar en blanco para no cambiar)"
+ onChange={(e) => setEditingUser({ ...editingUser, password: e.target.value })}
+                  className="form-input"
+                />
+              </div>
+              <div>
+                <label htmlFor="edit-role" className="form-label">Rol</label>
+                <select
+                  id="edit-role"
+                  value={editingUser.role}
+ onChange={(e) => setEditingUser({ ...editingUser, role: e.target.value as 'USER' | 'ADMIN' })}
+                  className="form-input"
+                >
+                  <option value="USER">Usuario</option>
+                  <option value="ADMIN">Administrador</option>
+                </select>
+              </div>
+
+              {error && (
+                <div className="p-3 bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-200 rounded-md text-sm">
+                  <p>{error}</p>
+                </div>
+              )}
+
+              <div className="flex justify-end gap-4 pt-4">
+                <button
+                  type="button"
+                  onClick={() => setIsModalOpen(false)}
+                  className="px-4 py-2 text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 dark:bg-gray-600 dark:text-gray-200 dark:hover:bg-gray-500"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="px-4 py-2 font-bold text-white bg-blue-500 rounded-md hover:bg-blue-600 disabled:bg-gray-400"
+                >
+                  {isLoading ? 'Guardando...' : 'Guardar Cambios'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
