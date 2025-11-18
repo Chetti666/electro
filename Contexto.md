@@ -8,7 +8,7 @@ Este proyecto está dirigido a técnicos y profesionales del área eléctrica, c
 
 ### Cálculos Eléctricos
 
-1. **Cálculo de Sección de Conductores**
+Cálculo de Sección de Conductores**
    - Monofásico
    - Trifásico
 
