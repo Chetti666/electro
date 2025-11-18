@@ -30,10 +30,10 @@ export default function Header() {
           <Link href="/calculadoras" className="text-gray-700 hover:text-blue-500 dark:text-gray-300 dark:hover:text-blue-400">
             Calculadoras
           </Link>
-          <Link href="/reportes" className="text-gray-700 hover:text-blue-500 dark:text-gray-300 dark:hover:text-blue-400">
-            Reportes
+          <Link href="/informes" className="text-gray-700 hover:text-blue-500 dark:text-gray-300 dark:hover:text-blue-400">
+            Generador de Informes
           </Link>
-          <Link href="/acerca" className="text-gray-700 hover:text-blue-500 dark:text-gray-300 dark:hover:text-blue-400">
+          <Link href="/about" className="text-gray-700 hover:text-blue-500 dark:text-gray-300 dark:hover:text-blue-400">
             Acerca de
           </Link>
           <Link href="/login" className="text-gray-700 hover:text-blue-500 dark:text-gray-300 dark:hover:text-blue-400">
