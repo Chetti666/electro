@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef, useCallback, DragEvent } from 'react';
+import React, { useState, useEffect, useRef, useCallback, DragEvent, useMemo } from 'react';
 import Image from 'next/image';
 import Chart, { type Chart as ChartType } from 'chart.js/auto';
 import imageCompression from 'browser-image-compression';
@@ -26,6 +26,12 @@ interface AnnexImage {
   height: number;
 }
 
+interface DriveFile {
+  id: string;
+  name: string;
+  webViewLink: string;
+}
+
 interface DocWithLastTable extends jsPDF {
   lastAutoTable: { finalY: number };
 }
@@ -33,6 +39,21 @@ interface DocWithLastTable extends jsPDF {
 type DocInternal = {
   getNumberOfPages: () => number;
 };
+
+// --- Declaraciones de tipos para las APIs de Google ---
+declare global {
+  interface Window {
+    gapi: any;
+  }
+}
+
+// --- Constantes y Configuración de Google API ---
+// REEMPLAZA ESTOS VALORES con tus propias credenciales de la Consola de Google Cloud
+const GOOGLE_API_KEY = "AIzaSyD5IDxw97TfaylZG9Aq_C79S9g5nhAa5bs"; 
+const GOOGLE_CLIENT_ID = "425398213294-8vqtd4578fo5oemr963maefn7m8lcq0v.apps.googleusercontent.com";
+const DISCOVERY_DOC = "https://www.googleapis.com/discovery/v1/apis/drive/v3/rest";
+const SCOPES = "https://www.googleapis.com/auth/drive.file";
+
 
 // --- Componente Principal ---
 export default function SevReport() {
@@ -67,6 +88,18 @@ export default function SevReport() {
   const chartInstance = useRef<ChartType | null>(null);
   // Referencia para el formulario de medidas
   const formCardRef = useRef<HTMLDivElement>(null);
+
+  // --- Estado para la integración con Google Drive ---
+  const [gapiReady, setGapiReady] = useState(false);
+  const [gisReady, setGisReady] = useState(false);
+  const [isSignedIn, setIsSignedIn] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadMessage, setUploadMessage] = useState('');
+  const [isFetchingFolder, setIsFetchingFolder] = useState(false);
+  const [driveFiles, setDriveFiles] = useState<DriveFile[]>([]);
+  const [isListingFiles, setIsListingFiles] = useState(false);
+  const tokenClient = useRef<google.accounts.oauth2.TokenClient | null>(null);
+
 
   const escapeHtml = (str: string): string => {
     return (str || "").replace(/[&<>]/g, s => ({
@@ -336,10 +369,10 @@ export default function SevReport() {
   }, [measurements]);
 
   // --- Generación de Informe ---
-  const handleGenerateReport = useCallback(() => {
+  const generatePdfBlob = useCallback(async (): Promise<{ doc: jsPDF, blob: Blob, fileName: string } | null> => {
     if (measurements.length === 0) {
       alert("No hay mediciones para generar un informe.");
-      return;
+      return null;
     }
 
     const interesadoVal = interesado || "No especificado";
@@ -354,7 +387,7 @@ export default function SevReport() {
     const calib = lastCalibration ? new Date(lastCalibration + 'T00:00:00').toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' }) : "No especificada";
     const date = new Date().toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' });
 
-    const generatePdfWithChart = (chartImage: string, chartWidthMM: number, chartHeightMM: number) => {
+    const createPdfDocument = (chartImage: string, chartWidthMM: number, chartHeightMM: number): jsPDF => {
       const doc = new jsPDF('p', 'mm', [210, 279]);
       const pageMargin = 15;
       const pageWidth = doc.internal.pageSize.getWidth() - pageMargin * 2;
@@ -504,15 +537,12 @@ export default function SevReport() {
           doc.setTextColor(0);
       }
 
-      doc.save(`Informe_SEV_${proj.replace(/ /g, '_')}.pdf`);
+      return doc;
+    };
 
-    }
-
-    // --- Generación del Gráfico para el PDF (Método Mejorado) ---
-    if (!chartInstance.current) return;
+    if (!chartInstance.current) return null;
 
     const chart = chartInstance.current;
-    
     // 1. Calcular dimensiones deseadas en mm
     const xMin = chart.options.scales?.x?.min ?? 0.1;
     const xMax = chart.options.scales?.x?.max ?? 50;
@@ -530,7 +560,7 @@ export default function SevReport() {
     offscreenCanvas.width = Math.round(chartWidthMM * resolutionMultiplier);
     offscreenCanvas.height = Math.round(chartHeightMM * resolutionMultiplier);
     const offCtx = offscreenCanvas.getContext('2d');
-    if (!offCtx) return;
+    if (!offCtx) return null;
 
     // 3. Clonar opciones y configurar para el renderizado del PDF
     const reportOptions = JSON.parse(JSON.stringify(chart.options));
@@ -549,19 +579,223 @@ export default function SevReport() {
         if(reportOptions.scales.y.grid) reportOptions.scales.y.grid.color = "rgba(0, 0, 0, 0.92)";
     }
 
-    // 4. Renderizar el gráfico en el canvas fuera de pantalla
-    new Chart(offCtx, {
-        type: 'line',
-        data: chart.data,
-        options: reportOptions,
-    });
+    // 4. Renderizar el gráfico y generar el PDF
+    return new Promise((resolve) => {
+      new Chart(offCtx, {
+          type: 'line',
+          data: chart.data,
+          options: reportOptions,
+      });
 
-    // 5. Obtener la imagen y generar el PDF
-    setTimeout(() => {
-        const chartImage = offscreenCanvas.toDataURL('image/png', 1.0);
-        generatePdfWithChart(chartImage, chartWidthMM, chartHeightMM);
-    }, 400); // Pequeña espera para asegurar que el gráfico se renderice completamente
+      setTimeout(() => {
+          const chartImage = offscreenCanvas.toDataURL('image/png', 1.0);
+          const doc = createPdfDocument(chartImage, chartWidthMM, chartHeightMM);
+          const blob = doc.output('blob');
+          const fileName = `Informe_SEV_${proj.replace(/ /g, '_')}.pdf`;
+          resolve({ doc, blob, fileName });
+      }, 400); // Pequeña espera para asegurar que el gráfico se renderice completamente
+    });
   }, [measurements, projectName, location, operator, annexImages, equipmentBrand, equipmentModel, serialNumber, lastCalibration, interesado, fecha, hora]);
+
+  const handleGenerateReport = async () => {
+    generatePdfBlob().then(pdfData => {
+      if (pdfData) {
+        pdfData.doc.save(pdfData.fileName);
+      }
+    });
+  };
+
+  // --- Lógica de Google Drive ---
+  useEffect(() => {
+    // Cargar script de GAPI
+    const gapiScript = document.createElement('script');
+    gapiScript.src = 'https://apis.google.com/js/api.js';
+    gapiScript.async = true;
+    gapiScript.defer = true;
+    gapiScript.onload = () => window.gapi.load('client', () => setGapiReady(true));
+    document.body.appendChild(gapiScript);
+
+    // Cargar script de GIS
+    const gisScript = document.createElement('script');
+    gisScript.src = 'https://accounts.google.com/gsi/client';
+    gisScript.async = true;
+    gisScript.defer = true;
+    gisScript.onload = () => setGisReady(true);
+    document.body.appendChild(gisScript);
+
+    return () => {
+      document.body.removeChild(gapiScript);
+      document.body.removeChild(gisScript);
+    };
+  }, []);
+
+  const gapiInited = useMemo(() => {
+    if (gapiReady) {
+      window.gapi.client.init({
+        apiKey: GOOGLE_API_KEY,
+        discoveryDocs: [DISCOVERY_DOC],
+      }).then(() => console.log("GAPI client initialized"));
+      return true;
+    }
+    return false;
+  }, [gapiReady]);
+
+  useEffect(() => {
+    if (gisReady) {
+      tokenClient.current = window.google.accounts.oauth2.initTokenClient({
+        client_id: GOOGLE_CLIENT_ID,
+        scope: SCOPES,
+        callback: (tokenResponse: google.accounts.oauth2.TokenResponse) => {
+          if (tokenResponse && tokenResponse.access_token) {
+            setIsSignedIn(true);
+            window.gapi.client.setToken(tokenResponse);
+          }
+        },
+      });
+    }
+  }, [gisReady]);
+
+  const handleAuthClick = () => {
+    if (tokenClient.current) {
+      tokenClient.current.requestAccessToken({ prompt: 'consent' });
+    }
+  };
+
+  const handleSignoutClick = () => {
+    const token = window.gapi.client.getToken();
+    if (token !== null) {
+      window.google.accounts.oauth2.revoke(token.access_token, () => {
+        window.gapi.client.setToken(null);
+        setIsSignedIn(false);
+      });
+    }
+  };
+
+  const getOrCreateFolderId = async (): Promise<string | null> => {
+    const FOLDER_NAME = 'Informes SEV App';
+    try {
+      // 1. Buscar si la carpeta ya existe
+      const searchResponse = await window.gapi.client.drive.files.list({
+        q: `mimeType='application/vnd.google-apps.folder' and name='${FOLDER_NAME}' and trashed=false`,
+        fields: 'files(id)',
+        spaces: 'drive',
+      });
+
+      if (searchResponse.result.files && searchResponse.result.files.length > 0) {
+        // Carpeta encontrada, devolver su ID
+        return searchResponse.result.files[0].id;
+      } else {
+        // 2. Si no existe, crearla
+        const createResponse = await window.gapi.client.drive.files.create({
+          resource: {
+            name: FOLDER_NAME,
+            mimeType: 'application/vnd.google-apps.folder',
+            fields: 'id'
+          }
+        });
+        // Devolver el ID de la nueva carpeta
+        return createResponse.result.id;
+      }
+    } catch (error) {
+      console.error("Error al buscar o crear la carpeta de Drive:", error);
+      return null;
+    }
+  };
+
+  const handleOpenDriveFolder = async () => {
+    setIsFetchingFolder(true);
+    try {
+      const folderId = await getOrCreateFolderId();
+      if (folderId) {
+        const folderUrl = `https://drive.google.com/drive/u/0/folders/${folderId}`;
+        window.open(folderUrl, '_blank', 'noopener,noreferrer');
+      } else {
+        alert('No se pudo encontrar o crear la carpeta en Google Drive.');
+      }
+    } finally {
+      setIsFetchingFolder(false);
+    }
+  };
+
+  const handleListDriveFiles = async () => {
+    setIsListingFiles(true);
+    setUploadMessage(''); // Limpiar mensajes anteriores
+    try {
+      const folderId = await getOrCreateFolderId();
+      if (folderId) {
+        const response = await window.gapi.client.drive.files.list({
+          q: `'${folderId}' in parents and trashed=false`,
+          fields: 'files(id, name, webViewLink)',
+          orderBy: 'createdTime desc',
+          pageSize: 100,
+        });
+        setDriveFiles(response.result.files || []);
+      } else {
+        alert('No se pudo encontrar la carpeta de la aplicación en Google Drive.');
+      }
+    } catch (error) {
+      console.error("Error al listar archivos de Drive:", error);
+      alert('Ocurrió un error al intentar listar los archivos.');
+    } finally {
+      setIsListingFiles(false);
+    }
+  };
+
+  const handleSaveToDrive = async () => {
+    setIsUploading(true);
+    setUploadMessage('Buscando/Creando carpeta en Drive...');
+    const folderId = await getOrCreateFolderId();
+    setUploadMessage('Generando PDF...');
+    const pdfData = await generatePdfBlob();
+    if (!pdfData) {
+      setIsUploading(false);
+      setUploadMessage('Error al generar el PDF.');
+      return;
+    }
+    setDriveFiles([]); // Limpiar la lista de archivos para forzar la recarga
+
+    setUploadMessage('Subiendo a Google Drive...');
+    const metadata = { 
+      name: pdfData.fileName, 
+      mimeType: 'application/pdf',
+      // Aquí está la magia: le decimos a Drive en qué carpeta guardar el archivo
+      parents: folderId ? [folderId] : [] 
+    };
+    const form = new FormData();
+    form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+    form.append('file', pdfData.blob);
+
+    const accessToken = window.gapi.client.getToken().access_token;
+
+    try {
+      const fetchResponse = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+        },
+        body: form,
+      });
+
+      if (!fetchResponse.ok) {
+        const errorBody = await fetchResponse.json();
+        throw errorBody;
+      }
+
+      const result = await fetchResponse.json();
+      // Construir el enlace al archivo y mostrarlo
+      const fileId = result.id;
+      const fileLink = `https://drive.google.com/file/d/${fileId}/view`;
+      setUploadMessage(
+        `¡Éxito! Archivo guardado. <a href="${fileLink}" target="_blank" rel="noopener noreferrer" class="font-bold text-blue-600 hover:underline">Abrir en Google Drive</a>`
+      );
+
+    } catch (error: any) {
+      console.error("Error al subir a Drive:", error);
+      setUploadMessage(`Error al subir: ${error.error?.message || 'Error desconocido.'}`);
+    } finally {
+      setIsUploading(false);
+    }
+  };
 
   const handleClearAll = () => {
     if (!confirm("¿Eliminar todos los datos del proyecto?")) return;
@@ -804,8 +1038,52 @@ export default function SevReport() {
           <div className="card">
             <h2 className="text-lg sm:text-xl font-semibold mb-4 text-gray-900 dark:text-white">Acciones</h2>
             <div className="flex flex-col space-y-3">
-              <button type="button" className="btn btn-primary w-full justify-center" onClick={handleGenerateReport}>Generar Informe (PDF)</button>
+              <button type="button" className="btn btn-primary w-full justify-center" onClick={handleGenerateReport} disabled={measurements.length === 0}>Descargar Informe (PDF)</button>
               <button type="button" className="btn btn-accent w-full justify-center" onClick={handleClearAll}>Limpiar Todo</button>
+            </div>
+          </div>
+
+          <div className="card">
+            <h2 className="text-lg sm:text-xl font-semibold mb-4 text-gray-900 dark:text-white">Google Drive</h2>
+            <div className="flex flex-col space-y-3">
+              {!isSignedIn ? (
+                <button type="button" className="btn btn-secondary w-full justify-center" onClick={handleAuthClick} disabled={!gapiInited || !gisReady}>
+                  {(!gapiInited || !gisReady) ? 'Cargando API de Google...' : 'Iniciar sesión con Google'}
+                </button>
+              ) : (
+                <>
+                  <button type="button" className="btn btn-primary w-full justify-center" onClick={handleSaveToDrive} disabled={isUploading || measurements.length === 0}>
+                    {isUploading ? 'Subiendo...' : 'Guardar en Drive'}
+                  </button>
+                  <button type="button" className="btn btn-secondary w-full justify-center" onClick={handleListDriveFiles} disabled={isListingFiles}>
+                    {isListingFiles ? 'Listando archivos...' : 'Ver archivos guardados'}
+                  </button>
+                  <button type="button" className="btn btn-accent w-full justify-center" onClick={handleSignoutClick}>Cerrar sesión de Google</button>
+                </>
+              )}
+              {uploadMessage && (
+                <p className="text-sm text-center text-gray-600 dark:text-gray-400 mt-2" dangerouslySetInnerHTML={{ __html: uploadMessage }} />
+              )}
+              {driveFiles.length > 0 && (
+                <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                  <h3 className="text-md font-semibold mb-2 text-gray-800 dark:text-gray-200">Informes en Drive</h3>
+                  <ul className="space-y-2 max-h-60 overflow-y-auto pr-2">
+                    {driveFiles.map(file => (
+                      <li key={file.id}>
+                        <a 
+                          href={file.webViewLink} 
+                          target="_blank" 
+                          rel="noopener noreferrer" 
+                          className="flex items-center justify-between p-2 rounded-md bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors text-sm"
+                        >
+                          <span className="truncate pr-2">{file.name}</span>
+                          <svg className="w-4 h-4 text-gray-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
           </div>
         </div>
