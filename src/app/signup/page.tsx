@@ -21,7 +21,7 @@ export default function SignupPage() {
   const [role, setRole] = useState('USER');
   const [users, setUsers] = useState<User[]>([]);
   const [editingUser, setEditingUser] = useState<EditingUser | null>(null);
- const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -33,7 +33,7 @@ export default function SignupPage() {
       if (response.ok) {
         setUsers(data);
       }
-    } catch (error) {
+    } catch {
       console.error('No se pudo cargar la lista de usuarios.');
     }
   };
@@ -103,7 +103,7 @@ export default function SignupPage() {
       setSuccess('¡Usuario actualizado con éxito!');
       fetchUsers();
       setIsModalOpen(false);
-    } catch (err) {
+    } catch {
       setError('Error al actualizar el usuario.');
     } finally {
       setIsLoading(false);
@@ -126,7 +126,7 @@ export default function SignupPage() {
         if (!response.ok) throw new Error('Failed to delete user');
         setSuccess('Usuario eliminado con éxito.');
         fetchUsers();
-      } catch (err) {
+      } catch {
         setError('Error al eliminar el usuario. Por favor, inténtelo de nuevo.');
       }
     }

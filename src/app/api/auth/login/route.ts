@@ -41,7 +41,8 @@ export async function POST(request: Request) {
     const sessionToken = 'este-es-un-token-de-sesion-secreto';
 
     // Excluir la contraseña de la respuesta
-    const { password: _, ...userWithoutPassword } = user;
+    const userWithoutPassword = { ...user };
+    delete (userWithoutPassword as { password?: string }).password;
 
     // 4. Crear la respuesta y establecer la cookie de sesión
     const response = NextResponse.json(userWithoutPassword);

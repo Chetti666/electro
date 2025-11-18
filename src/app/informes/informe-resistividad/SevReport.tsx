@@ -44,7 +44,11 @@ type DocInternal = {
 // --- Declaraciones de tipos para las APIs de Google ---
 declare global {
   interface Window {
-    gapi: any;
+    gapi: {
+      load: (api: string, callback: () => void) => void; // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      client: any; // Mantener 'any' aquí es pragmático si los tipos completos son complejos
+    };
+    google: typeof google;
   }
 }
 
@@ -790,9 +794,16 @@ export default function SevReport() {
         `¡Éxito! Archivo guardado. <a href="${fileLink}" target="_blank" rel="noopener noreferrer" class="font-bold text-blue-600 hover:underline">Abrir en Google Drive</a>`
       );
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error al subir a Drive:", error);
-      setUploadMessage(`Error al subir: ${error.error?.message || 'Error desconocido.'}`);
+      let errorMessage = 'Error desconocido.';
+      if (typeof error === 'object' && error !== null && 'error' in error) {
+        const nestedError = (error as { error: { message?: string } }).error;
+        if (nestedError && nestedError.message) {
+          errorMessage = nestedError.message;
+        }
+      }
+      setUploadMessage(`Error al subir: ${errorMessage}`);
     } finally {
       setIsUploading(false);
     }
@@ -1058,6 +1069,9 @@ export default function SevReport() {
                   </button>
                   <button type="button" className="btn btn-secondary w-full justify-center" onClick={handleListDriveFiles} disabled={isListingFiles}>
                     {isListingFiles ? 'Listando archivos...' : 'Ver archivos guardados'}
+                  </button>
+                  <button type="button" className="btn btn-info w-full justify-center" onClick={handleOpenDriveFolder} disabled={isFetchingFolder}>
+                    {isFetchingFolder ? 'Abriendo carpeta...' : 'Abrir carpeta en Drive'}
                   </button>
                   <button type="button" className="btn btn-accent w-full justify-center" onClick={handleSignoutClick}>Cerrar sesión de Google</button>
                 </>
