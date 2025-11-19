@@ -1,17 +1,21 @@
+'use client';
+
 import Link from 'next/link';
-import { ReactNode } from 'react';
+import React, { ReactNode } from 'react';
+import { cn } from '@/lib/utils';
 
 export type ColorType = 'blue' | 'emerald' | 'amber' | 'purple' | 'green' | 'red';
 
-interface InformeCardProps {
+export interface InformeCardProps {
   id: string;
   title: string;
   description: string;
   icon: ReactNode;
   color: ColorType;
+  className?: string;
 }
 
-export default function InformeCard({ id, title, description, icon, color }: InformeCardProps) {
+const InformeCard = React.forwardRef<HTMLAnchorElement, InformeCardProps>(({ className, id, title, description, icon, color }, ref) => {
   // Mapeo de colores para clases de Tailwind
   const colorClasses = {
     blue: {
@@ -47,18 +51,25 @@ export default function InformeCard({ id, title, description, icon, color }: Inf
   };
 
   return (
-    <Link 
+    <Link
       href={`/informes/${id}`}
-      className={`card hover:shadow-lg transition-shadow border-t-4 ${colorClasses[color].border} text-center sm:text-left`}
+      ref={ref}
+      className={cn(
+        "card hover:shadow-lg transition-shadow border-t-4 text-center sm:text-left h-full flex flex-col justify-between p-6",
+        colorClasses[color].border,
+        className
+      )}
     >
-      <div className={`h-12 w-12 ${colorClasses[color].bg} rounded-lg flex items-center justify-center mb-4 mx-auto sm:mx-0`}>
-        <div className={colorClasses[color].text}>
-          {icon}
+      <div>
+        <div className={`h-12 w-12 ${colorClasses[color].bg} rounded-lg flex items-center justify-center mb-4 mx-auto sm:mx-0`}>
+          <div className={colorClasses[color].text}>
+            {icon}
+          </div>
         </div>
+        <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white mb-2">{title}</h2>
+        <p className="text-gray-600 dark:text-gray-400 mb-4">{description}</p>
       </div>
-      <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white mb-2">{title}</h2>
-      <p className="text-gray-600 dark:text-gray-400 mb-4">{description}</p>
-      <div className={`${colorClasses[color].text} font-medium inline-flex items-center`}>
+      <div className={`${colorClasses[color].text} font-medium inline-flex items-center mt-4`}>
         Abrir Formulario de Informe
         <svg className="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -66,4 +77,7 @@ export default function InformeCard({ id, title, description, icon, color }: Inf
       </div>
     </Link>
   );
-}
+});
+InformeCard.displayName = "InformeCard";
+
+export default InformeCard;
