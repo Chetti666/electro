@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@plugin "@midudev/tailwind-animations";
+
 :root {
   --background: #f1f5f9;
   --foreground: #171717;

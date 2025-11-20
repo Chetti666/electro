@@ -48,8 +48,8 @@ const AnimatedCard: React.FC<{
   type: 'calculadora' | 'informe';
 }> = ({ item, index, type }) => {
   const [ref, isInView] = useInView<HTMLAnchorElement>();
-  const animationInClass = index % 2 === 0 ? 'animate-in fade-in-left duration-500' : 'animate-in fade-in-right duration-500';
-  const animationOutClass = index % 2 === 0 ? 'animate-out fade-out-left duration-500' : 'animate-out fade-out-right duration-500';
+  const animationInClass = index % 2 === 0 ? 'animate-fade-in-left' : 'animate-fade-in-right';
+  const animationOutClass = index % 2 === 0 ? 'animate-fade-out-left' : 'animate-fade-out-right';
 
   const CardComponent = type === 'calculadora' ? CalculadoraCard : InformeCard;
 
@@ -57,7 +57,7 @@ const AnimatedCard: React.FC<{
     <CardComponent
       {...item}
       ref={ref}
-      className={`transition-opacity ${isInView ? `opacity-100 ${animationInClass}` : `opacity-0 ${animationOutClass}`}`}
+      className={`${isInView ? animationInClass : animationOutClass}`}
     />
   );
 };
