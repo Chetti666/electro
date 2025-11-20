@@ -47,4 +47,4 @@ El proyecto se organizará en módulos independientes para cada tipo de cálculo
 - Interfaz gráfica amigable
 - Capacidad de exportación de resultados
 - Posibilidad de guardar proyectos
-- Base de datos de materiales y especificaciones eléctricas
+- Base de datos de materiales y especificaciones eléctrica
