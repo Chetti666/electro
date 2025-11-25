@@ -46,7 +46,7 @@ export default function CalculoVpPage() {
   const [seccion, setSeccion] = useState('');
   const [longitudMaxima, setLongitudMaxima] = useState('');
   const [corriente, setCorriente] = useState('');
-  
+
   // Estados para los resultados y el historial
   const [resultadoValor, setResultadoValor] = useState<string | null>(null);
   const [longitudFinal, setLongitudFinal] = useState<string | null>(null);
@@ -98,7 +98,7 @@ export default function CalculoVpPage() {
     }
 
     // ... (resto de la lógica de la gráfica sin cambios) ...
-    const dataPoints: {x: number, y: number}[] = [];
+    const dataPoints: { x: number, y: number }[] = [];
     const numeroDePuntos = Math.min(L_max, 100);
     for (let i = 0; i <= numeroDePuntos; i++) {
       const l_actual = (L_max / numeroDePuntos) * i;
@@ -225,14 +225,14 @@ export default function CalculoVpPage() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 pt-24 pb-12 md:pt-32">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Calculadora de Caída de Tensión (Vp)</h1>
         <p className="text-gray-600 dark:text-gray-400">
           Visualiza la caída de tensión a lo largo de un conductor y su límite normativo.
         </p>
       </div>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-5 gap-8">
         {/* Columna Izquierda: Formulario e Historial */}
         <div className="md:col-span-2 space-y-8">
@@ -247,22 +247,22 @@ export default function CalculoVpPage() {
                   <option value="trifasico">Trifásico (380V)</option>
                 </select>
               </div>
-              
+
               <div>
                 <label htmlFor="S" className="form-label">Sección del Conductor (S):</label>
                 <input type="number" id="S" value={seccion} onChange={(e) => setSeccion(e.target.value)} placeholder="mm²" className="form-input" />
               </div>
-              
+
               <div>
                 <label htmlFor="L" className="form-label">Longitud Máxima (L):</label>
                 <input type="number" id="L" value={longitudMaxima} onChange={(e) => setLongitudMaxima(e.target.value)} placeholder="Metros" className="form-input" />
               </div>
-              
+
               <div>
                 <label htmlFor="I" className="form-label">Corriente (I):</label>
                 <input type="number" id="I" value={corriente} onChange={(e) => setCorriente(e.target.value)} placeholder="Amperes" className="form-input" />
               </div>
-              
+
               <div className="pt-4">
                 <button type="submit" className="btn btn-primary w-full sm:w-auto">
                   Calcular y Graficar
@@ -297,12 +297,12 @@ export default function CalculoVpPage() {
             </div>
           </div>
         </div>
-        
+
         {/* Columna Derecha: Resultados y Gráfico */}
         <div className="md:col-span-3">
           <div className="card">
             <h2 className="text-lg sm:text-xl font-semibold mb-4 text-gray-900 dark:text-white">Resultados</h2>
-            
+
             {resultadoValor && (
               <div className="results text-center mb-4">
                 <p className="text-base sm:text-lg">Caída de Tensión (Vp) a <span className="font-bold text-emerald-500">{longitudFinal}</span> metros: <span className="font-bold text-emerald-500">{resultadoValor}</span></p>
@@ -311,12 +311,12 @@ export default function CalculoVpPage() {
             {advertenciaCruce && (
               <div className="warning-message text-center mb-4 text-sm sm:text-base" dangerouslySetInnerHTML={{ __html: advertenciaCruce }} />
             )}
-            
+
             <div className="mt-4">
               {chartData ? <Line data={chartData} options={chartOptions} /> : <div className="text-center text-gray-500 py-8">Ingrese los datos para generar el gráfico.</div>}
             </div>
           </div>
-          
+
           <div className="mt-6">
             <Link href="/calculadoras" className="text-emerald-500 hover:text-emerald-600 inline-flex items-center">
               <svg className="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">

@@ -131,7 +131,7 @@ export default function ElectricalPanelLabelGenerator() {
   const widthInPx = formData.labelWidth * 3.7795; // Approx conversion from mm to px
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 pt-24 pb-12 md:pt-32">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Generador de Rótulos para Tableros</h1>
         <p className="text-gray-600 dark:text-gray-400">Crea rótulos para tableros eléctricos según la normativa RIC N°02.</p>
@@ -140,57 +140,57 @@ export default function ElectricalPanelLabelGenerator() {
         <div className="card">
           <h2 className="text-lg sm:text-xl font-semibold mb-4 text-gray-900 dark:text-white">Datos del Tablero</h2>
           <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label htmlFor="fabricante" className="form-label">Marca de Fabricación:</label>
-                <input id="fabricante" value={formData.fabricante} onChange={handleChange} className="form-input" required />
-              </div>
-              <div>
-                <label htmlFor="nombre" className="form-label">Nombre del Tablero:</label>
-                <input id="nombre" value={formData.nombre} onChange={handleChange} placeholder="Ej: TGAux A. y F." className="form-input" required />
-              </div>
-              <div>
-                <label htmlFor="servicio" className="form-label">Tipo de servicio:</label>
-                <select id="servicio" value={formData.servicio} onChange={handleChange} className="form-select">
-                  <option value="Normal">Normal</option>
-                  <option value="Emergencia">Emergencia</option>
-                </select>
-              </div>
-              <div>
-                <label htmlFor="tension" className="form-label">Tensión de servicio (V):</label>
-                <input id="tension" value={formData.tension} onChange={handleChange} className="form-input" placeholder='220/380' required />
-              </div>
-              <div>
-                <label htmlFor="corriente" className="form-label">Corriente nominal (A):</label>
-                <input id="corriente" type="number" value={formData.corriente} onChange={handleChange} className="form-input" placeholder='16' required />
-              </div>
-              <div>
-                <label htmlFor="fases" className="form-label">Número de fases:</label>
-                <input id="fases" type="number" value={formData.fases} onChange={handleChange} className="form-input" required />
-              </div>
-              <div>
-                <label htmlFor="empresa" className="form-label">Empresa desarrolladora:</label>
-                <input id="empresa" value={formData.empresa} onChange={handleChange} className="form-input" required />
-              </div>
-              <div>
-                <label htmlFor="ano" className="form-label">Año de instalación:</label>
-                <input id="ano" type="number" value={formData.ano} onChange={handleChange} className="form-input" placeholder='2025' required />
-              </div>
-              <div>
-                <label htmlFor="ip" className="form-label">Grado de Protección IP:</label>
-                <input id="ip" value={formData.ip} onChange={handleChange} className="form-input" placeholder='IP54' required />
-              </div>
-              <div>
-                <label htmlFor="ambiente" className="form-label">Tipo de ambiente (si es especial):</label>
-                <input id="ambiente" value={formData.ambiente} onChange={handleChange} placeholder="Ej: Ambiente Salino" className="form-input" />
-              </div>
-              <hr className="my-4 border-gray-200 dark:border-gray-700" />
-              <div>
-                <label htmlFor="labelWidth" className="form-label">Ancho de Impresión (mm):</label>
-                <input id="labelWidth" type="number" value={formData.labelWidth} onChange={handleChange} className="form-input" required />
-              </div>
-              <button type="submit" className="btn btn-primary w-full sm:w-auto">
-                Generar Rótulo
-              </button>
+            <div>
+              <label htmlFor="fabricante" className="form-label">Marca de Fabricación:</label>
+              <input id="fabricante" value={formData.fabricante} onChange={handleChange} className="form-input" required />
+            </div>
+            <div>
+              <label htmlFor="nombre" className="form-label">Nombre del Tablero:</label>
+              <input id="nombre" value={formData.nombre} onChange={handleChange} placeholder="Ej: TGAux A. y F." className="form-input" required />
+            </div>
+            <div>
+              <label htmlFor="servicio" className="form-label">Tipo de servicio:</label>
+              <select id="servicio" value={formData.servicio} onChange={handleChange} className="form-select">
+                <option value="Normal">Normal</option>
+                <option value="Emergencia">Emergencia</option>
+              </select>
+            </div>
+            <div>
+              <label htmlFor="tension" className="form-label">Tensión de servicio (V):</label>
+              <input id="tension" value={formData.tension} onChange={handleChange} className="form-input" placeholder='220/380' required />
+            </div>
+            <div>
+              <label htmlFor="corriente" className="form-label">Corriente nominal (A):</label>
+              <input id="corriente" type="number" value={formData.corriente} onChange={handleChange} className="form-input" placeholder='16' required />
+            </div>
+            <div>
+              <label htmlFor="fases" className="form-label">Número de fases:</label>
+              <input id="fases" type="number" value={formData.fases} onChange={handleChange} className="form-input" required />
+            </div>
+            <div>
+              <label htmlFor="empresa" className="form-label">Empresa desarrolladora:</label>
+              <input id="empresa" value={formData.empresa} onChange={handleChange} className="form-input" required />
+            </div>
+            <div>
+              <label htmlFor="ano" className="form-label">Año de instalación:</label>
+              <input id="ano" type="number" value={formData.ano} onChange={handleChange} className="form-input" placeholder='2025' required />
+            </div>
+            <div>
+              <label htmlFor="ip" className="form-label">Grado de Protección IP:</label>
+              <input id="ip" value={formData.ip} onChange={handleChange} className="form-input" placeholder='IP54' required />
+            </div>
+            <div>
+              <label htmlFor="ambiente" className="form-label">Tipo de ambiente (si es especial):</label>
+              <input id="ambiente" value={formData.ambiente} onChange={handleChange} placeholder="Ej: Ambiente Salino" className="form-input" />
+            </div>
+            <hr className="my-4 border-gray-200 dark:border-gray-700" />
+            <div>
+              <label htmlFor="labelWidth" className="form-label">Ancho de Impresión (mm):</label>
+              <input id="labelWidth" type="number" value={formData.labelWidth} onChange={handleChange} className="form-input" required />
+            </div>
+            <button type="submit" className="btn btn-primary w-full sm:w-auto">
+              Generar Rótulo
+            </button>
           </form>
         </div>
 
@@ -220,10 +220,10 @@ export default function ElectricalPanelLabelGenerator() {
               </div>
               <div className="mt-6">
                 <Link href="/calculadoras" className="text-amber-500 hover:text-amber-600 inline-flex items-center">
-                    <svg className="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                    </svg>
-                    Volver a calculadoras
+                  <svg className="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                  </svg>
+                  Volver a calculadoras
                 </Link>
               </div>
             </>
