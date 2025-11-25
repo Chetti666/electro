@@ -229,8 +229,8 @@ export default function Home() {
                       <p className="text-lg sm:text-xl text-emerald-100 mb-8">
                         Genera informes de Sondeos Eléctricos Verticales (SEV) y fotográficos. Exporta a PDF listos para entregar.
                       </p>
-                      <Link href="/informes/informe-resistividad" className="inline-flex items-center justify-center px-8 py-3 text-base font-medium text-emerald-700 bg-white rounded-full hover:bg-emerald-50 transition-colors shadow-lg">
-                        Crear Informe
+                      <Link href="/informes" className="inline-flex items-center justify-center px-8 py-3 text-base font-medium text-emerald-700 bg-white rounded-full hover:bg-emerald-50 transition-colors shadow-lg">
+                        Explorar Informes
                       </Link>
                     </div>
                   </div>
