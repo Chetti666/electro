@@ -1,73 +1,25 @@
 'use client';
 
-import React, { useEffect, useState, useRef, ReactNode } from 'react';
+import React, { useRef } from 'react';
 import Link from "next/link";
 import {
   Carousel,
   CarouselContent,
   CarouselItem,
-  type CarouselApi,
 } from "@/components/ui/carousel";
+import Autoplay from "embla-carousel-autoplay";
+import { motion, Variants } from "framer-motion";
 import CalculadoraCard, { ColorType as CalculadoraColor } from '@/components/CalculadoraCard';
 import InformeCard, { ColorType as InformeColor } from '@/components/InformeCard';
+import { Calculator, FileText, BarChart3, Zap, Activity, Camera, ClipboardCheck, Search } from 'lucide-react';
 
-// --- Hook para detectar si un elemento está en la vista ---
-const useInView = <T extends HTMLElement>(options: IntersectionObserverInit = {}) => {
-  const [isInView, setIsInView] = useState(false);
-  const ref = useRef<T>(null);
-
-  useEffect(() => {
-    const node = ref.current; // Captura el valor de ref.current
-    if (!node) return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        // Actualiza el estado para reflejar si el elemento está visible o no
-        setIsInView(entry.isIntersecting);
-      },
-      { threshold: 0.1, ...options }
-    );
-
-    observer.observe(node);
-
-    return () => {
-      if (node) {
-        observer.unobserve(node); // Usa la variable en la limpieza
-      }
-    };
-  }, [options]);
-
-  return [ref, isInView] as const;
-};
-
-// --- Componente para una Tarjeta Animada ---
-// Este componente es una función de React válida, por lo que podemos usar hooks dentro de él.
-const AnimatedCard: React.FC<{
-  item: Calculadora | Informe;
-  index: number;
-  type: 'calculadora' | 'informe';
-}> = ({ item, index, type }) => {
-  const [ref, isInView] = useInView<HTMLAnchorElement>();
-  const animationInClass = index % 2 === 0 ? 'animate-fade-in-left' : 'animate-fade-in-right';
-  const animationOutClass = index % 2 === 0 ? 'animate-fade-out-left' : 'animate-fade-out-right';
-
-  const CardComponent = type === 'calculadora' ? CalculadoraCard : InformeCard;
-
-  return (
-    <CardComponent
-      {...item}
-      ref={ref}
-      className={`${isInView ? animationInClass : animationOutClass}`}
-    />
-  );
-};
-
+// --- Datos ---
 
 type Calculadora = {
   id: string;
   title: string;
   description: string;
-  icon: ReactNode;
+  icon: React.ReactNode;
   color: CalculadoraColor;
 };
 
@@ -75,7 +27,7 @@ type Informe = {
   id: string;
   title: string;
   description: string;
-  icon: ReactNode;
+  icon: React.ReactNode;
   color: InformeColor;
 };
 
@@ -83,43 +35,43 @@ const calculadoras: Calculadora[] = [
   {
     id: 'seccion',
     title: 'Cálculo de Sección de Conductores',
-    description: ' Calcula la sección minima del conductor. Determina la sección necesaria para imitar la Caída de Tensión y asegurar que el voltaje que llega a la carga final (💡) sea suficiente, garantizando el correcto funcionamiento y eficiencia del circuito.',
-    icon: <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 10V5.734a1 1 0 00-.707-.94L9 3.526M14 10H5.5C4.672 10 4 10.672 4 11.5v5C4 17.328 4.672 18 5.5 18H18c.828 0 1.5-.672 1.5-1.5V10H14zm0 0l-5 5" /></svg>,
+    description: 'Calcula la sección minima del conductor. Determina la sección necesaria para limitar la Caída de Tensión y asegurar el voltaje correcto.',
+    icon: <Zap className="h-6 w-6" />,
     color: 'blue'
   },
   {
     id: 'caida-tension',
     title: 'Cálculo de Caída de Tensión',
-    description: 'Determina el porcentaje de pérdida de voltaje que ocurrirá en un conductor ya dimensionado. Este cálculo es esencial para verificar que el voltaje final que recibe la carga cumpla con los límites normativos , asegurando el óptimo rendimiento de los equipos. 📉🔌',
-    icon: <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>,
+    description: 'Determina el porcentaje de pérdida de voltaje en un conductor. Esencial para verificar el cumplimiento normativo.',
+    icon: <Activity className="h-6 w-6" />,
     color: 'emerald'
   },
   {
     id: 'seccion-ric',
     title: 'Corriente Admisible por RIC',
-    description: 'Permite determinar la máxima corriente segura (admisible) que puede transportar un conductor, según sus características (tipo de aislamiento, material, etc.) y la normativa chilena RIC, incluyendo la revisión de sus propiedades.',
-    icon: <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>,
+    description: 'Determina la máxima corriente segura según características del conductor y normativa chilena RIC.',
+    icon: <ShieldCheckIcon className="h-6 w-6" />,
     color: 'amber'
   },
   {
     id: 'empalmes',
     title: 'Buscador Normativo de Empalmes',
-    description: 'Herramienta de consulta rápida que ayuda a seleccionar el empalme eléctrico (conexión a la red) ideal para tu proyecto, asegurando el cumplimiento de la normativa eléctrica vigente (RIC u otra aplicable).',
-    icon: <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>,
+    description: 'Consulta rápida para seleccionar el empalme eléctrico ideal según normativa vigente.',
+    icon: <Search className="h-6 w-6" />,
     color: 'red'
   },
   {
     id: 'calculadora-corriente',
-    title: 'Cálculo General de Corriente (Amperaje)',
-    description: 'Calcula la corriente eléctrica (Amperes) necesaria para cualquier instalación, utilizando la potencia (Watts), el voltaje y el factor de potencia para sistemas tanto monofásicos como trifásicos.',
-    icon: <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v.01M17 4v.01M12 10v.01M17 10v.01M12 16v.01M17 16v.01M4 20h16a2 2 0 002-2V6a2 2 0 00-2-2H4a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>,
+    title: 'Cálculo General de Corriente',
+    description: 'Calcula la corriente eléctrica (Amperes) necesaria utilizando potencia, voltaje y factor de potencia.',
+    icon: <Calculator className="h-6 w-6" />,
     color: 'purple'
   },
   {
     id: 'rotuladora',
-    title: 'Generador de Rótulos de Tableros Eléctricos',
-    description: 'Crea rótulos e identificadores personalizados para tableros eléctricos. Descarga o imprime directamente en formato PDF, cumpliendo con los estándares y normativas vigentes de etiquetado.',
-    icon: <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h.01M17 3h.01M7 17h.01M17 17h.01M4 12h16M4 12a8 8 0 0016 0M4 12a8 8 0 0116 0M4 12v.01" /></svg>,
+    title: 'Generador de Rótulos',
+    description: 'Crea rótulos personalizados para tableros eléctricos. Descarga o imprime en PDF.',
+    icon: <ClipboardCheck className="h-6 w-6" />,
     color: 'green'
   },
 ];
@@ -127,144 +79,186 @@ const calculadoras: Calculadora[] = [
 const informes: Informe[] = [
   {
     id: 'informe-resistividad',
-    title: 'Generador de Informe de Resistividad del Terreno',
-    description: 'Permite registrar y visualizar la curva de un sondeo eléctrico vertical (SEV). Genera un informe de medición en terreno de la resistividad para proyectos de puesta a tierra.',
-    icon: <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 12l3-3 3 3 3-3 3 3m-4-6h.01M6 16v-1a4 4 0 00-4-4v-1a4 4 0 004-4v-1" /></svg>,
+    title: 'Informe de Resistividad',
+    description: 'Registra y visualiza la curva SEV. Genera informe de medición de resistividad para puesta a tierra.',
+    icon: <Activity className="h-6 w-6" />,
     color: 'green'
   },
   {
     id: 'presupuesto',
-    title: 'Generador de Presupuestos Detallados',
-    description: 'Crea presupuestos detallados y profesionales para tus proyectos. Exporta el documento en formato PDF de manera rápida y sencilla para compartir con tus clientes.',
-    icon: <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2v4c0 1.105 1.343 2 3 2s3-.895 3-2v-4c0-1.105-1.343-2-3-2zM4 16v-4a8 8 0 018-8 8 8 0 018 8v4" /></svg>,
+    title: 'Generador de Presupuestos',
+    description: 'Crea presupuestos detallados y profesionales. Exporta a PDF para compartir con clientes.',
+    icon: <FileText className="h-6 w-6" />,
     color: 'green'
   },
   {
     id: 'informe-fotografico',
-    title: 'Generador de Informe Fotográfico RIC N°18',
-    description: 'Facilita la creación de tu informe fotográfico normativo. Genera el documento bajo los requisitos del Pliego Técnico Normativo RIC N°18 en formato PDF de forma ágil.',
-    icon: <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l1.416-2.356A2 2 0 0111 3h2a2 2 0 011.664.89l1.416 2.356A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg>,
+    title: 'Informe Fotográfico RIC N°18',
+    description: 'Genera el documento bajo los requisitos del Pliego Técnico Normativo RIC N°18.',
+    icon: <Camera className="h-6 w-6" />,
     color: 'green'
   },
   {
     id: 'informe-inspeccion',
-    title: 'Generador de Informe de inspección de Instalaciones',
-    description: 'Facilita la creación de tu informe fotográfico para el levantamiento de instalaciones existentes e inspección. Genera un reporte detallando los puntos criticos detectados, recomendaciones y evidencias de la inspección en formato PDF de forma ágil.',
-    icon: <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l1.416-2.356A2 2 0 0111 3h2a2 2 0 011.664.89l1.416 2.356A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg>,
+    title: 'Informe de Inspección',
+    description: 'Levantamiento de instalaciones existentes. Detalla puntos críticos y recomendaciones.',
+    icon: <Search className="h-6 w-6" />,
     color: 'green'
   }
 ];
 
-export default function Home() {
-  const [api, setApi] = useState<CarouselApi>();
-  const canScroll = useRef(true);
+// Icono auxiliar
+function ShieldCheckIcon(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      {...props}
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10" />
+      <path d="m9 12 2 2 4-4" />
+    </svg>
+  )
+}
 
-  useEffect(() => {
-    if (!api) {
-      return;
+// --- Componentes de Animación ---
+
+const containerVariants: Variants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1
     }
+  }
+};
 
+const itemVariants: Variants = {
+  hidden: { y: 20, opacity: 0 },
+  visible: {
+    y: 0,
+    opacity: 1,
+    transition: {
+      type: "spring",
+      stiffness: 100
+    }
+  }
+};
 
-    const handleWheel = (event: WheelEvent) => {
-      if (!canScroll.current) return;
-      
-      event.preventDefault();
-      canScroll.current = false; // Prevenir scrolls múltiples
-
-      if (event.deltaY > 0) {
-
-        api.scrollNext();
-      } else {
-        api.scrollPrev();
-      }
-
-      // Permitir el siguiente scroll después de un breve retraso
-      setTimeout(() => {
-        canScroll.current = true;
-      }, 500); // 500ms de cooldown
-    };
-
-
-    const container = api.containerNode();
-    container.addEventListener('wheel', handleWheel);
-
-    return () => {
-      container.removeEventListener('wheel', handleWheel);
-    };
-  }, [api]);
-
+export default function Home() {
+  const plugin = useRef(
+    Autoplay({ delay: 4000, stopOnInteraction: true })
+  );
 
   return (
     <>
-      
-      <section className="pt-8 pb-12 md:pt-12 md:pb-16">
-        <div className="container mx-auto px-4">
-          <div className="max-w-3xl mx-auto text-center mb-12">
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
-              Herramientas Eléctricas Profesionales
-            </h1>
-            <p className="text-md sm:text-lg text-gray-700 dark:text-gray-300">
-              Desde cálculos de sección hasta informes de campo detallados, todo en una sola plataforma.
-            </p>
-          </div>
+      {/* Hero Section con Carrusel */}
+      <section className="relative pt-8 pb-12 md:pt-16 md:pb-20 overflow-hidden">
+        {/* Fondo decorativo */}
+        <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-100 via-white to-white dark:from-blue-950 dark:via-gray-950 dark:to-gray-950 opacity-70"></div>
 
-          <Carousel 
-            setApi={setApi}
-            className="w-full max-w-6xl mx-auto" 
-            opts={{ loop: true }}
+        <div className="container mx-auto px-4">
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="max-w-4xl mx-auto text-center mb-12"
           >
-            <CarouselContent>
-              <CarouselItem>
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-gray-900 dark:text-white mb-6">
+              Herramientas Eléctricas <span className="text-blue-600 dark:text-blue-400">Profesionales</span>
+            </h1>
+            <p className="text-lg sm:text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto leading-relaxed">
+              Potencia tu trabajo en terreno. Desde cálculos de sección hasta informes normativos detallados, todo en una sola plataforma moderna.
+            </p>
+          </motion.div>
+
+          <Carousel
+            plugins={[plugin.current]}
+            className="w-full max-w-5xl mx-auto"
+            opts={{ loop: true, align: 'center' }}
+          >
+            <CarouselContent className="-ml-4">
+              {/* Slide 1: Calculadoras */}
+              <CarouselItem className="pl-4 md:basis-1/1 lg:basis-1/1">
                 <div className="p-1">
-                  <div className="card hover:shadow-lg transition-shadow text-center h-full flex flex-col justify-between p-8 md:p-16">
-                    <div>
-                      <div className="h-20 w-20 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center mb-6 mx-auto">
-                        <svg className="h-10 w-10 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
-                      </div>
-                      <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-4">Calculadoras Eléctricas Precisas</h3>
-                      <p className="text-base sm:text-lg text-gray-600 dark:text-gray-400 mb-6">
-                        Realiza cálculos complejos de forma rápida y segura. Determina la sección de conductores, la caída de tensión y la corriente admisible según normativas vigentes.
+                  <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 text-white shadow-2xl h-[400px] flex flex-col justify-center items-center text-center p-8 md:p-12">
+                    <div className="absolute top-0 left-0 w-full h-full bg-white/10 backdrop-blur-[2px] z-0"></div>
+                    <div className="relative z-10 max-w-2xl">
+                      <motion.div
+                        initial={{ scale: 0.8, opacity: 0 }}
+                        whileInView={{ scale: 1, opacity: 1 }}
+                        transition={{ duration: 0.5 }}
+                        className="h-20 w-20 bg-white/20 rounded-full flex items-center justify-center mb-6 mx-auto backdrop-blur-sm"
+                      >
+                        <Calculator className="h-10 w-10 text-white" />
+                      </motion.div>
+                      <h3 className="text-3xl sm:text-4xl font-bold mb-4">Calculadoras Precisas</h3>
+                      <p className="text-lg sm:text-xl text-blue-100 mb-8">
+                        Realiza cálculos complejos de forma rápida. Sección de conductores, caída de tensión y más, cumpliendo normativa RIC.
                       </p>
+                      <Link href="/calculadoras" className="inline-flex items-center justify-center px-8 py-3 text-base font-medium text-blue-700 bg-white rounded-full hover:bg-blue-50 transition-colors shadow-lg">
+                        Explorar Calculadoras
+                      </Link>
                     </div>
-                    <Link href="/calculadoras" className="btn btn-primary mt-4">
-                      Explorar Calculadoras
-                    </Link>
                   </div>
                 </div>
               </CarouselItem>
-              <CarouselItem>
+
+              {/* Slide 2: Informes */}
+              <CarouselItem className="pl-4 md:basis-1/1 lg:basis-1/1">
                 <div className="p-1">
-                  <div className="card hover:shadow-lg transition-shadow text-center h-full flex flex-col justify-between p-8 md:p-16">
-                    <div>
-                      <div className="h-20 w-20 bg-emerald-100 dark:bg-emerald-900 rounded-lg flex items-center justify-center mb-6 mx-auto">
-                        <svg className="h-10 w-10 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                      </div>
-                      <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-4">Informes de Campo Profesionales</h3>
-                      <p className="text-base sm:text-lg text-gray-600 dark:text-gray-400 mb-6">
-                        Genera informes detallados de Sondeos Eléctricos Verticales (SEV) directamente desde tus datos de campo. Personaliza, añade imágenes y exporta a PDF.
+                  <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-700 text-white shadow-2xl h-[400px] flex flex-col justify-center items-center text-center p-8 md:p-12">
+                    <div className="absolute top-0 left-0 w-full h-full bg-white/10 backdrop-blur-[2px] z-0"></div>
+                    <div className="relative z-10 max-w-2xl">
+                      <motion.div
+                        initial={{ scale: 0.8, opacity: 0 }}
+                        whileInView={{ scale: 1, opacity: 1 }}
+                        transition={{ duration: 0.5 }}
+                        className="h-20 w-20 bg-white/20 rounded-full flex items-center justify-center mb-6 mx-auto backdrop-blur-sm"
+                      >
+                        <FileText className="h-10 w-10 text-white" />
+                      </motion.div>
+                      <h3 className="text-3xl sm:text-4xl font-bold mb-4">Informes Profesionales</h3>
+                      <p className="text-lg sm:text-xl text-emerald-100 mb-8">
+                        Genera informes de Sondeos Eléctricos Verticales (SEV) y fotográficos. Exporta a PDF listos para entregar.
                       </p>
+                      <Link href="/informes/informe-resistividad" className="inline-flex items-center justify-center px-8 py-3 text-base font-medium text-emerald-700 bg-white rounded-full hover:bg-emerald-50 transition-colors shadow-lg">
+                        Crear Informe
+                      </Link>
                     </div>
-                    <Link href="/informes/informe-resistividad" className="btn btn-secondary mt-4">
-                      Crear un Informe
-                    </Link>
                   </div>
                 </div>
               </CarouselItem>
-              <CarouselItem>
+
+              {/* Slide 3: Gráficos */}
+              <CarouselItem className="pl-4 md:basis-1/1 lg:basis-1/1">
                 <div className="p-1">
-                  <div className="card hover:shadow-lg transition-shadow text-center h-full flex flex-col justify-between p-8 md:p-16">
-                    <div>
-                      <div className="h-20 w-20 bg-amber-100 dark:bg-amber-900 rounded-lg flex items-center justify-center mb-6 mx-auto">
-                        <svg className="h-10 w-10 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" /></svg>
-                      </div>
-                      <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-4">Gráficos y Visualización de Datos</h3>
-                      <p className="text-base sm:text-lg text-gray-600 dark:text-gray-400 mb-6">
-                        Interpreta tus mediciones con gráficos logarítmicos interactivos. Visualiza la curva de campo de tus SEV para un análisis más claro y preciso.
+                  <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 text-white shadow-2xl h-[400px] flex flex-col justify-center items-center text-center p-8 md:p-12">
+                    <div className="absolute top-0 left-0 w-full h-full bg-white/10 backdrop-blur-[2px] z-0"></div>
+                    <div className="relative z-10 max-w-2xl">
+                      <motion.div
+                        initial={{ scale: 0.8, opacity: 0 }}
+                        whileInView={{ scale: 1, opacity: 1 }}
+                        transition={{ duration: 0.5 }}
+                        className="h-20 w-20 bg-white/20 rounded-full flex items-center justify-center mb-6 mx-auto backdrop-blur-sm"
+                      >
+                        <BarChart3 className="h-10 w-10 text-white" />
+                      </motion.div>
+                      <h3 className="text-3xl sm:text-4xl font-bold mb-4">Visualización de Datos</h3>
+                      <p className="text-lg sm:text-xl text-amber-100 mb-8">
+                        Interpreta tus mediciones con gráficos interactivos. Visualiza curvas de campo para un análisis preciso.
                       </p>
+                      <Link href="/calculadoras" className="inline-flex items-center justify-center px-8 py-3 text-base font-medium text-amber-700 bg-white rounded-full hover:bg-amber-50 transition-colors shadow-lg">
+                        Ver Herramientas
+                      </Link>
                     </div>
-                    <Link href="/calculadoras" className="btn btn-accent mt-4">
-                      Explorar Herramientas
-                    </Link>
                   </div>
                 </div>
               </CarouselItem>
@@ -276,41 +270,70 @@ export default function Home() {
       {/* Calculadoras Section */}
       <section className="py-16 bg-gray-50 dark:bg-gray-900/50">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+            className="text-center mb-12"
+          >
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-            Calculadoras disponibles
+              Calculadoras Disponibles
             </h2>
             <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
               Herramientas especializadas para realizar tus cálculos eléctricos de manera precisa y eficiente.
             </p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {calculadoras.map((calc, index) => (
-              <AnimatedCard key={calc.id} item={calc} index={index} type="calculadora" />
+          </motion.div>
+
+          <motion.div
+            variants={containerVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-100px" }}
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+          >
+            {calculadoras.map((calc) => (
+              <motion.div key={calc.id} variants={itemVariants}>
+                <CalculadoraCard {...calc} />
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
         </div>
       </section>
 
       {/* Informes Section */}
       <section className="py-16">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+            className="text-center mb-12"
+          >
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
               Informes Disponibles
             </h2>
             <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
               Genera documentos eléctricos profesionales y detallados de manera rápida y sencilla.
             </p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {informes.map((informe, index) => (
-              <AnimatedCard key={informe.id} item={informe} index={index} type="informe" />
+          </motion.div>
+
+          <motion.div
+            variants={containerVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-100px" }}
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+          >
+            {informes.map((informe) => (
+              <motion.div key={informe.id} variants={itemVariants}>
+                <InformeCard {...informe} />
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
         </div>
       </section>
-
     </>
   );
 }
