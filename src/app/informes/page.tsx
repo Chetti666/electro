@@ -1,5 +1,9 @@
-import InformeCard, { ColorType } from '@/components/InformeCard'; //cambiar el componente importado
+'use client';
+
+import InformeCard, { ColorType } from '@/components/InformeCard';
 import { ReactNode } from 'react';
+import { motion, Variants } from 'framer-motion';
+import { Activity, FileText, Camera, Search } from 'lucide-react';
 
 export default function Informes() {
   type Informe = {
@@ -10,81 +14,91 @@ export default function Informes() {
     color: ColorType;
   };
 
-const calculadoras: Informe[] = [
- 
-  {
-    id: 'informe-resistividad',
-    title: 'Generador de Informe de Resistividad del Terreno',
-    description: 'Permite registrar y visualizar la curva de un sondeo eléctrico vertical (SEV). Genera un informe de medición en terreno de la resistividad para proyectos de puesta a tierra.',
-    icon: (
-      // Ícono de Gráfico de Líneas (Chart Bar) para Curva de Resistividad
-      <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 12l3-3 3 3 3-3 3 3m-4-6h.01M6 16v-1a4 4 0 00-4-4v-1a4 4 0 004-4v-1" />
-      </svg>
-    ),
-    color: 'green'
-  },
-  {
-    id: 'presupuesto',
-    title: 'Generador de Presupuestos Detallados',
-    description: 'Crea presupuestos detallados y profesionales para tus proyectos. Exporta el documento en formato PDF de manera rápida y sencilla para compartir con tus clientes.',
-    icon: (
-      // Ícono de Dinero (Cash) o Documento con Dinero
-      <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2v4c0 1.105 1.343 2 3 2s3-.895 3-2v-4c0-1.105-1.343-2-3-2zM4 16v-4a8 8 0 018-8 8 8 0 018 8v4" />
-      </svg>
-    ),
-    color: 'green'
-  },
-  {
-    id: 'informe-fotografico',
-    title: 'Generador de Informe Fotográfico RIC N°18',
-    description: 'Facilita la creación de tu informe fotográfico normativo. Genera el documento bajo los requisitos del Pliego Técnico Normativo RIC N°18 en formato PDF de forma ágil.',
-    icon: (
-      // Ícono de Cámara de fotos (Camera)
-      <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l1.416-2.356A2 2 0 0111 3h2a2 2 0 011.664.89l1.416 2.356A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-      </svg>
-    ),
-    color: 'green'
-  },
-  {
-    id: 'informe-inspeccion',
-    title: 'Generador de Informe de inspección de Instalaciones',
-    description: 'Facilita la creación de tu informe fotográfico para el levantamiento de instalaciones existentes e inspección. Genera un reporte detallando los puntos criticos detectados, recomendaciones y evidencias de la inspección en formato PDF de forma ágil.',
-    icon: (
-      // Ícono de Cámara de fotos (Camera)
-      <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l1.416-2.356A2 2 0 0111 3h2a2 2 0 011.664.89l1.416 2.356A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-      </svg>
-    ),
-    color: 'green'
-  }
-];
+  const informes: Informe[] = [
+    {
+      id: 'informe-resistividad',
+      title: 'Generador de Informe de Resistividad',
+      description: 'Permite registrar y visualizar la curva de un sondeo eléctrico vertical (SEV). Genera un informe de medición en terreno de la resistividad.',
+      icon: <Activity className="h-6 w-6" />,
+      color: 'green'
+    },
+    {
+      id: 'presupuesto',
+      title: 'Generador de Presupuestos',
+      description: 'Crea presupuestos detallados y profesionales para tus proyectos. Exporta el documento en formato PDF de manera rápida y sencilla.',
+      icon: <FileText className="h-6 w-6" />,
+      color: 'green'
+    },
+    {
+      id: 'informe-fotografico',
+      title: 'Generador de Informe Fotográfico',
+      description: 'Facilita la creación de tu informe fotográfico normativo. Genera el documento bajo los requisitos del Pliego Técnico Normativo RIC N°18.',
+      icon: <Camera className="h-6 w-6" />,
+      color: 'green'
+    },
+    {
+      id: 'informe-inspeccion',
+      title: 'Generador de Informe de Inspección',
+      description: 'Facilita la creación de tu informe para el levantamiento de instalaciones existentes. Detalla puntos críticos y recomendaciones.',
+      icon: <Search className="h-6 w-6" />,
+      color: 'green'
+    }
+  ];
+
+  const containerVariants: Variants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1
+      }
+    }
+  };
+
+  const itemVariants: Variants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: {
+        type: "spring",
+        stiffness: 100
+      }
+    }
+  };
 
   return (
-    <div className="container mx-auto px-4 py-12">
-      <div className="text-center mb-12">
+    <div className="container mx-auto px-4 pt-24 pb-12 md:pt-32">
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="text-center mb-12"
+      >
         <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">Informes Eléctricos</h1>
         <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-        Selecciona uno de nuestros generadores de informes especializados para crear documentos eléctricos profesionales y detallados de manera rápida y sencilla.
+          Selecciona uno de nuestros generadores de informes especializados para crear documentos eléctricos profesionales y detallados.
         </p>
-      </div>
+      </motion.div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {calculadoras.map((calc) => (
-          <InformeCard
-            key={calc.id}
-            id={calc.id}
-            title={calc.title}
-            description={calc.description}
-            icon={calc.icon}
-            color={calc.color}
-          />
+      <motion.div
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+      >
+        {informes.map((informe) => (
+          <motion.div key={informe.id} variants={itemVariants}>
+            <InformeCard
+              id={informe.id}
+              title={informe.title}
+              description={informe.description}
+              icon={informe.icon}
+              color={informe.color}
+            />
+          </motion.div>
         ))}
-      </div>
+      </motion.div>
     </div>
   );
 }
