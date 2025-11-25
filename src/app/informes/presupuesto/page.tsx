@@ -6,17 +6,17 @@ import Link from 'next/link';
 
 // Augment the jsPDF interface to include the autoTable plugin's property
 declare module 'jspdf' {
-  interface jsPDF {
-    lastAutoTable: {
-      finalY: number;
-    };
-  }
+    interface jsPDF {
+        lastAutoTable: {
+            finalY: number;
+        };
+    }
 }
 
 interface Item {
-  description: string;
-  quantity: number;
-  price: number;
+    description: string;
+    quantity: number;
+    price: number;
 }
 
 interface Insumo {
@@ -111,7 +111,7 @@ const PresupuestoPage = () => {
                 setter([] as unknown as T);
             }
         };
-        
+
         loadFromStorage('presupuesto_yourInfo', setYourInfo);
         loadFromStorage('presupuesto_clientInfo', setClientInfo);
         loadFromStorage('presupuesto_quoteInfo', setQuoteInfo);
@@ -297,17 +297,17 @@ const PresupuestoPage = () => {
                 doc.text(yourNameLines, margin, y + 5);
                 const yourNameHeight = yourNameLines.length * 5;
 
-                doc.text('RUT: '+ yourInfo.rut, margin, y + 5 + yourNameHeight);
-                doc.text('Dirección: '+ yourInfo.address, margin, y + 10 + yourNameHeight);
-                doc.text('Teléfono: '+ yourInfo.phone, margin, y + 15 + yourNameHeight);
+                doc.text('RUT: ' + yourInfo.rut, margin, y + 5 + yourNameHeight);
+                doc.text('Dirección: ' + yourInfo.address, margin, y + 10 + yourNameHeight);
+                doc.text('Teléfono: ' + yourInfo.phone, margin, y + 15 + yourNameHeight);
 
-                const clientNameLines = doc.splitTextToSize('Nombre o Razón Social: ' + clientInfo.name, (pageWidth / 2) - margin -10);
+                const clientNameLines = doc.splitTextToSize('Nombre o Razón Social: ' + clientInfo.name, (pageWidth / 2) - margin - 10);
                 doc.text(clientNameLines, pageWidth / 2 + 10, y + 5);
                 const clientNameHeight = clientNameLines.length * 5;
 
-                doc.text('RUT: '+ clientInfo.rut, pageWidth / 2 + 10, y + 5 + clientNameHeight);
-                doc.text('Dirección: '+ clientInfo.address, pageWidth / 2 + 10, y + 10 + clientNameHeight);
-                doc.text('Teléfono: '+ clientInfo.phone, pageWidth / 2 + 10, y + 15 + clientNameHeight);
+                doc.text('RUT: ' + clientInfo.rut, pageWidth / 2 + 10, y + 5 + clientNameHeight);
+                doc.text('Dirección: ' + clientInfo.address, pageWidth / 2 + 10, y + 10 + clientNameHeight);
+                doc.text('Teléfono: ' + clientInfo.phone, pageWidth / 2 + 10, y + 15 + clientNameHeight);
 
                 y += Math.max(30, 15 + yourNameHeight, 15 + clientNameHeight);
 
@@ -760,7 +760,7 @@ interface ApuAnalizadorViewProps {
     setApuUnidad: React.Dispatch<React.SetStateAction<string>>;
     apuActual: Apu;
     apuCalculations: ApuCalculations;
-    apuPorcHm: number; 
+    apuPorcHm: number;
     setApuPorcHm: React.Dispatch<React.SetStateAction<number>>;
     apuPorcGg: number;
     setApuPorcGg: React.Dispatch<React.SetStateAction<number>>;
@@ -914,7 +914,7 @@ interface PresupuestoPageContentProps extends PresupuestoViewProps, ApuAnalizado
 
 const PresupuestoPageContent = (props: PresupuestoPageContentProps) => {
     return (
-         <div className="container mx-auto px-4 py-8">
+        <div className="container mx-auto px-4 pt-24 pb-12 md:pt-32">
             <div className="mb-8">
                 <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Análisis de Precios Unitarios y Presupuestos</h1>
                 <p className="text-gray-600 dark:text-gray-400">Crea APU, gestiona bases de datos y genera cotizaciones en PDF.</p>

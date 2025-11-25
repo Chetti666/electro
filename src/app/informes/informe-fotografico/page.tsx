@@ -112,7 +112,7 @@ const InformeFotograficoSECPage = () => {
     const updateImageDescription = (sectionId: string, imageIndex: number, description: string) => {
         setSections(sections.map(s => {
             if (s.id === sectionId) {
-                const updatedImages = s.images.map((img, idx) => 
+                const updatedImages = s.images.map((img, idx) =>
                     idx === imageIndex ? { ...img, description } : img
                 );
                 return { ...s, images: updatedImages };
@@ -176,9 +176,9 @@ const InformeFotograficoSECPage = () => {
     // --- Generación de PDF (sin cambios en la lógica interna) ---
     const generatePdf = async () => {
         setIsLoading(true);
-        
+
         // Pequeña pausa para que el UI se actualice
-        await new Promise(resolve => setTimeout(resolve, 50)); 
+        await new Promise(resolve => setTimeout(resolve, 50));
 
         try {
             const doc = new jsPDF('p', 'mm', [210, 279]);
@@ -203,7 +203,7 @@ const InformeFotograficoSECPage = () => {
             doc.setFontSize(18); doc.text('Instalación Eléctrica', pageWidth / 2, 72, { align: 'center' });
             doc.setFont('helvetica', 'normal'); doc.setFontSize(12);
             doc.text('En conformidad al punto 6.4 del Pliego Técnico Normativo RIC N°18', pageWidth / 2, 90, { align: 'center' });
-            
+
             const details = [
                 [{ content: 'Proyecto:', styles: { fontStyle: 'bold' as const } }, reportData.projectName],
                 [{ content: 'Dirección:', styles: { fontStyle: 'bold' as const } }, reportData.projectAddress],
@@ -228,8 +228,8 @@ const InformeFotograficoSECPage = () => {
                     doc.setFont('helvetica', 'bold');
                     doc.setDrawColor(0, 86, 179); // Azul para el subrayado
                 };
-                const newPage = () => { 
-                    doc.addPage(); 
+                const newPage = () => {
+                    doc.addPage();
                     yPosition = margin + 1;
                     applyTitleStyle(); // Re-aplicar estilo en cada nueva página
                 };
@@ -259,7 +259,7 @@ const InformeFotograficoSECPage = () => {
                     doc.line(margin, yPosition + 1, margin + textWidth, yPosition + 1);
                     yPosition += 10;
                     doc.setFont('helvetica', 'normal');
-    
+
                     let currentRowMaxHeight = 0;
 
                     section.images.forEach((image, index) => {
@@ -284,7 +284,7 @@ const InformeFotograficoSECPage = () => {
                         doc.addImage(image.src, 'JPEG', xPos, yPosition, imgWidth, imgHeight);
                         doc.setFontSize(10);
                         doc.setTextColor(80);
-                        
+
                         const figureText = `Figura ${index + 1}`;
                         doc.setFont('helvetica', 'bold');
 
@@ -338,7 +338,7 @@ const InformeFotograficoSECPage = () => {
 
     // --- Renderizado del Componente ---
     return (
-        <div className="container mx-auto px-4 py-8">
+        <div className="container mx-auto px-4 pt-24 pb-12 md:pt-32">
             <div className="mb-8">
                 <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Generador de Informe Fotográfico SEC</h1>
                 <p className="text-gray-600 dark:text-gray-400">Cumplimiento del punto 6.4 del Pliego Técnico Normativo RIC N°18.</p>
@@ -356,19 +356,19 @@ const InformeFotograficoSECPage = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 mb-6">
                     <div>
                         <label htmlFor="projectName" className="form-label">Nombre del Proyecto</label>
-                        <input id="projectName" className="form-input" value={projectName} onChange={e => setProjectName(e.target.value)} placeholder="Ej: Vivienda Unifamiliar Pérez"/>
+                        <input id="projectName" className="form-input" value={projectName} onChange={e => setProjectName(e.target.value)} placeholder="Ej: Vivienda Unifamiliar Pérez" />
                     </div>
                     <div>
                         <label htmlFor="projectAddress" className="form-label">Dirección de la Obra</label>
-                        <input id="projectAddress" className="form-input" value={projectAddress} onChange={e => setProjectAddress(e.target.value)} placeholder="Ej: Av. Principal 123, Santiago"/>
+                        <input id="projectAddress" className="form-input" value={projectAddress} onChange={e => setProjectAddress(e.target.value)} placeholder="Ej: Av. Principal 123, Santiago" />
                     </div>
                     <div>
                         <label htmlFor="installerName" className="form-label">Instalador (Licencia SEC)</label>
-                        <input id="installerName" className="form-input" value={installerName} onChange={e => setInstallerName(e.target.value)} placeholder="Ej: Juan González (Clase B - 12345)"/>
+                        <input id="installerName" className="form-input" value={installerName} onChange={e => setInstallerName(e.target.value)} placeholder="Ej: Juan González (Clase B - 12345)" />
                     </div>
                     <div>
                         <label htmlFor="reportDate" className="form-label">Fecha del Informe</label>
-                        <input type="date" id="reportDate" className="form-input" value={reportDate} onChange={e => setReportDate(e.target.value)}/>
+                        <input type="date" id="reportDate" className="form-input" value={reportDate} onChange={e => setReportDate(e.target.value)} />
                     </div>
                 </div>
 
@@ -399,7 +399,7 @@ const InformeFotograficoSECPage = () => {
                                     {/* --- Vista para Escritorio: Arrastrar y Soltar --- */}
                                     <label htmlFor={`file-upload-${section.id}`} className={`hidden sm:flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer transition-colors ${isDragging ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' : 'border-gray-300 bg-gray-50 hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:hover:bg-gray-600'}`} onDragOver={handleDragOver} onDragLeave={handleDragLeave} onDrop={(e) => handleDrop(e, section.id)}>
                                         <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                                            <svg className="w-8 h-8 mb-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16"><path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"/></svg>
+                                            <svg className="w-8 h-8 mb-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16"><path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2" /></svg>
                                             <p className="mb-2 text-sm text-gray-500 dark:text-gray-400"><span className="font-semibold">Haz clic para cargar</span> o arrastra y suelta</p>
                                             <p className="text-xs text-gray-500 dark:text-gray-400">SVG, PNG, JPG or GIF</p>
                                         </div>
