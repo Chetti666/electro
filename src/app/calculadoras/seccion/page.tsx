@@ -72,7 +72,7 @@ export default function CalculoSeccionPage() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 pt-24 pb-12 md:pt-32">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Cálculo de Sección de Conductores</h1>
         <p className="text-gray-600 dark:text-gray-400">
@@ -156,7 +156,7 @@ export default function CalculoSeccionPage() {
             </div>
           </form>
         </div>
-        
+
         {/* Columna Derecha: Resultados e Historial */}
         <div className="space-y-6">
           {/* Resultados */}

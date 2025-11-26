@@ -67,7 +67,7 @@ export default function EmpalmesPage() {
             empalme = seleccionarEmpalmePorCorriente(tipoInstalacion, corrienteNum);
             valorInput = `${corrienteNum.toLocaleString('es-CL')} A`;
         }
-        
+
         setValorBuscado(valorInput);
 
         if (empalme) {
@@ -94,7 +94,7 @@ export default function EmpalmesPage() {
     };
 
     return (
-        <div className="container mx-auto px-4 py-8">
+        <div className="container mx-auto px-4 pt-24 pb-12 md:pt-32">
             <div className="mb-8">
                 <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Calculadora de Empalme Eléctrico</h1>
                 <p className="text-gray-600 dark:text-gray-400">

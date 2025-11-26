@@ -83,7 +83,7 @@ export default function SeccionRicPage() {
 
   // --- RENDERIZADO ---
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 pt-24 pb-12 md:pt-32">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Corriente Admisible de Conductores (RIC)</h1>
         <p className="text-gray-600 dark:text-gray-400">
@@ -126,8 +126,8 @@ export default function SeccionRicPage() {
                       {selectedConductor.tabla_ref === 'movil'
                         ? <option value="E">{metodosInstalacion.find(m => m.id === 'E')?.label}</option>
                         : metodosInstalacion.map(m => (
-                            <option key={m.id} value={m.id}>{m.label}</option>
-                          ))}
+                          <option key={m.id} value={m.id}>{m.label}</option>
+                        ))}
                     </select>
                   </div>
 

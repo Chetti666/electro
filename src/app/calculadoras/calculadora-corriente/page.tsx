@@ -100,12 +100,12 @@ export default function CalculadoraCorrientePage() {
   const labelPotencia = tipoSistema === 'monofasico' ? 'Potencia (P):' : 'Potencia Activa (P):';
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 pt-24 pb-12 md:pt-32">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Calculadora de Corriente y Potencia</h1>
         <p className="text-gray-600 dark:text-gray-400">Calcula la corriente (A) o la potencia (W) para sistemas monofásicos y trifásicos.</p>
       </div>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {/* Columna del Formulario */}
         <div className="card">
@@ -202,8 +202,8 @@ export default function CalculadoraCorrientePage() {
                       Calculado: {item.inputs.calculoObjetivo === 'corriente' ? 'Corriente' : 'Potencia'} ({item.inputs.tipoSistema})
                     </p>
                     <p className="text-xs text-gray-500 dark:text-gray-500">
-                      {item.inputs.calculoObjetivo === 'corriente' 
-                        ? `P: ${item.inputs.potencia}W, V: ${item.inputs.voltaje}V` 
+                      {item.inputs.calculoObjetivo === 'corriente'
+                        ? `P: ${item.inputs.potencia}W, V: ${item.inputs.voltaje}V`
                         : `I: ${item.inputs.corriente}A, V: ${item.inputs.voltaje}V`}
                     </p>
                   </div>
