@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Zap, Github, Twitter, Linkedin, Heart, Mail, MapPin, Phone } from "lucide-react";
+import { Zap, Github, Twitter, Linkedin, Heart, Mail, MapPin, MessageCircle } from "lucide-react";
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
@@ -93,8 +93,11 @@ export default function Footer() {
                 <span>contacto@electrocalc.cl</span>
               </li>
               <li className="flex items-start gap-3 text-gray-600 dark:text-gray-400">
-                <Phone className="w-5 h-5 text-emerald-500 mt-0.5 shrink-0" />
-                <span>+56 9 4038 1316</span>
+                <MessageCircle className="w-5 h-5 text-emerald-500 mt-0.5 shrink-0" />
+                <div className="flex flex-col">
+                  <span>+56 9 4038 1316</span>
+                  <span>+56 9 3303 8620</span>
+                </div>
               </li>
               <li className="flex items-start gap-3 text-gray-600 dark:text-gray-400">
                 <MapPin className="w-5 h-5 text-amber-500 mt-0.5 shrink-0" />
