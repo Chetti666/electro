@@ -9,12 +9,12 @@ import { ClipboardList, Eye, TrendingUp, User, ChevronDown, ChevronUp } from 'lu
 const teamMembers = [
     {
         name: 'Antonio Guiachetti',
-        role: 'Desarrollador Full Stack',
+        role: 'Ingeniero Metalúrgico / Desarrollador Full Stack',
         color: 'blue'
     },
     {
         name: 'Marcos Arriagada',
-        role: 'Desarrollador Front End',
+        role: 'Ingeniero Eléctrico / Desarrollador Front End',
         color: 'emerald'
     },
 ];
