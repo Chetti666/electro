@@ -15,10 +15,23 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "ElectroCalc",
-  description: "Herramienta de cálculos eléctricos para profesionales y técnicos",
+  title: "VMElectric - Herramientas Eléctricas Profesionales",
+  description: "Plataforma integral para cálculos eléctricos, informes técnicos y herramientas normativas para profesionales en Chile.",
   icons: {
     icon: '/electrocalc-logo.svg',
+  },
+  openGraph: {
+    title: "VMElectric - Herramientas Eléctricas Profesionales",
+    description: "Calculadoras de sección, caída de tensión, informes SEV y más herramientas para electricistas.",
+    url: "https://vmelectric.cl",
+    siteName: "VMElectric",
+    locale: "es_CL",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "VMElectric - Herramientas Eléctricas Profesionales",
+    description: "Calculadoras de sección, caída de tensión, informes SEV y más herramientas para electricistas.",
   },
 };
 
