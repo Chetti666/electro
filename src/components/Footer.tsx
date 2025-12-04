@@ -40,7 +40,7 @@ export default function Footer() {
                 <Zap className="w-5 h-5 text-white fill-current" />
               </div>
               <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-300">
-                ElectroCalc
+                VMElectric
               </span>
             </Link>
             <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
@@ -90,7 +90,7 @@ export default function Footer() {
             <ul className="space-y-4">
               <li className="flex items-start gap-3 text-gray-600 dark:text-gray-400">
                 <Mail className="w-5 h-5 text-blue-500 mt-0.5 shrink-0" />
-                <span>contacto@electrocalc.cl</span>
+                <span>vmelectric2025@gmail.com</span>
               </li>
               <li className="flex items-start gap-3 text-gray-600 dark:text-gray-400">
                 <MessageCircle className="w-5 h-5 text-emerald-500 mt-0.5 shrink-0" />
@@ -115,9 +115,9 @@ export default function Footer() {
           transition={{ delay: 0.2, duration: 0.6 }}
           className="border-t border-gray-200 dark:border-gray-800 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-gray-500 dark:text-gray-500"
         >
-          <p>&copy; {currentYear} ElectroCalc. Todos los derechos reservados.</p>
+          <p>&copy; {currentYear} VMElectric. Todos los derechos reservados.</p>
           <p className="flex items-center gap-1">
-            Hecho con <Heart className="w-4 h-4 text-red-500 fill-current animate-pulse" /> por el equipo de ElectroCalc
+            Hecho con <Heart className="w-4 h-4 text-red-500 fill-current animate-pulse" /> por el equipo de VMElectric
           </p>
         </motion.div>
       </div>
