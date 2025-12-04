@@ -2,18 +2,24 @@
 
 import React, { useRef } from 'react';
 import Link from "next/link";
+import dynamic from 'next/dynamic';
 import {
   Carousel,
   CarouselContent,
   CarouselItem,
 } from "@/components/ui/carousel";
 import Autoplay from "embla-carousel-autoplay";
-import { motion, Variants } from "framer-motion";
+import { motion, Variants, AnimatePresence } from "framer-motion";
 import CalculadoraCard, { ColorType as CalculadoraColor } from '@/components/CalculadoraCard';
 import InformeCard, { ColorType as InformeColor } from '@/components/InformeCard';
-import { Calculator, FileText, BarChart3, Zap, Activity, Camera, ClipboardCheck, Search } from 'lucide-react';
+import { Calculator, FileText, BarChart3, Zap, Activity, Camera, ClipboardCheck, Search, Loader2 } from 'lucide-react';
 
 // --- Datos ---
+
+const SampleDocumentsViewer = dynamic(
+  () => import('@/components/SampleDocumentsViewer'),
+  { ssr: false, loading: () => <div className="h-[788px] w-full bg-gray-50 dark:bg-gray-900/50 flex items-center justify-center"><Loader2 className="h-12 w-12 text-blue-500 animate-spin" /></div> }
+);
 
 type Calculadora = {
   id: string;
@@ -334,6 +340,9 @@ export default function Home() {
           </motion.div>
         </div>
       </section>
+
+      {/* Sample Documents Section */}
+      <SampleDocumentsViewer />
     </>
   );
 }
