@@ -398,7 +398,7 @@ const InformeFotograficoSECPage = () => {
 
         } catch (error) {
             console.error("Error generando el PDF:", error);
-            alert("Ocurrió un error al generar el PDF. Por favor, revise la consola.");
+            alert("Ocurrió un error al generar el PDF. Por favor, revise la consola");
         } finally {
             setIsLoading(false);
         }
