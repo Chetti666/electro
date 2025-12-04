@@ -909,7 +909,7 @@ export default function SevReport() {
                 </div>
                 <div>
                   <input type="number" value={lVal} onChange={e => setLVal(e.target.value === '' ? '' : Number(e.target.value))} step="any" placeholder="L (m)" className={`form-input w-full ${highlightEdit ? 'highlight-animation' : ''}`} aria-label="Separación entre electrodo de corriente y centro (L)" />
-                  <p className="text-xs text-gray-500 dark:text-gray-200 mt-1">Separación entre electrodo de corriente y centro.</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-200 mt-1">Separación entre electrodo de corriente y centro de la medición.</p>
                 </div>
                 <div>
                   <input type="number" value={rVal} onChange={e => setRVal(e.target.value === '' ? '' : Number(e.target.value))} step="any" placeholder="R (Ω)" className={`form-input w-full ${highlightEdit ? 'highlight-animation' : ''}`} aria-label="Resistencia medida por el instrumento (R)" />
