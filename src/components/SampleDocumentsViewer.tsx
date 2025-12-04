@@ -28,7 +28,7 @@ const sampleDocuments: SampleDocument[] = [
     id: 'sample-presupuesto',
     title: 'Presupuesto',
     description: 'Ejemplo de un presupuesto generado por nuestra plataforma.',
-    pdfUrl: '/samples/presupuesto-ejemplo.pdf',
+    pdfUrl: '/samples/Presupuesto-ejemplo.pdf',
   },
  
 ];
