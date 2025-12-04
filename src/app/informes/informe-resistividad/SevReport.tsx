@@ -902,11 +902,19 @@ export default function SevReport() {
           <div id="medidas-form" ref={formCardRef} className="card">
             <h2 className="text-lg sm:text-xl font-semibold mb-4 text-gray-900 dark:text-white">Medidas de Campo</h2>
             <div className="space-y-4">
-              <p className="text-sm text-gray-600 dark:text-gray-400">Ingrese a, L y R según el esquema del documento.</p>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <input type="number" value={aVal} onChange={e => setAVal(e.target.value === '' ? '' : Number(e.target.value))} step="any" placeholder="a (m)" className={`form-input ${highlightEdit ? 'highlight-animation' : ''}`} />
-                <input type="number" value={lVal} onChange={e => setLVal(e.target.value === '' ? '' : Number(e.target.value))} step="any" placeholder="L (m)" className={`form-input ${highlightEdit ? 'highlight-animation' : ''}`} />
-                <input type="number" value={rVal} onChange={e => setRVal(e.target.value === '' ? '' : Number(e.target.value))} step="any" placeholder="R (Ω)" className={`form-input ${highlightEdit ? 'highlight-animation' : ''}`} />
+                <div>
+                  <input type="number" value={aVal} onChange={e => setAVal(e.target.value === '' ? '' : Number(e.target.value))} step="any" placeholder="a (m)" className={`form-input w-full ${highlightEdit ? 'highlight-animation' : ''}`} aria-label="Separación entre electrodos de potencial (a)" />
+                  <p className="text-xs text-gray-500 dark:text-gray-200 mt-1">Separación entre electrodos de potencial.</p>
+                </div>
+                <div>
+                  <input type="number" value={lVal} onChange={e => setLVal(e.target.value === '' ? '' : Number(e.target.value))} step="any" placeholder="L (m)" className={`form-input w-full ${highlightEdit ? 'highlight-animation' : ''}`} aria-label="Separación entre electrodo de corriente y centro (L)" />
+                  <p className="text-xs text-gray-500 dark:text-gray-200 mt-1">Separación entre electrodo de corriente y centro.</p>
+                </div>
+                <div>
+                  <input type="number" value={rVal} onChange={e => setRVal(e.target.value === '' ? '' : Number(e.target.value))} step="any" placeholder="R (Ω)" className={`form-input w-full ${highlightEdit ? 'highlight-animation' : ''}`} aria-label="Resistencia medida por el instrumento (R)" />
+                  <p className="text-xs text-gray-500 dark:text-gray-200 mt-1">Resistencia (Ω) medida por el instrumento.</p>
+                </div>
               </div>
               <div className="flex gap-2 flex-wrap">
                 {editId === null ? (
