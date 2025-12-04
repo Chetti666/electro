@@ -8,8 +8,10 @@ import Image from 'next/image';
 
 // --- Interfaces y Datos --- 
 interface Image {
+    id: string;
     src: string;
     description: string;
+    orientation: 'horizontal' | 'vertical';
 }
 
 interface ReportSection {
@@ -21,7 +23,7 @@ interface ReportSection {
 
 interface EditingImage {
     sectionId: string;
-    imageIndex: number;
+    imageId: string;
 }
 
 const defaultSectionsData = [
@@ -90,13 +92,32 @@ const InformeFotograficoSECPage = () => {
             try {
                 const compressedFile = await imageCompression(file, imageProcessingOptions);
                 const imageSrc = await imageCompression.getDataUrlFromFile(compressedFile);
-                return { src: imageSrc, description: '' };
+                const orientation = await new Promise<'horizontal' | 'vertical'>(resolve => {
+                    const img = new window.Image();
+                    img.onload = () => resolve(img.naturalWidth >= img.naturalHeight ? 'horizontal' : 'vertical');
+                    img.onerror = () => resolve('horizontal'); // Fallback orientation
+                    img.src = imageSrc;
+                });
+                return { id: `${file.name}-${Date.now()}`, src: imageSrc, description: '', orientation };
             } catch (error) {
                 console.error("Error al procesar la imagen:", error);
                 // Fallback: si la compresión falla, leer el archivo original.
                 return new Promise<Image | null>(resolve => {
                     const reader = new FileReader();
-                    reader.onload = event => resolve(event.target && typeof event.target.result === 'string' ? { src: event.target.result, description: '' } : null);
+                    reader.onload = async event => {
+                        if (event.target && typeof event.target.result === 'string') {
+                            const imageSrc = event.target.result;
+                            const orientation = await new Promise<'horizontal' | 'vertical'>(res => {
+                                const img = new window.Image();
+                                img.onload = () => res(img.naturalWidth >= img.naturalHeight ? 'horizontal' : 'vertical');
+                                img.onerror = () => res('horizontal');
+                                img.src = imageSrc;
+                            });
+                            resolve({ id: `${file.name}-${Date.now()}`, src: imageSrc, description: '', orientation });
+                        } else {
+                            resolve(null);
+                        }
+                    };
                     reader.onerror = () => resolve(null);
                     reader.readAsDataURL(file);
                 });
@@ -109,11 +130,11 @@ const InformeFotograficoSECPage = () => {
         e.target.value = ''; // Resetear el input
     };
 
-    const updateImageDescription = (sectionId: string, imageIndex: number, description: string) => {
+    const updateImageDescription = (sectionId: string, imageId: string, description: string) => {
         setSections(sections.map(s => {
             if (s.id === sectionId) {
                 const updatedImages = s.images.map((img, idx) =>
-                    idx === imageIndex ? { ...img, description } : img
+                    img.id === imageId ? { ...img, description } : img
                 );
                 return { ...s, images: updatedImages };
             }
@@ -121,24 +142,24 @@ const InformeFotograficoSECPage = () => {
         }));
     };
 
-    const deleteImage = (sectionId: string, imageIndex: number) => {
+    const deleteImage = (sectionId: string, imageId: string) => {
         setSections(sections.map(s => {
             if (s.id === sectionId) {
-                return { ...s, images: s.images.filter((_, idx) => idx !== imageIndex) };
+                return { ...s, images: s.images.filter(img => img.id !== imageId) };
             }
             return s;
         }));
     };
 
     // --- Handlers para Edición de Descripción ---
-    const handleEnterEditMode = (sectionId: string, imageIndex: number, currentDescription: string) => {
-        setEditingImage({ sectionId, imageIndex });
+    const handleEnterEditMode = (sectionId: string, imageId: string, currentDescription: string) => {
+        setEditingImage({ sectionId, imageId });
         setTempDescription(currentDescription);
     };
 
     const handleSaveDescription = () => {
         if (editingImage) {
-            updateImageDescription(editingImage.sectionId, editingImage.imageIndex, tempDescription);
+            updateImageDescription(editingImage.sectionId, editingImage.imageId, tempDescription);
             setEditingImage(null);
             setTempDescription('');
         }
@@ -149,8 +170,8 @@ const InformeFotograficoSECPage = () => {
         setTempDescription('');
     };
 
-    const handleDeleteDescription = (sectionId: string, imageIndex: number) => {
-        updateImageDescription(sectionId, imageIndex, '');
+    const handleDeleteDescription = (sectionId: string, imageId: string) => {
+        updateImageDescription(sectionId, imageId, '');
     };
 
     // --- Drag and Drop Handlers ---
@@ -236,23 +257,36 @@ const InformeFotograficoSECPage = () => {
                 newPage();
 
                 reportData.sections.forEach(section => {
+                    // Separar imágenes por orientación
+                    const horizontalImages = section.images.filter(img => img.orientation === 'horizontal');
+                    const verticalImages = section.images.filter(img => img.orientation === 'vertical');
+
+                    const hasContent = horizontalImages.length > 0 || verticalImages.length > 0;
+
+                    if (!hasContent) return; // Si no hay imágenes, no renderizar la sección
+
                     // Estimar la altura de la primera fila de imágenes para evitar títulos huérfanos
                     let requiredHeight = 15; // Altura del título + un pequeño margen
-                    if (section.images.length > 0) {
-                        const firstImage = section.images[0];
-                        const imgWidth = 80;
+                    const imagesToEstimate = horizontalImages.length > 0 ? horizontalImages : verticalImages;
+                    if (imagesToEstimate.length > 0) {
+                        const firstImage = imagesToEstimate[0];
+                        const maxImgWidth = 80;
+                        const maxImgHeight = 85;
                         const imgProps = doc.getImageProperties(firstImage.src);
-                        const imgHeight = (imgProps.height * imgWidth) / imgProps.width;
+                        let imgWidth = (maxImgHeight / imgProps.height) * imgProps.width;
+                        if (imgWidth > maxImgWidth) imgWidth = maxImgWidth;
+                        const imgHeight = (imgWidth / imgProps.width) * imgProps.height;
+
                         const descLines = firstImage.description ? doc.splitTextToSize(`Figura 1: ${firstImage.description}`, imgWidth) : [];
                         const descHeight = descLines.length * (doc.getFontSize() * 0.35);
-                        const firstImageBlockHeight = imgHeight + (firstImage.description ? descHeight + 10 : 5);
-                        requiredHeight += firstImageBlockHeight;
+                        requiredHeight += imgHeight + (firstImage.description ? descHeight + 10 : 5);
                     }
 
+                    // Solo dibujar el título si hay imágenes
                     if (yPosition + requiredHeight > pageHeight - margin) {
                         newPage();
                     }
-                    applyTitleStyle(); // Usar la función de estilo
+                    applyTitleStyle();
                     doc.text(section.title, margin, yPosition);
                     const textWidth = doc.getStringUnitWidth(section.title) * doc.getFontSize() / doc.internal.scaleFactor;
                     doc.setLineWidth(0.3);
@@ -260,57 +294,91 @@ const InformeFotograficoSECPage = () => {
                     yPosition += 10;
                     doc.setFont('helvetica', 'normal');
 
-                    let currentRowMaxHeight = 0;
 
-                    section.images.forEach((image, index) => {
-                        const imgWidth = 80;
-                        const imgProps = doc.getImageProperties(image.src);
-                        const imgHeight = (imgProps.height * imgWidth) / imgProps.width;
+                    // Función reutilizable para renderizar un grupo de imágenes
+                    const renderImageGroup = (images: Image[], startY: number, figureStartIndex: number): number => {
+                        let currentY = startY;
+                        let currentRowMaxHeight = 0;
 
-                        // Calcular la altura total del bloque (imagen + descripción) para el borde
-                        const descLines = image.description ? doc.splitTextToSize(`Figura ${index + 1}: ${image.description}`, imgWidth) : [];
-                        const descHeight = descLines.length * (doc.getFontSize() * 0.35); // Aproximación de la altura del texto
-                        const blockHeight = imgHeight + (image.description ? descHeight + 10 : 5);
+                        images.forEach((image, index) => {
+                            const maxImgWidth = 80;
+                            const maxImgHeight = 85;
+                            const imgProps = doc.getImageProperties(image.src);
 
-                        currentRowMaxHeight = Math.max(currentRowMaxHeight, blockHeight);
+                            let imgWidth = imgProps.width;
+                            let imgHeight = imgProps.height;
 
-                        // Comprobación de salto de página ANTES de dibujar
-                        if (yPosition + blockHeight > pageHeight - margin) {
-                            newPage();
-                        }
-
-                        const xPos = (index % 2 === 0) ? margin : margin + imgWidth + 10;
-
-                        doc.addImage(image.src, 'JPEG', xPos, yPosition, imgWidth, imgHeight);
-                        doc.setFontSize(10);
-                        doc.setTextColor(80);
-
-                        const figureText = `Figura ${index + 1}`;
-                        doc.setFont('helvetica', 'bold');
-
-                        if (image.description) {
-                            const figureTextWithColon = `${figureText}:`;
-                            const descText = image.description;
-                            doc.text(figureTextWithColon, xPos, yPosition + imgHeight + 5);
-                            const figureTextWidth = doc.getStringUnitWidth(figureTextWithColon) * doc.getFontSize() / doc.internal.scaleFactor;
-                            doc.setFont('helvetica', 'normal');
-                            doc.text(descText, xPos + figureTextWidth + 1, yPosition + imgHeight + 5, { maxWidth: imgWidth - figureTextWidth - 1 });
-                        } else {
-                            doc.text(figureText, xPos, yPosition + imgHeight + 5);
-                        }
-
-                        if (index % 2 !== 0 || index === section.images.length - 1) {
-                            yPosition += currentRowMaxHeight + 10;
-                            // Dibuja una línea separadora entre filas, pero no después de la última imagen de la sección
-                            if (index < section.images.length - 1) {
-                                doc.setDrawColor(220, 220, 220); doc.setLineWidth(0.2);
-                                doc.line(margin, yPosition - 5, pageWidth - margin, yPosition - 5);
+                            if (imgHeight > maxImgHeight) {
+                                imgWidth = (maxImgHeight / imgHeight) * imgWidth;
+                                imgHeight = maxImgHeight;
                             }
-                            currentRowMaxHeight = 0; // Reset for the next row
-                        }
-                    });
+                            if (imgWidth > maxImgWidth) {
+                                imgHeight = (maxImgWidth / imgWidth) * imgHeight;
+                                imgWidth = maxImgWidth;
+                            }
+
+                            const isLeftColumn = index % 2 === 0;
+                            const xPos = isLeftColumn ? margin : margin + maxImgWidth + 10;
+
+                            const figureNumber = figureStartIndex + index + 1;
+                            const descLines = image.description ? doc.splitTextToSize(`Figura ${figureNumber}: ${image.description}`, imgWidth) : [];
+                            const descHeight = descLines.length * (doc.getFontSize() * 0.35);
+                            const blockHeight = imgHeight + (image.description ? descHeight + 10 : 5);
+
+                            if (isLeftColumn) {
+                                currentRowMaxHeight = blockHeight;
+                                if (currentY + currentRowMaxHeight > pageHeight - margin) {
+                                    newPage();
+                                    currentY = yPosition; // yPosition es global y se actualiza en newPage()
+                                }
+                            } else {
+                                currentRowMaxHeight = Math.max(currentRowMaxHeight, blockHeight);
+                            }
+
+                            doc.addImage(image.src, 'JPEG', xPos, currentY, imgWidth, imgHeight);
+                            doc.setFontSize(10);
+                            doc.setTextColor(80);
+
+                            const figureText = `Figura ${figureNumber}`;
+                            doc.setFont('helvetica', 'bold');
+
+                            if (image.description) {
+                                const figureTextWithColon = `${figureText}:`;
+                                const descText = image.description;
+                                doc.text(figureTextWithColon, xPos, currentY + imgHeight + 5);
+                                const figureTextWidth = doc.getStringUnitWidth(figureTextWithColon) * doc.getFontSize() / doc.internal.scaleFactor;
+                                doc.setFont('helvetica', 'normal');
+                                doc.text(descText, xPos + figureTextWidth + 1, currentY + imgHeight + 5, { maxWidth: imgWidth - figureTextWidth - 1 });
+                            } else {
+                                doc.text(figureText, xPos, currentY + imgHeight + 5);
+                            }
+
+                            if (!isLeftColumn || index === images.length - 1) {
+                                currentY += currentRowMaxHeight + 10;
+                                if (index < images.length - 1) {
+                                    doc.setDrawColor(220, 220, 220); doc.setLineWidth(0.2);
+                                    doc.line(margin, currentY - 5, pageWidth - margin, currentY - 5);
+                                }
+                                currentRowMaxHeight = 0;
+                            }
+                        });
+                        return currentY;
+                    };
+
+                    // Renderizar primero las horizontales y luego las verticales
+                    const yAfterHorizontals = renderImageGroup(horizontalImages, yPosition, 0);
+
+                    if (horizontalImages.length > 0 && verticalImages.length > 0 && yAfterHorizontals > yPosition) {
+                        // Añadir un separador más grueso entre grupos si ambos existen
+                        doc.setDrawColor(180, 180, 180); doc.setLineWidth(0.4);
+                        doc.line(margin, yAfterHorizontals - 5, pageWidth - margin, yAfterHorizontals - 5);
+                    }
+
+                    const yAfterVerticals = renderImageGroup(verticalImages, yAfterHorizontals, horizontalImages.length);
+                    yPosition = yAfterVerticals; // Actualizar yPosition global para la siguiente sección
                 });
             }
+
 
             // Encabezados y Pies de Página
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -407,18 +475,23 @@ const InformeFotograficoSECPage = () => {
                                     </label>
 
                                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mt-4">
-                                        {section.images.map((image, index) => (
-                                            <div key={index} className="card overflow-hidden p-0">
+                                        {/* Ordenar imágenes para agrupar por orientación (horizontales primero) */}
+                                        {[...section.images].sort((a, b) => {
+                                            if (a.orientation === 'horizontal' && b.orientation === 'vertical') return -1;
+                                            if (a.orientation === 'vertical' && b.orientation === 'horizontal') return 1;
+                                            return 0;
+                                        }).map((image) => (
+                                            <div key={image.id} className="card overflow-hidden p-0">
                                                 <div className="relative h-40 w-full group">
-                                                    <Image src={image.src} alt={`Preview ${index}`} layout="fill" objectFit="cover" />
+                                                    <Image src={image.src} alt={`Preview ${image.id}`} layout="fill" objectFit="cover" />
                                                     <div className="absolute top-1 right-1">
-                                                        <button className="btn btn-sm bg-red-400 hover:bg-red-600 cursor-pointer h-7 w-7 opacity-70 group-hover:opacity-100 flex items-center justify-center" onClick={() => deleteImage(section.id, index)}>
+                                                        <button className="btn btn-sm bg-red-400 hover:bg-red-600 cursor-pointer h-7 w-7 opacity-70 group-hover:opacity-100 flex items-center justify-center" onClick={() => deleteImage(section.id, image.id)}>
                                                             <span className="text-lg">×</span>
                                                         </button>
                                                     </div>
                                                 </div>
                                                 <div className="p-2 flex-grow flex flex-col justify-between">
-                                                    {editingImage?.sectionId === section.id && editingImage?.imageIndex === index ? (
+                                                    {editingImage?.sectionId === section.id && editingImage?.imageId === image.id ? (
                                                         <div className="space-y-2">
                                                             <textarea
                                                                 autoFocus
@@ -438,12 +511,12 @@ const InformeFotograficoSECPage = () => {
                                                                 <div className="flex flex-col h-full justify-between flex-grow">
                                                                     <div className="form-input text-sm min-h-[70px] flex-grow p-2">{image.description}</div>
                                                                     <div className="flex flex-col sm:flex-row justify-end gap-2 pt-2 mt-auto">
-                                                                        <button className="btn btn-secondary btn-sm" onClick={() => handleEnterEditMode(section.id, index, image.description)}>Editar</button>
-                                                                        <button className="btn btn-sm bg-red-600 hover:bg-red-800 cursor-pointer" onClick={() => handleDeleteDescription(section.id, index)}>Eliminar</button>
+                                                                        <button className="btn btn-secondary btn-sm" onClick={() => handleEnterEditMode(section.id, image.id, image.description)}>Editar</button>
+                                                                        <button className="btn btn-sm bg-red-600 hover:bg-red-800 cursor-pointer" onClick={() => handleDeleteDescription(section.id, image.id)}>Eliminar</button>
                                                                     </div>
                                                                 </div>
                                                             ) : (
-                                                                <button className="btn btn-secondary w-full mt-auto cursor-pointer" onClick={() => handleEnterEditMode(section.id, index, image.description)}>Agregar descripción</button>
+                                                                <button className="btn btn-secondary w-full mt-auto cursor-pointer" onClick={() => handleEnterEditMode(section.id, image.id, image.description)}>Agregar descripción</button>
                                                             )}
                                                         </div>
                                                     )}

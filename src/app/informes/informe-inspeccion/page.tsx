@@ -365,50 +365,107 @@ const InformeInspeccionPage: React.FC = () => {
 
                     // --- Evidencia Fotográfica ---
                     if (point.images.length > 0) {
-                        newPageIfNeeded(15);
-                        doc.setFont('helvetica', 'bold'); doc.setFontSize(10);
-                        doc.text('Evidencia Fotográfica:', margin, yPosition); yPosition += 8;
+                        const horizontalImages: (ImageEvidence & { props: any })[] = [];
+                        const verticalImages: (ImageEvidence & { props: any })[] = [];
+                        let globalImageCounter = 0;
 
-                        let currentRowMaxHeight = 0;
-                        point.images.forEach((image, index) => {
+                        point.images.forEach(image => {
                             if (image.src && typeof image.src === 'string') {
                                 try {
-                                    const imgWidth = 80;
                                     const imgProps = doc.getImageProperties(image.src);
-                                    const imgHeight = (imgProps.height * imgWidth) / imgProps.width;
-                                    const blockHeight = imgHeight + (image.description ? 13 : 5);
-                                    currentRowMaxHeight = Math.max(currentRowMaxHeight, blockHeight);
-
-                                    if (yPosition + blockHeight > pageHeight - margin) {
-                                        newPageIfNeeded(blockHeight);
-                                        yPosition += 5;
+                                    if (imgProps.width >= imgProps.height) {
+                                        horizontalImages.push({ ...image, props: imgProps });
+                                    } else {
+                                        verticalImages.push({ ...image, props: imgProps });
                                     }
-
-                                    const xPos = (index % 2 === 0) ? margin : margin + imgWidth + 10;
-                                    doc.addImage(image.src, 'JPEG', xPos, yPosition, imgWidth, imgHeight);
-
-                                    doc.setFontSize(10); doc.setTextColor(80);
-                                    const figureLabel = `Figura ${index + 1}`;
-                                    doc.setFont('helvetica', 'bold');
-                                    doc.text(figureLabel, xPos, yPosition + imgHeight + 5);
-
-                                    const figureLabelWidth = doc.getStringUnitWidth(figureLabel) * doc.getFontSize() / doc.internal.scaleFactor;
-                                    doc.setFont('helvetica', 'normal');
-                                    const descriptionText = image.description ? `: ${image.description}` : '';
-                                    doc.text(descriptionText, xPos + figureLabelWidth, yPosition + imgHeight + 5, { maxWidth: imgWidth - figureLabelWidth });
                                 } catch (e) {
-                                    console.error(`Error processing image ${index}:`, e);
+                                    console.error(`Error getting image properties:`, e);
                                 }
                             }
-                            if (index % 2 !== 0 || index === point.images.length - 1) {
-                                yPosition += currentRowMaxHeight + 10;
-                                if (index < point.images.length - 1) {
+                        });
+
+                        const drawImageWithDescription = (image: ImageEvidence, x: number, y: number, width: number, height: number, figure: number) => {
+                            doc.addImage(image.src, 'JPEG', x, y, width, height);
+                            doc.setFontSize(10); doc.setTextColor(80);
+                            const figureLabel = `Figura ${figure}`;
+                            doc.setFont('helvetica', 'bold');
+                            doc.text(figureLabel, x, y + height + 5);
+
+                            const figureLabelWidth = doc.getStringUnitWidth(figureLabel) * doc.getFontSize() / doc.internal.scaleFactor;
+                            doc.setFont('helvetica', 'normal');
+                            const descriptionText = image.description ? `: ${image.description}` : '';
+                            doc.text(descriptionText, x + figureLabelWidth, y + height + 5, { maxWidth: width - figureLabelWidth });
+                        };
+
+                        if (horizontalImages.length > 0 || verticalImages.length > 0) {
+                            newPageIfNeeded(15);
+                            doc.setFont('helvetica', 'bold'); doc.setFontSize(10);
+                            doc.text('Evidencia Fotográfica:', margin, yPosition); yPosition += 8;
+                        }
+
+                        // Renderizar imágenes horizontales (2 por fila)
+                        if (horizontalImages.length > 0) {
+                            const imgWidth = (contentWidth - 10) / 2;
+                            for (let i = 0; i < horizontalImages.length; i += 2) {
+                                const img1 = horizontalImages[i];
+                                const img2 = horizontalImages[i + 1];
+
+                                const img1Height = (img1.props.height * imgWidth) / img1.props.width;
+                                const img1BlockHeight = img1Height + (img1.description ? 13 : 5);
+
+                                let rowHeight = img1BlockHeight;
+
+                                if (img2) {
+                                    const img2Height = (img2.props.height * imgWidth) / img2.props.width;
+                                    const img2BlockHeight = img2Height + (img2.description ? 13 : 5);
+                                    rowHeight = Math.max(img1BlockHeight, img2BlockHeight);
+                                }
+
+                                newPageIfNeeded(rowHeight + 5);
+
+                                drawImageWithDescription(img1, margin, yPosition, imgWidth, img1Height, ++globalImageCounter);
+
+                                if (img2) {
+                                    const img2Height = (img2.props.height * imgWidth) / img2.props.width;
+                                    drawImageWithDescription(img2, margin + imgWidth + 10, yPosition, imgWidth, img2Height, ++globalImageCounter);
+                                }
+
+                                yPosition += rowHeight + 10;
+                                if (i + 2 < horizontalImages.length || verticalImages.length > 0) {
                                     doc.setDrawColor(220, 220, 220); doc.setLineWidth(0.2);
                                     doc.line(margin, yPosition - 5, pageWidth - margin, yPosition - 5);
                                 }
-                                currentRowMaxHeight = 0;
                             }
-                        });
+                        }
+
+                        // Renderizar imágenes verticales (3 por fila)
+                        if (verticalImages.length > 0) {
+                            const imgWidth = (contentWidth - 20) / 3;
+                            for (let i = 0; i < verticalImages.length; i += 3) {
+                                const imagesInRow = verticalImages.slice(i, i + 3);
+                                let rowHeight = 0;
+
+                                imagesInRow.forEach(img => {
+                                    const imgHeight = (img.props.height * imgWidth) / img.props.width;
+                                    const blockHeight = imgHeight + (img.description ? 13 : 5);
+                                    rowHeight = Math.max(rowHeight, blockHeight);
+                                });
+
+                                newPageIfNeeded(rowHeight + 5);
+
+                                imagesInRow.forEach((img, index) => {
+                                    const xPos = margin + index * (imgWidth + 10);
+                                    const imgHeight = (img.props.height * imgWidth) / img.props.width;
+                                    drawImageWithDescription(img, xPos, yPosition, imgWidth, imgHeight, ++globalImageCounter);
+                                });
+
+                                yPosition += rowHeight + 10;
+                                if (i + 3 < verticalImages.length) {
+                                    doc.setDrawColor(220, 220, 220); doc.setLineWidth(0.2);
+                                    doc.line(margin, yPosition - 5, pageWidth - margin, yPosition - 5);
+                                }
+                            }
+                        }
                     }
                     yPosition += 10; // Espacio extra después de cada punto de inspección
                 };
