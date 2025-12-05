@@ -4,10 +4,10 @@ import imageCompression from 'browser-image-compression';
 import autoTable from 'jspdf-autotable';
 import jsPDF from 'jspdf';
 import Link from 'next/link';
-import Image from 'next/image';
+import NextImage from 'next/image';
 
 // --- Interfaces y Datos --- 
-interface Image {
+interface ReportImage {
     id: string;
     src: string;
     description: string;
@@ -17,7 +17,7 @@ interface Image {
 interface ReportSection {
     id: string;
     title: string;
-    images: Image[];
+    images: ReportImage[];
     isOpen: boolean;
 }
 
@@ -102,7 +102,7 @@ const InformeFotograficoSECPage = () => {
             } catch (error) {
                 console.error("Error al procesar la imagen:", error);
                 // Fallback: si la compresión falla, leer el archivo original.
-                return new Promise<Image | null>(resolve => {
+                return new Promise<ReportImage | null>(resolve => {
                     const reader = new FileReader();
                     reader.onload = async event => {
                         if (event.target && typeof event.target.result === 'string') {
@@ -125,7 +125,7 @@ const InformeFotograficoSECPage = () => {
         });
 
         const newImages = await Promise.all(filePromises);
-        const validImages = newImages.filter((img): img is Image => img !== null);
+        const validImages = newImages.filter((img): img is ReportImage => img !== null);
         setSections(prev => prev.map(s => s.id === sectionId ? { ...s, images: [...s.images, ...validImages] } : s));
         e.target.value = ''; // Resetear el input
     };
@@ -133,7 +133,7 @@ const InformeFotograficoSECPage = () => {
     const updateImageDescription = (sectionId: string, imageId: string, description: string) => {
         setSections(sections.map(s => {
             if (s.id === sectionId) {
-                const updatedImages = s.images.map((img, idx) =>
+                const updatedImages = s.images.map((img, _idx) =>
                     img.id === imageId ? { ...img, description } : img
                 );
                 return { ...s, images: updatedImages };
@@ -296,7 +296,7 @@ const InformeFotograficoSECPage = () => {
 
 
                     // Función reutilizable para renderizar un grupo de imágenes
-                    const renderImageGroup = (images: Image[], startY: number, figureStartIndex: number): number => {
+                    const renderImageGroup = (images: ReportImage[], startY: number, figureStartIndex: number): number => {
                         let currentY = startY;
                         let currentRowMaxHeight = 0;
 
@@ -483,7 +483,7 @@ const InformeFotograficoSECPage = () => {
                                         }).map((image) => (
                                             <div key={image.id} className="card overflow-hidden p-0">
                                                 <div className="relative h-40 w-full group">
-                                                    <Image src={image.src} alt={`Preview ${image.id}`} layout="fill" objectFit="cover" />
+                                                    <NextImage src={image.src} alt={`Preview ${image.id}`} layout="fill" objectFit="cover" />
                                                     <div className="absolute top-1 right-1">
                                                         <button className="btn btn-sm bg-red-400 hover:bg-red-600 cursor-pointer h-7 w-7 opacity-70 group-hover:opacity-100 flex items-center justify-center" onClick={() => deleteImage(section.id, image.id)}>
                                                             <span className="text-lg">×</span>
@@ -538,7 +538,7 @@ const InformeFotograficoSECPage = () => {
 
                 <div className="mt-8">
                     {isLoading ? (
-                        <div className="text-center p-4 rounded-lg bg-gray-100 dark:bg-gray-800">Generando PDF, por favor espere...</div>
+                        <div className="text-center p-4 rounded-lg bg-gray-100 dark:bg-gray-800">Generando PDF, por favor espere....</div>
                     ) : (
                         <button onClick={generatePdf} className="btn btn-primary w-full font-bold">
                             Generar Informe PDF

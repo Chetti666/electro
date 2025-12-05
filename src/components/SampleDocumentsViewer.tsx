@@ -54,7 +54,7 @@ function useContainerWidth() {
     return () => {
       resizeObserver.disconnect();
     };
-  }, [containerRef.current]); // Depender del elemento DOM actual
+  }, []); // El efecto solo debe correr una vez para configurar el observer
  
   return { containerRef, containerWidth };
 }
