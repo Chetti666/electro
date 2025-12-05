@@ -605,7 +605,7 @@ const InformeFotograficoSECPage = () => {
                         <div className="text-center p-4 rounded-lg bg-gray-100 dark:bg-gray-800">Generando PDF, por favor espere....</div>
                     ) : (
                         <button onClick={generatePdf} className="btn btn-primary w-full font-bold">
-                            Generar Informe PDF
+                            Generar Informe PDF.
                         </button>
                     )}
                 </div>
