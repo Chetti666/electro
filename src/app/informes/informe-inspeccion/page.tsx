@@ -5,7 +5,7 @@ import imageCompression from 'browser-image-compression';
 import autoTable from 'jspdf-autotable';
 import jsPDF from 'jspdf';
 import Link from 'next/link';
-import Image from 'next/image';
+import NextImage from 'next/image';
 
 // --- Interfaces --- 
 interface ImageEvidence {
@@ -623,7 +623,7 @@ const InformeInspeccionPage: React.FC = () => {
                                             {p.images.map((img, idx) => (
                                                 <div key={idx} className="relative group card overflow-hidden p-0">
                                                     <div className="relative h-40 w-full">
-                                                        <Image src={img.src} alt={`Evidencia ${idx + 1}`} layout="fill" objectFit="cover" />
+                                                        <NextImage src={img.src} alt={`Evidencia ${idx + 1}`} layout="fill" objectFit="cover" />
                                                         <button onClick={() => deleteImage(p.id, idx)} className="absolute top-1 right-1 btn btn-sm bg-red-500 hover:bg-red-600 h-7 w-7 opacity-70 group-hover:opacity-100 flex items-center justify-center"><span className="text-lg">×</span></button>
                                                     </div>
                                                     <div className="p-2 flex-grow flex flex-col justify-between">
