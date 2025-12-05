@@ -1089,7 +1089,7 @@ export default function SevReport() {
               )}
               {driveFiles.length > 0 && (
                 <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                  <h3 className="text-md font-semibold mb-2 text-gray-800 dark:text-gray-200">Informes en Drive</h3>
+                  <h3 className="text-md font-semibold mb-2 text-gray-800 dark:text-gray-200">Informes en Drive.</h3>
                   <ul className="space-y-2 max-h-60 overflow-y-auto pr-2">
                     {driveFiles.map(file => (
                       <li key={file.id}>
