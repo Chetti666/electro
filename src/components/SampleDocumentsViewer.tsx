@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import { motion, AnimatePresence } from 'framer-motion';
-import { pdfjs } from 'react-pdf';
+import { Document, Page, pdfjs } from 'react-pdf';
 import 'react-pdf/dist/Page/AnnotationLayer.css';
 import 'react-pdf/dist/Page/TextLayer.css';
 import { Loader2 } from 'lucide-react';
@@ -83,9 +83,6 @@ const PDFDisplay = ({
   onPageRenderError: (error: Error) => void;
   numPages: number | null;
 }) => {
-  // Importamos Document y Page aquí dentro, ya que este componente solo se renderiza en el cliente.
-  const { Document, Page } = require('react-pdf');
-
   return (
     <Document file={pdfUrl} onLoadSuccess={onLoadSuccess} loading={<div className="flex items-center justify-center h-full"><Loader2 className="h-12 w-12 text-blue-500 animate-spin" /></div>} error={<div className="flex items-center justify-center h-full text-red-500">Error al cargar el PDF. Asegúrate que el archivo existe en <code>public/samples/</code>.</div>}>
       {Array.from(new Array(numPages), (el, index) => (
