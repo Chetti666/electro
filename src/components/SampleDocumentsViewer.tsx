@@ -72,12 +72,11 @@ export default function SampleDocumentsViewer() {
   const { containerRef, containerWidth } = useContainerWidth();
 
   useEffect(() => {
-    // This is the recommended way to set up the worker for Next.js and other bundlers.
-    // It ensures the worker is loaded from the correct path.
-    pdfjs.GlobalWorkerOptions.workerSrc = new URL(
-      'pdfjs-dist/build/pdf.worker.min.mjs',
-      import.meta.url,
-    ).toString();
+    // Para asegurar que el worker de PDF.js se cargue correctamente en producción (Vercel),
+    // es más robusto usar una CDN. La configuración con `import.meta.url` a menudo falla
+    // en los builds de producción de Next.js.
+    // Usamos la versión del worker que corresponde a la versión de pdfjs que react-pdf utiliza.
+    pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
   }, []);
 
   // Maneja los errores de renderizado de la página del PDF.
