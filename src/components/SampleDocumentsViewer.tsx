@@ -43,25 +43,26 @@ const sampleDocuments: SampleDocument[] = [
 // Hook personalizado para medir el ancho de un elemento
 function useContainerWidth() {
   const [containerWidth, setContainerWidth] = useState<number | undefined>();
-  const containerRef = useRef<HTMLDivElement>(null);
+  const observerRef = useRef<ResizeObserver | null>(null);
  
-  useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
- 
-    const updateWidth = () => {
-      setContainerWidth(container.offsetWidth);
-    };
- 
-    updateWidth();
- 
-    const resizeObserver = new ResizeObserver(updateWidth);
-    resizeObserver.observe(container);
- 
-    return () => {
-      resizeObserver.disconnect();
-    };
-  }, []); // El efecto solo debe correr una vez para configurar el observer
+  // Usamos un "callback ref" para obtener el nodo del DOM.
+  // Esta función se ejecuta cuando el elemento se monta o desmonta.
+  const containerRef = (node: HTMLDivElement | null) => {
+    // Desconectar el observer anterior si existe
+    if (observerRef.current) {
+      observerRef.current.disconnect();
+    }
+
+    // Si el nodo existe, creamos y conectamos un nuevo ResizeObserver
+    if (node) {
+      const observer = new ResizeObserver(() => {
+        setContainerWidth(node.offsetWidth);
+      });
+      observer.observe(node);
+      observerRef.current = observer; // Guardamos la instancia del observer
+      setContainerWidth(node.offsetWidth); // Establecemos el ancho inicial
+    }
+  };
  
   return { containerRef, containerWidth };
 }
@@ -79,6 +80,15 @@ export default function SampleDocumentsViewer() {
     ).toString();
   }, []);
 
+  // Maneja los errores de renderizado de la página del PDF.
+  // La AbortException es común y esperada cuando se cambia de documento rápidamente,
+  // ya que la tarea de renderizado anterior se cancela. La ignoramos para limpiar la consola.
+  function onPageRenderError(error: Error) {
+    if (error.name === 'AbortException') {
+      return; // Ignorar errores de aborto, es un comportamiento esperado.
+    }
+    console.error('Error al renderizar una página del PDF:', error);
+  }
 
   return (
     <section className="py-16 bg-gray-50 dark:bg-gray-900/50">
@@ -139,7 +149,7 @@ export default function SampleDocumentsViewer() {
               >
                 <Document file={selectedSample.pdfUrl} onLoadSuccess={({ numPages }) => setNumPages(numPages)} loading={<div className="flex items-center justify-center h-full"><Loader2 className="h-12 w-12 text-blue-500 animate-spin" /></div>} error={<div className="flex items-center justify-center h-full text-red-500">Error al cargar el PDF. Asegúrate que el archivo existe en <code>public/samples/</code>.</div>}>
                   {Array.from(new Array(numPages), (el, index) => (
-                    <Page key={`page_${index + 1}`} pageNumber={index + 1} width={containerWidth ? containerWidth - 32 : undefined} className="mb-4 shadow-md" />
+                    <Page key={`page_${index + 1}`} pageNumber={index + 1} width={containerWidth ? containerWidth - 48 : undefined} className="mb-4 shadow-md" onRenderError={onPageRenderError} />
                   ))}
                 </Document>
               </motion.div>
