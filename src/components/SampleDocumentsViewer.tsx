@@ -24,6 +24,13 @@ const sampleDocuments: SampleDocument[] = [
     pdfUrl: '/samples/informe-resistividad-ejemplo.pdf',
   },
 
+  {
+    id: 'sample-informe-inspeccion',
+    title: 'Informe de Inspección',
+    description: 'Ejemplo de un informe de inspección generado por nuestra plataforma.',
+    pdfUrl: '/samples/Informe-Inspeccion-ejemplo.pdf',
+  },
+
    {
     id: 'sample-presupuesto',
     title: 'Presupuesto',
