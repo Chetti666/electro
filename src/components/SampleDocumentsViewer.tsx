@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import dynamic from 'next/dynamic';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Document, Page, pdfjs } from 'react-pdf';
 import 'react-pdf/dist/Page/AnnotationLayer.css';
@@ -67,48 +66,18 @@ function useContainerWidth() {
  
   return { containerRef, containerWidth };
 }
-
-// Componente que encapsula la lógica de react-pdf.
-// Será importado dinámicamente para evitar problemas de SSR en el build de Vercel.
-const PDFDisplay = ({
-  pdfUrl,
-  containerWidth,
-  onLoadSuccess,
-  onPageRenderError,
-  numPages,
-}: {
-  pdfUrl: string;
-  containerWidth: number | undefined;
-  onLoadSuccess: (pdf: { numPages: number }) => void;
-  onPageRenderError: (error: Error) => void;
-  numPages: number | null;
-}) => {
-  return (
-    <Document file={pdfUrl} onLoadSuccess={onLoadSuccess} loading={<div className="flex items-center justify-center h-full"><Loader2 className="h-12 w-12 text-blue-500 animate-spin" /></div>} error={<div className="flex items-center justify-center h-full text-red-500">Error al cargar el PDF. Asegúrate que el archivo existe en <code>public/samples/</code>.</div>}>
-      {Array.from(new Array(numPages), (el, index) => (
-        <Page key={`page_${index + 1}`} pageNumber={index + 1} width={containerWidth ? containerWidth - 48 : undefined} className="mb-4 shadow-md" onRenderError={onPageRenderError} />
-      ))}
-    </Document>
-  );
-};
-
-// Hacemos la importación dinámica del componente que usa react-pdf
-const DynamicPDFDisplay = dynamic(() => Promise.resolve(PDFDisplay), {
-  ssr: false,
-  loading: () => <div className="flex items-center justify-center h-full"><Loader2 className="h-12 w-12 text-blue-500 animate-spin" /></div>,
-});
-
 export default function SampleDocumentsViewer() {
   const [selectedSample, setSelectedSample] = useState<SampleDocument>(sampleDocuments[0]);
   const [numPages, setNumPages] = useState<number | null>(null);
   const { containerRef, containerWidth } = useContainerWidth();
 
   useEffect(() => {
-    // Para asegurar que el worker de PDF.js se cargue correctamente en producción (Vercel),
-    // es más robusto usar una CDN. La configuración con `import.meta.url` a menudo falla
-    // en los builds de producción de Next.js.
-    // Usamos la versión del worker que corresponde a la versión de pdfjs que react-pdf utiliza.
-    pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+    // This is the recommended way to set up the worker for Next.js and other bundlers.
+    // It ensures the worker is loaded from the correct path.
+    pdfjs.GlobalWorkerOptions.workerSrc = new URL(
+      'pdfjs-dist/build/pdf.worker.min.mjs',
+      import.meta.url,
+    ).toString();
   }, []);
 
   // Maneja los errores de renderizado de la página del PDF.
@@ -178,13 +147,11 @@ export default function SampleDocumentsViewer() {
                 ref={containerRef}
                 className="absolute inset-0 overflow-y-auto p-4"
               >
-                <DynamicPDFDisplay
-                  pdfUrl={selectedSample.pdfUrl}
-                  containerWidth={containerWidth}
-                  numPages={numPages}
-                  onLoadSuccess={({ numPages }) => setNumPages(numPages)}
-                  onPageRenderError={onPageRenderError}
-                />
+                <Document file={selectedSample.pdfUrl} onLoadSuccess={({ numPages }) => setNumPages(numPages)} loading={<div className="flex items-center justify-center h-full"><Loader2 className="h-12 w-12 text-blue-500 animate-spin" /></div>} error={<div className="flex items-center justify-center h-full text-red-500">Error al cargar el PDF. Asegúrate que el archivo existe en <code>public/samples/</code>.</div>}>
+                  {Array.from(new Array(numPages), (el, index) => (
+                    <Page key={`page_${index + 1}`} pageNumber={index + 1} width={containerWidth ? containerWidth - 48 : undefined} className="mb-4 shadow-md" onRenderError={onPageRenderError} />
+                  ))}
+                </Document>
               </motion.div>
             </AnimatePresence>
           </div>

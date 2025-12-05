@@ -143,7 +143,7 @@ const InformeFotograficoSECPage = () => {
     const updateImageDescription = (sectionId: string, imageId: string, description: string) => {
         setSections(sections.map(s => {
             if (s.id === sectionId) {
-                const updatedImages = s.images.map((img) =>
+                const updatedImages = s.images.map((img, _idx) =>
                     img.id === imageId ? { ...img, description } : img
                 );
                 return { ...s, images: updatedImages };
