@@ -105,10 +105,6 @@ export default function SevReport() {
   const [isListingFiles, setIsListingFiles] = useState(false);
   const tokenClient = useRef<google.accounts.oauth2.TokenClient | null>(null);
 
-  // Estado para validaciones
-  const [validationErrors, setValidationErrors] = useState<string[]>([]);
-  const [showWarningPopup, setShowWarningPopup] = useState(false);
-  const [warningMessage, setWarningMessage] = useState('');
 
   const escapeHtml = (str: string): string => {
     return (str || "").replace(/[&<>]/g, s => ({
@@ -117,14 +113,6 @@ export default function SevReport() {
       '>': '&gt;',
     }[s] || s));
   };
-
-  const handleInputChange = (setter: React.Dispatch<React.SetStateAction<string>>, fieldName: string, value: string) => {
-    setter(value);
-    // Si el campo estaba en los errores, lo quitamos al empezar a escribir
-    if (validationErrors.includes(fieldName)) {
-        setValidationErrors(prev => prev.filter(err => err !== fieldName));
-    }
-};
 
   // --- Lógica de Mediciones ---
   const calculateMeasurement = (a: number, L: number, R: number): Omit<Measurement, 'id'> => {
@@ -355,7 +343,6 @@ export default function SevReport() {
               },
               grid: {
                 color: "rgba(156, 163, 175, 0.4)", // text-gray-400 with more alpha
-                drawOnChartArea: true,
               },
             },
             y: {
@@ -388,35 +375,10 @@ export default function SevReport() {
 
   // --- Generación de Informe ---
   const generatePdfBlob = useCallback(async (): Promise<{ doc: jsPDF, blob: Blob, fileName: string } | null> => {
-    // --- Validación ---
-    const missingFields: string[] = [];
-    if (!interesado.trim()) missingFields.push('interesado');
-    if (!projectName.trim()) missingFields.push('projectName');
-    if (!location.trim()) missingFields.push('location');
-    if (!operator.trim()) missingFields.push('operator');
-    if (!fecha) missingFields.push('fecha');
-
-    if (missingFields.length > 0) {
-        setValidationErrors(missingFields);
-        setWarningMessage('Por favor, complete todos los datos del proyecto antes de generar el informe. Los campos que faltan se han resaltado.');
-        setShowWarningPopup(true);
-        const firstErrorField = document.getElementById(missingFields[0]);
-        if (firstErrorField) {
-            firstErrorField.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            firstErrorField.focus();
-        }
-        return null;
-    }
-
     if (measurements.length === 0) {
-      setValidationErrors([]); // Limpiar errores de campos si los hubiera
-      setWarningMessage("No hay mediciones para generar un informe. Por favor, agregue al menos una medición.");
-      setShowWarningPopup(true);
+      alert("No hay mediciones para generar un informe.");
       return null;
     }
-
-    setValidationErrors([]); // Limpiar todos los errores si la validación es exitosa
-
 
     const interesadoVal = interesado || "No especificado";
     const proj = projectName || "No especificado";
@@ -641,10 +603,11 @@ export default function SevReport() {
   }, [measurements, projectName, location, operator, annexImages, equipmentBrand, equipmentModel, serialNumber, lastCalibration, interesado, fecha, hora]);
 
   const handleGenerateReport = async () => {
-    const pdfData = await generatePdfBlob();
-    if (pdfData) {
-      pdfData.doc.save(pdfData.fileName);
-    }
+    generatePdfBlob().then(pdfData => {
+      if (pdfData) {
+        pdfData.doc.save(pdfData.fileName);
+      }
+    });
   };
 
   // --- Lógica de Google Drive ---
@@ -869,35 +832,6 @@ export default function SevReport() {
 
   return (
     <>
-      {/* --- Pop-up de Advertencia --- */}
-      {showWarningPopup && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-              <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 max-w-md w-full text-center">
-                  <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-yellow-100 dark:bg-yellow-900/50 mb-4">
-                      <svg className="h-6 w-6 text-yellow-600 dark:text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                      </svg>
-                  </div>
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Datos Incompletos</h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-2 mb-6">
-                      {warningMessage}
-                  </p>
-                  <button onClick={() => setShowWarningPopup(false)} className="btn btn-primary w-full">
-                      Entendido
-                  </button>
-              </div>
-          </div>
-      )}
-
-      {/* Solución para el icono del calendario en modo oscuro */}
-      <style jsx global>{`
-        @media (prefers-color-scheme: dark) {
-          input[type="date"]::-webkit-calendar-picker-indicator {
-            filter: invert(1);
-          }
-        }
-      `}</style>
-
       <style jsx>{`
         @keyframes highlight-blink {
           0%, 50%, 100% { background-color: transparent; }
@@ -919,47 +853,47 @@ export default function SevReport() {
               <div className="space-y-4">
                 <div>
                   <label className="form-label" htmlFor="interesado">Interesado</label>
-                  <input id="interesado" type="text" value={interesado} onChange={e => handleInputChange(setInteresado, 'interesado', e.target.value)} placeholder="Nombre del interesado" className={`form-input ${validationErrors.includes('interesado') ? 'border-red-500' : ''}`} />
+                  <input id="interesado" type="text" value={interesado} onChange={e => setInteresado(e.target.value)} placeholder="Nombre del interesado" className="form-input" />
                 </div>
                 <div>
                   <label className="form-label" htmlFor="projectName">Proyecto</label>
-                  <input id="projectName" type="text" value={projectName} onChange={e => handleInputChange(setProjectName, 'projectName', e.target.value)} placeholder="Nombre del Proyecto" className={`form-input ${validationErrors.includes('projectName') ? 'border-red-500' : ''}`} />
+                  <input id="projectName" type="text" value={projectName} onChange={e => setProjectName(e.target.value)} placeholder="Nombre del Proyecto" className="form-input" />
                 </div>
                 <div>
                   <label className="form-label" htmlFor="location">Ubicación</label>
-                  <input id="location" type="text" value={location} onChange={e => handleInputChange(setLocation, 'location', e.target.value)} placeholder="Ubicación" className={`form-input ${validationErrors.includes('location') ? 'border-red-500' : ''}`} />
+                  <input id="location" type="text" value={location} onChange={e => setLocation(e.target.value)} placeholder="Ubicación" className="form-input" />
                 </div>
               </div>
               <div className="space-y-4">
                 <div>
                   <label className="form-label" htmlFor="operator">Operador</label>
-                  <input id="operator" type="text" value={operator} onChange={e => handleInputChange(setOperator, 'operator', e.target.value)} placeholder="Operador" className={`form-input ${validationErrors.includes('operator') ? 'border-red-500' : ''}`} />
+                  <input id="operator" type="text" value={operator} onChange={e => setOperator(e.target.value)} placeholder="Operador" className="form-input" />
                 </div>
                 <div>
                   <label className="form-label" htmlFor="fecha">Fecha Medición</label>
-                  <input id="fecha" type="date" value={fecha} onChange={e => handleInputChange(setFecha, 'fecha', e.target.value)} className={`form-input ${validationErrors.includes('fecha') ? 'border-red-500' : ''}`} />
+                  <input id="fecha" type="date" value={fecha} onChange={e => setFecha(e.target.value)} className="form-input" />
                 </div>
                 <div>
                   <label className="form-label" htmlFor="hora">Hora</label>
-                  <input id="hora" type="time" value={hora} onChange={e => handleInputChange(setHora, 'hora', e.target.value)} className="form-input" />
+                  <input id="hora" type="time" value={hora} onChange={e => setHora(e.target.value)} className="form-input" />
                 </div>
               </div>
               <div className="space-y-4">
                 <div>
                   <label className="form-label" htmlFor="equipmentBrand">Marca del equipo</label>
-                  <input id="equipmentBrand" type="text" value={equipmentBrand} onChange={e => handleInputChange(setEquipmentBrand, 'equipmentBrand', e.target.value)} placeholder="Marca del equipo" className="form-input" />
+                  <input id="equipmentBrand" type="text" value={equipmentBrand} onChange={e => setEquipmentBrand(e.target.value)} placeholder="Marca del equipo" className="form-input" />
                 </div>
                 <div>
                   <label className="form-label" htmlFor="equipmentModel">Modelo</label>
-                  <input id="equipmentModel" type="text" value={equipmentModel} onChange={e => handleInputChange(setEquipmentModel, 'equipmentModel', e.target.value)} placeholder="Modelo" className="form-input" />
+                  <input id="equipmentModel" type="text" value={equipmentModel} onChange={e => setEquipmentModel(e.target.value)} placeholder="Modelo" className="form-input" />
                 </div>
                 <div>
                   <label className="form-label" htmlFor="serialNumber">N° Serie</label>
-                  <input id="serialNumber" type="text" value={serialNumber} onChange={e => handleInputChange(setSerialNumber, 'serialNumber', e.target.value)} placeholder="N° Serie" className="form-input" />
+                  <input id="serialNumber" type="text" value={serialNumber} onChange={e => setSerialNumber(e.target.value)} placeholder="N° Serie" className="form-input" />
                 </div>
                 <div>
                   <label className="form-label" htmlFor="lastCalibration">Última calibración</label>
-                  <input id="lastCalibration" type="date" value={lastCalibration} onChange={e => handleInputChange(setLastCalibration, 'lastCalibration', e.target.value)} className="form-input" />
+                  <input id="lastCalibration" type="date" value={lastCalibration} onChange={e => setLastCalibration(e.target.value)} className="form-input" />
                 </div>
               </div>
             </div>
@@ -1124,7 +1058,7 @@ export default function SevReport() {
           <div className="card">
             <h2 className="text-lg sm:text-xl font-semibold mb-4 text-gray-900 dark:text-white">Acciones</h2>
             <div className="flex flex-col space-y-3">
-              <button type="button" className="btn btn-primary w-full justify-center" onClick={handleGenerateReport}>Descargar Informe (PDF)</button>
+              <button type="button" className="btn btn-primary w-full justify-center" onClick={handleGenerateReport} disabled={measurements.length === 0}>Descargar Informe (PDF)</button>
               <button type="button" className="btn btn-accent w-full justify-center" onClick={handleClearAll}>Limpiar Todo</button>
             </div>
           </div>
@@ -1155,9 +1089,9 @@ export default function SevReport() {
               )}
               {driveFiles.length > 0 && (
                 <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                  <h3 className="text-md font-semibold mb-2 text-gray-800 dark:text-gray-200">Informes en Drive</h3>
+                  <h3 className="text-md font-semibold mb-2 text-gray-800 dark:text-gray-200">Informes en Drive.</h3>
                   <ul className="space-y-2 max-h-60 overflow-y-auto pr-2">
-                    {driveFiles.map((file: DriveFile) => (
+                    {driveFiles.map(file => (
                       <li key={file.id}>
                         <a 
                           href={file.webViewLink} 
