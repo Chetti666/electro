@@ -9,7 +9,7 @@ import {
   CarouselItem,
 } from "@/components/ui/carousel";
 import Autoplay from "embla-carousel-autoplay";
-import { motion, Variants, AnimatePresence } from "framer-motion";
+import { motion, Variants } from "framer-motion";
 import CalculadoraCard, { ColorType as CalculadoraColor } from '@/components/CalculadoraCard';
 import InformeCard, { ColorType as InformeColor } from '@/components/InformeCard';
 import { Calculator, FileText, BarChart3, Zap, Activity, Camera, ClipboardCheck, Search, Loader2 } from 'lucide-react';

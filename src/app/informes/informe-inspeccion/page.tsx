@@ -365,8 +365,8 @@ const InformeInspeccionPage: React.FC = () => {
 
                     // --- Evidencia Fotográfica ---
                     if (point.images.length > 0) {
-                        const horizontalImages: (ImageEvidence & { props: any })[] = [];
-                        const verticalImages: (ImageEvidence & { props: any })[] = [];
+                        const horizontalImages: (ImageEvidence & { props: { width: number; height: number; } })[] = [];
+                        const verticalImages: (ImageEvidence & { props: { width: number; height: number; } })[] = [];
                         let globalImageCounter = 0;
 
                         point.images.forEach(image => {
