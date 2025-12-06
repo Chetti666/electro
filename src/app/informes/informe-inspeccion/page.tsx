@@ -21,7 +21,7 @@ interface EditingImage {
 interface InspectionPoint {
     id: string;
     title: string;
-    status: 'Bueno' | 'Regular' | 'Malo' | null;
+    status: 'Bueno' | 'Regular' | 'Malo' | 'N/A';
     observation: string;
     images: ImageEvidence[];
     isOpen: boolean;
@@ -63,30 +63,19 @@ const InformeInspeccionPage: React.FC = () => {
         reference: '',
     });
     const [inspectionPoints, setInspectionPoints] = useState<InspectionPoint[]>(
-        defaultInspectionPoints.map(p => ({ ...p, status: null, observation: '', images: [], isOpen: false }))
+        defaultInspectionPoints.map(p => ({ ...p, status: 'N/A', observation: '', images: [], isOpen: false }))
     );
     const [customItemName, setCustomItemName] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [editingImage, setEditingImage] = useState<EditingImage | null>(null);
     const [isDragging, setIsDragging] = useState(false);
     const [tempDescription, setTempDescription] = useState('');
-    const [validationErrors, setValidationErrors] = useState<{ fields: string[], points: string[] }>({ fields: [], points: [] });
-    const [showWarningPopup, setShowWarningPopup] = useState(false);
-    const [warningMessage, setWarningMessage] = useState('');
 
     useEffect(() => {
         setReportDetails(prev => ({
             ...prev,
             inspectionDate: new Date().toISOString().split('T')[0]
         }));
-
-        // Solución para el icono del calendario en modo oscuro
-        const style = document.createElement('style');
-        style.innerHTML = `
-          @media (prefers-color-scheme: dark) {
-            input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1); }
-          }`;
-        document.head.appendChild(style);
     }, []);
 
     // --- Manejadores de Cambios --- 
@@ -163,8 +152,8 @@ const InformeInspeccionPage: React.FC = () => {
         if (customItemName.trim()) {
             const newPoint: InspectionPoint = {
                 id: 'custom-' + Date.now(),
-                title: customItemName.trim(), 
-                status: null,
+                title: customItemName.trim(),
+                status: 'N/A',
                 observation: '',
                 images: [],
                 isOpen: true,
@@ -226,45 +215,6 @@ const InformeInspeccionPage: React.FC = () => {
 
     // --- Generación de PDF --- 
     const generatePdf = async () => {
-        // --- Validación ---
-        const missingFields: string[] = [];
-        if (!reportDetails.clientName.trim()) missingFields.push('clientName');
-        if (!reportDetails.clientAddress.trim()) missingFields.push('clientAddress');
-        if (!reportDetails.inspectorName.trim()) missingFields.push('inspectorName');
-        if (!reportDetails.inspectionDate) missingFields.push('inspectionDate');
-
-        if (missingFields.length > 0) {
-            setValidationErrors({ fields: missingFields, points: [] });
-            setWarningMessage('Por favor, complete todos los datos de la inspección antes de generar el informe. Los campos que faltan se han resaltado.');
-            setShowWarningPopup(true);
-            const firstErrorField = document.getElementById(missingFields[0]);
-            if (firstErrorField) {
-                firstErrorField.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                firstErrorField.focus();
-            }
-            return;
-        }
-
-        const pointsWithImagesAndNoStatus = inspectionPoints
-            .filter(p => p.images.length > 0 && p.status === null)
-            .map(p => p.id);
-
-        if (pointsWithImagesAndNoStatus.length > 0) {
-            setValidationErrors({ fields: [], points: pointsWithImagesAndNoStatus });
-            setWarningMessage('Hay puntos con fotografías pero sin un estado asignado (Bueno, Regular o Malo). Por favor, seleccione un estado para continuar.');
-            setShowWarningPopup(true);
-            // Abrir y enfocar el primer punto con error
-            const firstErrorPointId = pointsWithImagesAndNoStatus[0];
-            setInspectionPoints(prev => prev.map(p => p.id === firstErrorPointId ? { ...p, isOpen: true } : p));
-            setTimeout(() => {
-                const firstErrorElement = document.getElementById(`point-card-${firstErrorPointId}`);
-                firstErrorElement?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }, 100);
-            return;
-        }
-
-        setValidationErrors({ fields: [], points: [] }); // Limpiar errores
-
         setIsLoading(true);
         await new Promise(resolve => setTimeout(resolve, 50));
 
@@ -272,7 +222,7 @@ const InformeInspeccionPage: React.FC = () => {
             const doc = new jsPDF('p', 'mm', [210, 279]);
             const reportData: ReportData = {
                 ...reportDetails,
-                points: inspectionPoints.filter(p => p.status !== null),
+                points: inspectionPoints.filter(p => p.status !== 'N/A'),
             };
 
             const findings = {
@@ -374,8 +324,7 @@ const InformeInspeccionPage: React.FC = () => {
 
                 const drawPoint = (point: InspectionPoint) => {
                     const statusColors: { [key: string]: number[] } = { Malo: [220, 53, 69], Regular: [255, 193, 7], Bueno: [40, 167, 69] };
-                    if (!point.status) return; // No dibujar si el estado es null
-                    const color = statusColors[point.status]; 
+                    const color = statusColors[point.status];
 
                     let requiredHeight = 15; // Altura del título
                     if (point.observation) requiredHeight += 15;
@@ -573,26 +522,6 @@ const InformeInspeccionPage: React.FC = () => {
     // --- Renderizado --- 
     return (
         <div className="container mx-auto px-4 pt-24 pb-12 md:pt-32">
-            {/* --- Pop-up de Advertencia --- */}
-            {showWarningPopup && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 max-w-md w-full text-center">
-                        <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-yellow-100 dark:bg-yellow-900/50 mb-4">
-                            <svg className="h-6 w-6 text-yellow-600 dark:text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                            </svg>
-                        </div>
-                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Datos Incompletos</h3>
-                        <p className="text-sm text-gray-600 dark:text-gray-400 mt-2 mb-6">
-                            {warningMessage}
-                        </p>
-                        <button onClick={() => setShowWarningPopup(false)} className="btn btn-primary w-full">
-                            Entendido
-                        </button>
-                    </div>
-                </div>
-            )}
-
             <div className="mb-8">
                 <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Generador de Informe de Inspección</h1>
                 <p className="text-gray-600 dark:text-gray-400">Crea informes de inspección eléctrica detallados y profesionales.</p>
@@ -608,11 +537,11 @@ const InformeInspeccionPage: React.FC = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 mb-6">
                     <div>
                         <label htmlFor="clientName" className="form-label">Nombre del Cliente</label>
-                        <input id="clientName" className={`form-input ${validationErrors.fields.includes('clientName') ? 'border-red-500' : ''}`} value={reportDetails.clientName} onChange={handleDataChange} placeholder="Ej: Constructora XYZ" />
+                        <input id="clientName" className="form-input" value={reportDetails.clientName} onChange={handleDataChange} placeholder="Ej: Constructora XYZ" />
                     </div>
                     <div>
                         <label htmlFor="clientAddress" className="form-label">Dirección del Proyecto</label>
-                        <input id="clientAddress" className={`form-input ${validationErrors.fields.includes('clientAddress') ? 'border-red-500' : ''}`} value={reportDetails.clientAddress} onChange={handleDataChange} placeholder="Ej: Av. Siempreviva 742, Springfield" />
+                        <input id="clientAddress" className="form-input" value={reportDetails.clientAddress} onChange={handleDataChange} placeholder="Ej: Av. Siempreviva 742, Springfield" />
                     </div>
                     <div>
                         <label htmlFor="reference" className="form-label">Referencia</label>
@@ -620,11 +549,11 @@ const InformeInspeccionPage: React.FC = () => {
                     </div>
                     <div>
                         <label htmlFor="inspectorName" className="form-label">Inspector a Cargo</label>
-                        <input id="inspectorName" className={`form-input ${validationErrors.fields.includes('inspectorName') ? 'border-red-500' : ''}`} value={reportDetails.inspectorName} onChange={handleDataChange} placeholder="Ej: Juan Pérez (Licencia SEC)" />
+                        <input id="inspectorName" className="form-input" value={reportDetails.inspectorName} onChange={handleDataChange} placeholder="Ej: Juan Pérez (Licencia SEC)" />
                     </div>
                     <div>
                         <label htmlFor="inspectionDate" className="form-label">Fecha de Inspección</label>
-                        <input type="date" id="inspectionDate" className={`form-input ${validationErrors.fields.includes('inspectionDate') ? 'border-red-500' : ''}`} value={reportDetails.inspectionDate} onChange={handleDataChange} />
+                        <input type="date" id="inspectionDate" className="form-input" value={reportDetails.inspectionDate} onChange={handleDataChange} />
                     </div>
                 </div>
 
@@ -645,18 +574,18 @@ const InformeInspeccionPage: React.FC = () => {
                 <h2 className="text-xl font-semibold my-6 text-gray-900 dark:text-white">2. Checklist y Evidencias</h2>
                 <div className="space-y-4">
                     {inspectionPoints.map(p => (
-                        <div key={p.id} id={`point-card-${p.id}`} className="border rounded-lg dark:border-gray-700 overflow-hidden">
+                        <div key={p.id} className="border rounded-lg dark:border-gray-700 overflow-hidden">
                             <div className="p-4 cursor-pointer flex justify-between items-center bg-gray-50 dark:bg-gray-800/50" onClick={() => togglePoint(p.id)}>
                                 <h3 className="font-semibold text-lg">{p.title}</h3>
                                 <span className={`text-xl transition-transform duration-200 transform ${p.isOpen ? 'rotate-180' : ''}`}>▼</span>
                             </div>
                             {p.isOpen && (
                                 <div className="p-4 border-t dark:border-gray-700 space-y-4">
-                                    <div className={`flex flex-wrap gap-3 p-2 rounded-lg ${validationErrors.points.includes(p.id) ? 'bg-red-100 dark:bg-red-900/30 ring-2 ring-red-500' : ''}`}>
-                                        {(['Bueno', 'Regular', 'Malo'] as const).map(status => (
+                                    <div className="flex flex-wrap gap-3">
+                                        {(['Bueno', 'Regular', 'Malo', 'N/A'] as const).map(status => (
                                             <React.Fragment key={status}>
                                                 <input type="radio" id={`status-${status.toLowerCase()}-${p.id}`} name={`status-${p.id}`} value={status} checked={p.status === status} onChange={() => handlePointChange(p.id, 'status', status)} className="hidden" />
-                                                <label htmlFor={`status-${status.toLowerCase()}-${p.id}`} className={`px-4 py-2 rounded-full text-sm font-semibold cursor-pointer transition-all duration-200 ${p.status === status ? (status === 'Bueno' ? 'bg-green-500 text-white' : status === 'Regular' ? 'bg-yellow-400 text-gray-800' : 'bg-red-500 text-white') : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'}`}>{status}</label>
+                                                <label htmlFor={`status-${status.toLowerCase()}-${p.id}`} className={`px-4 py-2 rounded-full text-sm font-semibold cursor-pointer transition-all duration-200 ${p.status === status ? (status === 'Bueno' ? 'bg-green-500 text-white' : status === 'Regular' ? 'bg-yellow-400 text-gray-800' : status === 'Malo' ? 'bg-red-500 text-white' : 'bg-gray-200 text-gray-800 dark:bg-gray-600 dark:text-gray-200') : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'}`}>{status}</label>
                                             </React.Fragment>
                                         ))}
                                     </div>
