@@ -619,7 +619,7 @@ const InformeFotograficoSECPage = () => {
                                 {Object.values(formErrors).some(Boolean) ? (
                                     hasImagesError ? 
                                         <>Por favor, complete los <strong>Datos del Proyecto</strong> y agregue al menos una <strong>fotografía</strong>.</> :
-                                        <>Por favor, complete todos los campos de la sección <strong>"Datos del Proyecto"</strong> antes de generar el informe.</>
+                                        <>Por favor, complete todos los campos de la sección <strong>&quot;Datos del Proyecto&quot;</strong> antes de generar el informe.</>
                                 ) : (
                                     <>El informe debe contener al menos una <strong>fotografía</strong> en cualquiera de las secciones.</>
                                 )}
