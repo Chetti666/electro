@@ -72,9 +72,12 @@ export default function SampleDocumentsViewer() {
   const { containerRef, containerWidth } = useContainerWidth();
 
   useEffect(() => {
-    // Configurar el worker para usar la versión exacta de pdfjs-dist instalada desde un CDN.
-    // Esto resuelve el error de discrepancia de versiones entre la API y el Worker.
-    pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+    // This is the recommended way to set up the worker for Next.js and other bundlers.
+    // It ensures the worker is loaded from the correct path.
+    pdfjs.GlobalWorkerOptions.workerSrc = new URL(
+      'pdfjs-dist/build/pdf.worker.min.mjs',
+      import.meta.url,
+    ).toString();
   }, []);
 
   // Maneja los errores de renderizado de la página del PDF.
