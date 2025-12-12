@@ -53,8 +53,14 @@ const InformeFotograficoSECPage = () => {
     const [isDragging, setIsDragging] = useState(false);
     const [editingImage, setEditingImage] = useState<EditingImage | null>(null);
     const [tempDescription, setTempDescription] = useState('');
-    const [validationErrors, setValidationErrors] = useState<string[]>([]);
-    const [showWarningPopup, setShowWarningPopup] = useState(false);
+    const [showErrorModal, setShowErrorModal] = useState(false);
+    const [hasImagesError, setHasImagesError] = useState(false);
+    const [formErrors, setFormErrors] = useState({
+        projectName: false,
+        projectAddress: false,
+        installerName: false,
+        reportDate: false
+    });
 
     useEffect(() => {
         setReportDate(new Date().toISOString().split('T')[0]);
@@ -76,14 +82,6 @@ const InformeFotograficoSECPage = () => {
             };
             setSections([...sections, newSection]);
             setCustomSectionName('');
-        }
-    };
-
-    const handleInputChange = (setter: React.Dispatch<React.SetStateAction<string>>, fieldName: string, value: string) => {
-        setter(value);
-        // Si el campo estaba en los errores, lo quitamos al empezar a escribir
-        if (validationErrors.includes(fieldName)) {
-            setValidationErrors(prev => prev.filter(err => err !== fieldName));
         }
     };
 
@@ -143,7 +141,7 @@ const InformeFotograficoSECPage = () => {
     const updateImageDescription = (sectionId: string, imageId: string, description: string) => {
         setSections(sections.map(s => {
             if (s.id === sectionId) {
-                const updatedImages = s.images.map((img, _idx) =>
+                const updatedImages = s.images.map((img) =>
                     img.id === imageId ? { ...img, description } : img
                 );
                 return { ...s, images: updatedImages };
@@ -184,6 +182,55 @@ const InformeFotograficoSECPage = () => {
         updateImageDescription(sectionId, imageId, '');
     };
 
+    const validateAndGenerate = () => {
+        const newErrors = {
+            projectName: !projectName.trim(),
+            projectAddress: !projectAddress.trim(),
+            installerName: !installerName.trim(),
+            reportDate: !reportDate.trim(),
+        };
+
+        const hasEmptyFields = Object.values(newErrors).some(Boolean);
+        const hasNoImages = !sections.some(s => s.images.length > 0);
+
+        if (hasEmptyFields || hasNoImages) {
+            setFormErrors(newErrors);
+            setHasImagesError(hasNoImages);
+            setShowErrorModal(true);
+        } else {
+            setFormErrors({
+                projectName: false,
+                projectAddress: false,
+                installerName: false,
+                reportDate: false
+            });
+            setHasImagesError(false);
+            generatePdf();
+        }
+    };
+
+    const handleCloseModal = () => {
+        setShowErrorModal(false);
+        // Pequeño delay para permitir que el modal se cierre antes de hacer scroll
+        setTimeout(() => {
+            const errorOrder = ['projectName', 'projectAddress', 'installerName', 'reportDate'];
+            const firstErrorKey = errorOrder.find(key => formErrors[key as keyof typeof formErrors]);
+            
+            if (firstErrorKey) {
+                const element = document.getElementById(firstErrorKey);
+                if (element) {
+                    element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    element.focus();
+                }
+            } else if (hasImagesError) {
+                const element = document.getElementById('sections-title');
+                if (element) {
+                    element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }
+        }, 100);
+    };
+
     // --- Drag and Drop Handlers ---
     const handleDragOver = (e: DragEvent<HTMLLabelElement>) => {
         e.preventDefault();
@@ -206,25 +253,6 @@ const InformeFotograficoSECPage = () => {
 
     // --- Generación de PDF (sin cambios en la lógica interna) ---
     const generatePdf = async () => {
-        const missingFields: string[] = [];
-        if (!projectName.trim()) missingFields.push('projectName');
-        if (!projectAddress.trim()) missingFields.push('projectAddress');
-        if (!installerName.trim()) missingFields.push('installerName');
-        if (!reportDate) missingFields.push('reportDate');
-
-        if (missingFields.length > 0) {
-            setValidationErrors(missingFields);
-            setShowWarningPopup(true);
-
-            const firstErrorField = document.getElementById(missingFields[0]);
-            if (firstErrorField) {
-                firstErrorField.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                firstErrorField.focus();
-            }
-            return;
-        }
-        setValidationErrors([]); // Limpiar errores si todo está bien
-
         setIsLoading(true);
 
         // Pequeña pausa para que el UI se actualice
@@ -436,41 +464,6 @@ const InformeFotograficoSECPage = () => {
     // --- Renderizado del Componente ---
     return (
         <div className="container mx-auto px-4 pt-24 pb-12 md:pt-32">
-            {/* --- Pop-up de Advertencia --- */}
-            {showWarningPopup && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 max-w-sm w-full text-center">
-                        <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-yellow-100 dark:bg-yellow-900/50 mb-4">
-                            <svg className="h-6 w-6 text-yellow-600 dark:text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                            </svg>
-                        </div>
-                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Datos Incompletos</h3>
-                        <p className="text-sm text-gray-600 dark:text-gray-400 mt-2 mb-6">
-                            Por favor, complete todos los datos del proyecto antes de generar el informe. Los campos que faltan se han resaltado en rojo.
-                        </p>
-                        <button
-                            onClick={() => setShowWarningPopup(false)}
-                            className="btn btn-primary w-full"
-                        >
-                            Entendido
-                        </button>
-                    </div>
-                </div>
-            )}
-            {/*
-              Solución mejorada para el icono y texto del calendario en modo oscuro.
-              Usa media queries para detectar el tema del sistema operativo,
-              haciéndolo más compatible.
-             */}
-            <style jsx global>{`
-              @media (prefers-color-scheme: dark) {
-                input[type="date"]::-webkit-calendar-picker-indicator {
-                  filter: invert(1);
-                }
-              }
-            `}</style>
-
             <div className="mb-8">
                 <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Generador de Informe Fotográfico SEC</h1>
                 <p className="text-gray-600 dark:text-gray-400">Cumplimiento del punto 6.4 del Pliego Técnico Normativo RIC N°18.</p>
@@ -488,23 +481,23 @@ const InformeFotograficoSECPage = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 mb-6">
                     <div>
                         <label htmlFor="projectName" className="form-label">Nombre del Proyecto</label>
-                        <input id="projectName" className={`form-input ${validationErrors.includes('projectName') ? 'border-red-500' : ''}`} value={projectName} onChange={e => handleInputChange(setProjectName, 'projectName', e.target.value)} placeholder="Ej: Vivienda Unifamiliar Pérez" />
+                        <input id="projectName" className={`form-input ${formErrors.projectName ? 'border-red-500 ring-1 ring-red-500' : ''}`} value={projectName} onChange={e => setProjectName(e.target.value)} placeholder="Ej: Vivienda Unifamiliar Pérez" />
                     </div>
                     <div>
                         <label htmlFor="projectAddress" className="form-label">Dirección de la Obra</label>
-                        <input id="projectAddress" className={`form-input ${validationErrors.includes('projectAddress') ? 'border-red-500' : ''}`} value={projectAddress} onChange={e => handleInputChange(setProjectAddress, 'projectAddress', e.target.value)} placeholder="Ej: Av. Principal 123, Santiago" />
+                        <input id="projectAddress" className={`form-input ${formErrors.projectAddress ? 'border-red-500 ring-1 ring-red-500' : ''}`} value={projectAddress} onChange={e => setProjectAddress(e.target.value)} placeholder="Ej: Av. Principal 123, Santiago" />
                     </div>
                     <div>
                         <label htmlFor="installerName" className="form-label">Instalador (Licencia SEC)</label>
-                        <input id="installerName" className={`form-input ${validationErrors.includes('installerName') ? 'border-red-500' : ''}`} value={installerName} onChange={e => handleInputChange(setInstallerName, 'installerName', e.target.value)} placeholder="Ej: Juan González (Clase B - 12345)" />
+                        <input id="installerName" className={`form-input ${formErrors.installerName ? 'border-red-500 ring-1 ring-red-500' : ''}`} value={installerName} onChange={e => setInstallerName(e.target.value)} placeholder="Ej: Juan González (Clase B - 12345)" />
                     </div>
                     <div>
                         <label htmlFor="reportDate" className="form-label">Fecha del Informe</label>
-                        <input type="date" id="reportDate" className={`form-input ${validationErrors.includes('reportDate') ? 'border-red-500' : ''}`} value={reportDate} onChange={e => handleInputChange(setReportDate, 'reportDate', e.target.value)} />
+                        <input type="date" id="reportDate" className={`form-input ${formErrors.reportDate ? 'border-red-500 ring-1 ring-red-500' : ''}`} value={reportDate} onChange={e => setReportDate(e.target.value)} />
                     </div>
                 </div>
 
-                <h2 className="text-xl font-semibold my-6 text-gray-900 dark:text-white">2. Cargar Fotografías por Sección</h2>
+                <h2 id="sections-title" className="text-xl font-semibold my-6 text-gray-900 dark:text-white">2. Cargar Fotografías por Sección</h2>
                 <div className="space-y-4">
                     {sections.map(section => (
                         <div key={section.id} className="border rounded-lg dark:border-gray-700 overflow-hidden">
@@ -604,11 +597,42 @@ const InformeFotograficoSECPage = () => {
                     {isLoading ? (
                         <div className="text-center p-4 rounded-lg bg-gray-100 dark:bg-gray-800">Generando PDF, por favor espere....</div>
                     ) : (
-                        <button onClick={generatePdf} className="btn btn-primary w-full font-bold">
-                            Generar Informe PDF
+                        <button onClick={validateAndGenerate} className="btn btn-primary w-full font-bold">
+                            Generar Informe PDF.
                         </button>
                     )}
                 </div>
+
+                {/* Modal de Validación */}
+                {showErrorModal && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm transition-opacity">
+                        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-md w-full p-6 transform transition-all scale-100 border border-gray-200 dark:border-gray-700">
+                            <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 bg-red-100 rounded-full dark:bg-red-900/30">
+                                <svg className="w-8 h-8 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                </svg>
+                            </div>
+                            <h3 className="text-xl font-bold text-center text-gray-900 dark:text-white mb-2">
+                                Faltan Datos Requeridos
+                            </h3>
+                            <p className="text-center text-gray-500 dark:text-gray-400 mb-6">
+                                {Object.values(formErrors).some(Boolean) ? (
+                                    hasImagesError ? 
+                                        <>Por favor, complete los <strong>Datos del Proyecto</strong> y agregue al menos una <strong>fotografía</strong>.</> :
+                                        <>Por favor, complete todos los campos de la sección <strong>&quot;Datos del Proyecto&quot;</strong> antes de generar el informe.</>
+                                ) : (
+                                    <>El informe debe contener al menos una <strong>fotografía</strong> en cualquiera de las secciones.</>
+                                )}
+                            </p>
+                            <button 
+                                onClick={handleCloseModal}
+                                className="w-full btn btn-primary py-3 text-lg font-semibold shadow-lg hover:shadow-xl transition-shadow"
+                            >
+                                Entendido, completar datos
+                            </button>
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );
