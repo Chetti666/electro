@@ -74,6 +74,22 @@ export default function SevReport() {
   const [fecha, setFecha] = useState(new Date().toISOString().split('T')[0]);
   const [hora, setHora] = useState(new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }));
 
+  // Estados para validación y alertas
+  const [showErrorModal, setShowErrorModal] = useState(false);
+  const [hasMeasurementsError, setHasMeasurementsError] = useState(false);
+  const [formErrors, setFormErrors] = useState({
+    interesado: false,
+    projectName: false,
+    location: false,
+    operator: false,
+    fecha: false,
+    hora: false,
+    equipmentBrand: false,
+    equipmentModel: false,
+    serialNumber: false,
+    lastCalibration: false,
+  });
+
   // Estado para las mediciones de campo
   const [aVal, setAVal] = useState<number | '' > ('');
   const [lVal, setLVal] = useState<number | '' > ('');
@@ -177,6 +193,67 @@ export default function SevReport() {
   const cancelEdit = () => {
     setEditId(null);
     setAVal(''); setLVal(''); setRVal('');
+  };
+
+  // --- Lógica de Validación ---
+  const validateAndProceed = (action: () => void) => {
+    const newErrors = {
+        interesado: !interesado.trim(),
+        projectName: !projectName.trim(),
+        location: !location.trim(),
+        operator: !operator.trim(),
+        fecha: !fecha.trim(),
+        hora: !hora.trim(),
+        equipmentBrand: !equipmentBrand.trim(),
+        equipmentModel: !equipmentModel.trim(),
+        serialNumber: !serialNumber.trim(),
+        lastCalibration: !lastCalibration.trim(),
+    };
+
+    const hasEmptyFields = Object.values(newErrors).some(Boolean);
+    const hasNoMeasurements = measurements.length === 0;
+
+    if (hasEmptyFields || hasNoMeasurements) {
+        setFormErrors(newErrors);
+        setHasMeasurementsError(hasNoMeasurements);
+        setShowErrorModal(true);
+    } else {
+        setFormErrors({
+            interesado: false,
+            projectName: false,
+            location: false,
+            operator: false,
+            fecha: false,
+            hora: false,
+            equipmentBrand: false,
+            equipmentModel: false,
+            serialNumber: false,
+            lastCalibration: false,
+        });
+        setHasMeasurementsError(false);
+        action();
+    }
+  };
+
+  const handleCloseModal = () => {
+    setShowErrorModal(false);
+    setTimeout(() => {
+        const errorOrder = ['interesado', 'projectName', 'location', 'operator', 'fecha', 'hora', 'equipmentBrand', 'equipmentModel', 'serialNumber', 'lastCalibration'];
+        const firstErrorKey = errorOrder.find(key => formErrors[key as keyof typeof formErrors]);
+        
+        if (firstErrorKey) {
+            const element = document.getElementById(firstErrorKey);
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                element.focus();
+            }
+        } else if (hasMeasurementsError) {
+            const element = document.getElementById('medidas-form');
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+    }, 100);
   };
 
   // --- Lógica de Imágenes ---
@@ -376,7 +453,7 @@ export default function SevReport() {
   // --- Generación de Informe ---
   const generatePdfBlob = useCallback(async (): Promise<{ doc: jsPDF, blob: Blob, fileName: string } | null> => {
     if (measurements.length === 0) {
-      alert("No hay mediciones para generar un informe.");
+      // La validación previa maneja esto, pero se mantiene como seguridad
       return null;
     }
 
@@ -853,53 +930,53 @@ export default function SevReport() {
               <div className="space-y-4">
                 <div>
                   <label className="form-label" htmlFor="interesado">Interesado</label>
-                  <input id="interesado" type="text" value={interesado} onChange={e => setInteresado(e.target.value)} placeholder="Nombre del interesado" className="form-input" />
+                  <input id="interesado" type="text" value={interesado} onChange={e => setInteresado(e.target.value)} placeholder="Nombre del interesado" className={`form-input ${formErrors.interesado ? 'border-red-500 ring-1 ring-red-500' : ''}`} />
                 </div>
                 <div>
                   <label className="form-label" htmlFor="projectName">Proyecto</label>
-                  <input id="projectName" type="text" value={projectName} onChange={e => setProjectName(e.target.value)} placeholder="Nombre del Proyecto" className="form-input" />
+                  <input id="projectName" type="text" value={projectName} onChange={e => setProjectName(e.target.value)} placeholder="Nombre del Proyecto" className={`form-input ${formErrors.projectName ? 'border-red-500 ring-1 ring-red-500' : ''}`} />
                 </div>
                 <div>
                   <label className="form-label" htmlFor="location">Ubicación</label>
-                  <input id="location" type="text" value={location} onChange={e => setLocation(e.target.value)} placeholder="Ubicación" className="form-input" />
+                  <input id="location" type="text" value={location} onChange={e => setLocation(e.target.value)} placeholder="Ubicación" className={`form-input ${formErrors.location ? 'border-red-500 ring-1 ring-red-500' : ''}`} />
                 </div>
               </div>
               <div className="space-y-4">
                 <div>
                   <label className="form-label" htmlFor="operator">Operador</label>
-                  <input id="operator" type="text" value={operator} onChange={e => setOperator(e.target.value)} placeholder="Operador" className="form-input" />
+                  <input id="operator" type="text" value={operator} onChange={e => setOperator(e.target.value)} placeholder="Operador" className={`form-input ${formErrors.operator ? 'border-red-500 ring-1 ring-red-500' : ''}`} />
                 </div>
                 <div>
                   <label className="form-label" htmlFor="fecha">Fecha Medición</label>
-                  <input id="fecha" type="date" value={fecha} onChange={e => setFecha(e.target.value)} className="form-input" />
+                  <input id="fecha" type="date" value={fecha} onChange={e => setFecha(e.target.value)} className={`form-input ${formErrors.fecha ? 'border-red-500 ring-1 ring-red-500' : ''}`} />
                 </div>
                 <div>
                   <label className="form-label" htmlFor="hora">Hora</label>
-                  <input id="hora" type="time" value={hora} onChange={e => setHora(e.target.value)} className="form-input" />
+                  <input id="hora" type="time" value={hora} onChange={e => setHora(e.target.value)} className={`form-input ${formErrors.hora ? 'border-red-500 ring-1 ring-red-500' : ''}`} />
                 </div>
               </div>
               <div className="space-y-4">
                 <div>
                   <label className="form-label" htmlFor="equipmentBrand">Marca del equipo</label>
-                  <input id="equipmentBrand" type="text" value={equipmentBrand} onChange={e => setEquipmentBrand(e.target.value)} placeholder="Marca del equipo" className="form-input" />
+                  <input id="equipmentBrand" type="text" value={equipmentBrand} onChange={e => setEquipmentBrand(e.target.value)} placeholder="Marca del equipo" className={`form-input ${formErrors.equipmentBrand ? 'border-red-500 ring-1 ring-red-500' : ''}`} />
                 </div>
                 <div>
                   <label className="form-label" htmlFor="equipmentModel">Modelo</label>
-                  <input id="equipmentModel" type="text" value={equipmentModel} onChange={e => setEquipmentModel(e.target.value)} placeholder="Modelo" className="form-input" />
+                  <input id="equipmentModel" type="text" value={equipmentModel} onChange={e => setEquipmentModel(e.target.value)} placeholder="Modelo" className={`form-input ${formErrors.equipmentModel ? 'border-red-500 ring-1 ring-red-500' : ''}`} />
                 </div>
                 <div>
                   <label className="form-label" htmlFor="serialNumber">N° Serie</label>
-                  <input id="serialNumber" type="text" value={serialNumber} onChange={e => setSerialNumber(e.target.value)} placeholder="N° Serie" className="form-input" />
+                  <input id="serialNumber" type="text" value={serialNumber} onChange={e => setSerialNumber(e.target.value)} placeholder="N° Serie" className={`form-input ${formErrors.serialNumber ? 'border-red-500 ring-1 ring-red-500' : ''}`} />
                 </div>
                 <div>
                   <label className="form-label" htmlFor="lastCalibration">Última calibración</label>
-                  <input id="lastCalibration" type="date" value={lastCalibration} onChange={e => setLastCalibration(e.target.value)} className="form-input" />
+                  <input id="lastCalibration" type="date" value={lastCalibration} onChange={e => setLastCalibration(e.target.value)} className={`form-input ${formErrors.lastCalibration ? 'border-red-500 ring-1 ring-red-500' : ''}`} />
                 </div>
               </div>
             </div>
           </div>
 
-          <div id="medidas-form" ref={formCardRef} className="card">
+          <div id="medidas-form" ref={formCardRef} className={`card ${hasMeasurementsError ? 'border-red-500 ring-1 ring-red-500' : ''}`}>
             <h2 className="text-lg sm:text-xl font-semibold mb-4 text-gray-900 dark:text-white">Medidas de Campo</h2>
             <div className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -1058,7 +1135,7 @@ export default function SevReport() {
           <div className="card">
             <h2 className="text-lg sm:text-xl font-semibold mb-4 text-gray-900 dark:text-white">Acciones</h2>
             <div className="flex flex-col space-y-3">
-              <button type="button" className="btn btn-primary w-full justify-center" onClick={handleGenerateReport} disabled={measurements.length === 0}>Descargar Informe (PDF)</button>
+              <button type="button" className="btn btn-primary w-full justify-center" onClick={() => validateAndProceed(handleGenerateReport)}>Descargar Informe (PDF)</button>
               <button type="button" className="btn btn-accent w-full justify-center" onClick={handleClearAll}>Limpiar Todo</button>
             </div>
           </div>
@@ -1072,7 +1149,7 @@ export default function SevReport() {
                 </button>
               ) : (
                 <>
-                  <button type="button" className="btn btn-primary w-full justify-center" onClick={handleSaveToDrive} disabled={isUploading || measurements.length === 0}>
+                  <button type="button" className="btn btn-primary w-full justify-center" onClick={() => validateAndProceed(handleSaveToDrive)} disabled={isUploading}>
                     {isUploading ? 'Subiendo...' : 'Guardar en Drive'}
                   </button>
                   <button type="button" className="btn btn-secondary w-full justify-center" onClick={handleListDriveFiles} disabled={isListingFiles}>
@@ -1111,6 +1188,37 @@ export default function SevReport() {
           </div>
         </div>
       </div>
+
+      {/* Modal de Validación */}
+      {showErrorModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm transition-opacity">
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-md w-full p-6 transform transition-all scale-100 border border-gray-200 dark:border-gray-700">
+                <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 bg-red-100 rounded-full dark:bg-red-900/30">
+                    <svg className="w-8 h-8 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                </div>
+                <h3 className="text-xl font-bold text-center text-gray-900 dark:text-white mb-2">
+                    Faltan Datos Requeridos
+                </h3>
+                <p className="text-center text-gray-500 dark:text-gray-400 mb-6">
+                    {Object.values(formErrors).some(Boolean) ? (
+                        hasMeasurementsError ? 
+                            <>Por favor, complete los <strong>Datos del Proyecto</strong> y agregue al menos una <strong>medición de campo</strong>.</> :
+                            <>Por favor, complete todos los campos de la sección <strong>&quot;Datos del Proyecto&quot;</strong> antes de generar el informe.</>
+                    ) : (
+                        <>El informe debe contener al menos una <strong>medición de campo</strong>.</>
+                    )}
+                </p>
+                <button 
+                    onClick={handleCloseModal}
+                    className="w-full btn btn-primary py-3 text-lg font-semibold shadow-lg hover:shadow-xl transition-shadow"
+                >
+                    Entendido, completar datos
+                </button>
+            </div>
+        </div>
+      )}
     </>
   );
 }
