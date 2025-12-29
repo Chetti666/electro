@@ -21,7 +21,7 @@ interface EditingImage {
 interface InspectionPoint {
     id: string;
     title: string;
-    status: 'Bueno' | 'Regular' | 'Malo' | 'N/A';
+    status: 'Bueno' | 'Regular' | 'Malo' | '';
     observation: string;
     images: ImageEvidence[];
     isOpen: boolean;
@@ -63,13 +63,22 @@ const InformeInspeccionPage: React.FC = () => {
         reference: '',
     });
     const [inspectionPoints, setInspectionPoints] = useState<InspectionPoint[]>(
-        defaultInspectionPoints.map(p => ({ ...p, status: 'N/A', observation: '', images: [], isOpen: false }))
+        defaultInspectionPoints.map(p => ({ ...p, status: '', observation: '', images: [], isOpen: false }))
     );
     const [customItemName, setCustomItemName] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [editingImage, setEditingImage] = useState<EditingImage | null>(null);
     const [isDragging, setIsDragging] = useState(false);
     const [tempDescription, setTempDescription] = useState('');
+    const [showErrorModal, setShowErrorModal] = useState(false);
+    const [hasImagesError, setHasImagesError] = useState(false);
+    const [hasStatusError, setHasStatusError] = useState(false);
+    const [formErrors, setFormErrors] = useState({
+        clientName: false,
+        clientAddress: false,
+        inspectorName: false,
+        inspectionDate: false
+    });
 
     useEffect(() => {
         setReportDetails(prev => ({
@@ -153,7 +162,7 @@ const InformeInspeccionPage: React.FC = () => {
             const newPoint: InspectionPoint = {
                 id: 'custom-' + Date.now(),
                 title: customItemName.trim(),
-                status: 'N/A',
+                status: '',
                 observation: '',
                 images: [],
                 isOpen: true,
@@ -192,6 +201,57 @@ const InformeInspeccionPage: React.FC = () => {
         handleImageDescriptionChange(pointId, imageIndex, '');
     };
 
+    const validateAndGenerate = () => {
+        const newErrors = {
+            clientName: !reportDetails.clientName.trim(),
+            clientAddress: !reportDetails.clientAddress.trim(),
+            inspectorName: !reportDetails.inspectorName.trim(),
+            inspectionDate: !reportDetails.inspectionDate.trim(),
+        };
+
+        const hasEmptyFields = Object.values(newErrors).some(Boolean);
+        const hasNoImages = !inspectionPoints.some(p => p.images.length > 0);
+        const hasNoStatus = !inspectionPoints.some(p => p.status !== '');
+
+        if (hasEmptyFields || hasNoImages || hasNoStatus) {
+            setFormErrors(newErrors);
+            setHasImagesError(hasNoImages);
+            setHasStatusError(hasNoStatus);
+            setShowErrorModal(true);
+        } else {
+            setFormErrors({
+                clientName: false,
+                clientAddress: false,
+                inspectorName: false,
+                inspectionDate: false
+            });
+            setHasImagesError(false);
+            setHasStatusError(false);
+            generatePdf();
+        }
+    };
+
+    const handleCloseModal = () => {
+        setShowErrorModal(false);
+        setTimeout(() => {
+            const errorOrder = ['clientName', 'clientAddress', 'inspectorName', 'inspectionDate'];
+            const firstErrorKey = errorOrder.find(key => formErrors[key as keyof typeof formErrors]);
+            
+            if (firstErrorKey) {
+                const element = document.getElementById(firstErrorKey);
+                if (element) {
+                    element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    element.focus();
+                }
+            } else if (hasImagesError || hasStatusError) {
+                const element = document.getElementById('checklist-title');
+                if (element) {
+                    element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }
+        }, 100);
+    };
+
     // --- Drag and Drop Handlers ---
     const handleDragOver = (e: DragEvent<HTMLLabelElement>) => {
         e.preventDefault();
@@ -222,7 +282,7 @@ const InformeInspeccionPage: React.FC = () => {
             const doc = new jsPDF('p', 'mm', [210, 279]);
             const reportData: ReportData = {
                 ...reportDetails,
-                points: inspectionPoints.filter(p => p.status !== 'N/A'),
+                points: inspectionPoints.filter(p => p.status !== ''),
             };
 
             const findings = {
@@ -537,11 +597,11 @@ const InformeInspeccionPage: React.FC = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 mb-6">
                     <div>
                         <label htmlFor="clientName" className="form-label">Nombre del Cliente</label>
-                        <input id="clientName" className="form-input" value={reportDetails.clientName} onChange={handleDataChange} placeholder="Ej: Constructora XYZ" />
+                        <input id="clientName" className={`form-input ${formErrors.clientName ? 'border-red-500 ring-1 ring-red-500' : ''}`} value={reportDetails.clientName} onChange={handleDataChange} placeholder="Ej: Constructora XYZ" />
                     </div>
                     <div>
                         <label htmlFor="clientAddress" className="form-label">Dirección del Proyecto</label>
-                        <input id="clientAddress" className="form-input" value={reportDetails.clientAddress} onChange={handleDataChange} placeholder="Ej: Av. Siempreviva 742, Springfield" />
+                        <input id="clientAddress" className={`form-input ${formErrors.clientAddress ? 'border-red-500 ring-1 ring-red-500' : ''}`} value={reportDetails.clientAddress} onChange={handleDataChange} placeholder="Ej: Av. Siempreviva 742, Springfield" />
                     </div>
                     <div>
                         <label htmlFor="reference" className="form-label">Referencia</label>
@@ -549,11 +609,11 @@ const InformeInspeccionPage: React.FC = () => {
                     </div>
                     <div>
                         <label htmlFor="inspectorName" className="form-label">Inspector a Cargo</label>
-                        <input id="inspectorName" className="form-input" value={reportDetails.inspectorName} onChange={handleDataChange} placeholder="Ej: Juan Pérez (Licencia SEC)" />
+                        <input id="inspectorName" className={`form-input ${formErrors.inspectorName ? 'border-red-500 ring-1 ring-red-500' : ''}`} value={reportDetails.inspectorName} onChange={handleDataChange} placeholder="Ej: Juan Pérez (Licencia SEC)" />
                     </div>
                     <div>
                         <label htmlFor="inspectionDate" className="form-label">Fecha de Inspección</label>
-                        <input type="date" id="inspectionDate" className="form-input" value={reportDetails.inspectionDate} onChange={handleDataChange} />
+                        <input type="date" id="inspectionDate" className={`form-input ${formErrors.inspectionDate ? 'border-red-500 ring-1 ring-red-500' : ''}`} value={reportDetails.inspectionDate} onChange={handleDataChange} />
                     </div>
                 </div>
 
@@ -571,7 +631,7 @@ const InformeInspeccionPage: React.FC = () => {
                     />
                 </div>
 
-                <h2 className="text-xl font-semibold my-6 text-gray-900 dark:text-white">2. Checklist y Evidencias</h2>
+                <h2 id="checklist-title" className="text-xl font-semibold my-6 text-gray-900 dark:text-white">2. Checklist y Evidencias</h2>
                 <div className="space-y-4">
                     {inspectionPoints.map(p => (
                         <div key={p.id} className="border rounded-lg dark:border-gray-700 overflow-hidden">
@@ -581,8 +641,8 @@ const InformeInspeccionPage: React.FC = () => {
                             </div>
                             {p.isOpen && (
                                 <div className="p-4 border-t dark:border-gray-700 space-y-4">
-                                    <div className="flex flex-wrap gap-3">
-                                        {(['Bueno', 'Regular', 'Malo', 'N/A'] as const).map(status => (
+                                    <div className={`flex flex-wrap gap-3 p-2 rounded-lg border transition-all ${hasStatusError && p.status === '' ? 'border-red-500 ring-1 ring-red-500 bg-red-50 dark:bg-red-900/10' : 'border-transparent'}`}>
+                                        {(['Bueno', 'Regular', 'Malo'] as const).map(status => (
                                             <React.Fragment key={status}>
                                                 <input type="radio" id={`status-${status.toLowerCase()}-${p.id}`} name={`status-${p.id}`} value={status} checked={p.status === status} onChange={() => handlePointChange(p.id, 'status', status)} className="hidden" />
                                                 <label htmlFor={`status-${status.toLowerCase()}-${p.id}`} className={`px-4 py-2 rounded-full text-sm font-semibold cursor-pointer transition-all duration-200 ${p.status === status ? (status === 'Bueno' ? 'bg-green-500 text-white' : status === 'Regular' ? 'bg-yellow-400 text-gray-800' : status === 'Malo' ? 'bg-red-500 text-white' : 'bg-gray-200 text-gray-800 dark:bg-gray-600 dark:text-gray-200') : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'}`}>{status}</label>
@@ -676,11 +736,46 @@ const InformeInspeccionPage: React.FC = () => {
                     {isLoading ? (
                         <div className="text-center p-4 rounded-lg bg-gray-100 dark:bg-gray-800">Generando PDF, por favor espere...</div>
                     ) : (
-                        <button onClick={generatePdf} className="btn btn-primary w-full font-bold">
+                        <button onClick={validateAndGenerate} className="btn btn-primary w-full font-bold">
                             Generar Informe PDF.
                         </button>
                     )}
                 </div>
+
+                {/* Modal de Validación */}
+                {showErrorModal && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm transition-opacity">
+                        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-md w-full p-6 transform transition-all scale-100 border border-gray-200 dark:border-gray-700">
+                            <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 bg-red-100 rounded-full dark:bg-red-900/30">
+                                <svg className="w-8 h-8 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                </svg>
+                            </div>
+                            <h3 className="text-xl font-bold text-center text-gray-900 dark:text-white mb-2">
+                                Faltan Datos Requeridos
+                            </h3>
+                            <p className="text-center text-gray-500 dark:text-gray-400 mb-6">
+                                {Object.values(formErrors).some(Boolean) ? (
+                                    (hasImagesError || hasStatusError) ? 
+                                        <>Por favor, complete los <strong>Datos de la Inspección</strong> y asegúrese de llenar el <strong>Checklist</strong> (Estados y Fotos).</> :
+                                        <>Por favor, complete todos los campos de la sección <strong>&quot;Datos de la Inspección&quot;</strong> antes de generar el informe.</>
+                                ) : (
+                                    hasImagesError && hasStatusError ? 
+                                        <>Debe seleccionar un <strong>estado</strong> (Bueno, Regular, Malo) y agregar al menos una <strong>fotografía</strong>.</> :
+                                    hasStatusError ?
+                                        <>Debe calificar al menos un punto con estado <strong>Bueno, Regular o Malo</strong>.</> :
+                                        <>El informe debe contener al menos una <strong>fotografía</strong> en cualquiera de los puntos.</>
+                                )}
+                            </p>
+                            <button 
+                                onClick={handleCloseModal}
+                                className="w-full btn btn-primary py-3 text-lg font-semibold shadow-lg hover:shadow-xl transition-shadow"
+                            >
+                                Entendido, completar datos
+                            </button>
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );
