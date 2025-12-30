@@ -54,7 +54,7 @@ declare global {
 
 // --- Constantes y Configuración de Google API ---
 // REEMPLAZA ESTOS VALORES con tus propias credenciales de la Consola de Google Cloud
-const GOOGLE_API_KEY = "AIzaSyD5IDxw97TfaylZG9Aq_C79S9g5nhAa5bs"; 
+const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY 
 const GOOGLE_CLIENT_ID = "425398213294-8vqtd4578fo5oemr963maefn7m8lcq0v.apps.googleusercontent.com";
 const DISCOVERY_DOC = "https://www.googleapis.com/discovery/v1/apis/drive/v3/rest";
 const SCOPES = "https://www.googleapis.com/auth/drive.file";
