@@ -13,6 +13,7 @@ import { motion, Variants } from "framer-motion";
 import CalculadoraCard, { ColorType as CalculadoraColor } from '@/components/CalculadoraCard';
 import InformeCard, { ColorType as InformeColor } from '@/components/InformeCard';
 import { Calculator, FileText, BarChart3, Zap, Activity, Camera, ClipboardCheck, Search, Loader2 } from 'lucide-react';
+import { sendGAEvent } from '@next/third-parties/google';
 
 // --- Datos ---
 
@@ -209,7 +210,11 @@ export default function Home() {
                       <p className="text-lg sm:text-xl text-blue-100 mb-8">
                         Realiza cálculos complejos de forma rápida. Sección de conductores, caída de tensión y más, cumpliendo normativa RIC.
                       </p>
-                      <Link href="/calculadoras" className="inline-flex items-center justify-center px-8 py-3 text-base font-medium text-blue-700 bg-white rounded-full hover:bg-blue-50 transition-colors shadow-lg">
+                      <Link 
+                        href="/calculadoras" 
+                        onClick={() => sendGAEvent({ event: 'click_cta', value: 'hero_calculadoras' })}
+                        className="inline-flex items-center justify-center px-8 py-3 text-base font-medium text-blue-700 bg-white rounded-full hover:bg-blue-50 transition-colors shadow-lg"
+                      >
                         Explorar Calculadoras
                       </Link>
                     </div>
@@ -235,7 +240,11 @@ export default function Home() {
                       <p className="text-lg sm:text-xl text-emerald-100 mb-8">
                         Genera informes de Sondeos Eléctricos Verticales (SEV) y fotográficos. Exporta a PDF listos para entregar.
                       </p>
-                      <Link href="/informes" className="inline-flex items-center justify-center px-8 py-3 text-base font-medium text-emerald-700 bg-white rounded-full hover:bg-emerald-50 transition-colors shadow-lg">
+                      <Link 
+                        href="/informes" 
+                        onClick={() => sendGAEvent({ event: 'click_cta', value: 'hero_informes' })}
+                        className="inline-flex items-center justify-center px-8 py-3 text-base font-medium text-emerald-700 bg-white rounded-full hover:bg-emerald-50 transition-colors shadow-lg"
+                      >
                         Explorar Informes
                       </Link>
                     </div>
@@ -261,7 +270,11 @@ export default function Home() {
                       <p className="text-lg sm:text-xl text-amber-100 mb-8">
                         Interpreta tus mediciones con gráficos interactivos. Visualiza curvas de campo para un análisis preciso.
                       </p>
-                      <Link href="/calculadoras" className="inline-flex items-center justify-center px-8 py-3 text-base font-medium text-amber-700 bg-white rounded-full hover:bg-amber-50 transition-colors shadow-lg">
+                      <Link 
+                        href="/calculadoras" 
+                        onClick={() => sendGAEvent({ event: 'click_cta', value: 'hero_graficos' })}
+                        className="inline-flex items-center justify-center px-8 py-3 text-base font-medium text-amber-700 bg-white rounded-full hover:bg-amber-50 transition-colors shadow-lg"
+                      >
                         Ver Herramientas
                       </Link>
                     </div>
