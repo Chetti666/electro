@@ -69,4 +69,4 @@ El proyecto se organizará en módulos independientes para cada tipo de cálculo
 1.  **Diseñar el Mockup/UI**: Crear un diseño visual de la interfaz para las nuevas funcionalidades.
 2.  **Desarrollar Módulos Faltantes**: Implementar las calculadoras de "Factor de Potencia", "Cálculo Lumínico", etc.
 3.  **Refactorizar y Optimizar**: Revisar el código existente para mejorar la reutilización de componentes y la performance.
-4.  **Documentación para Desarrolladores**: Detallar la arquitectura y el flujo de la integración con la API de Google Drive.
+4.  **Documentación para Desarrolladores**: Detallar la arquitectura y el flujo de la integración con la API de Google Drive..
