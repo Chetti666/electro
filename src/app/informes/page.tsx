@@ -68,15 +68,15 @@ export default function Informes() {
   };
 
   return (
-    <div className="container mx-auto px-4 pt-24 pb-12 md:pt-32">
+    <div className="container mx-auto px-4 pt-24 pb-12 md:pt-32 grid-bg" style={{ minHeight: '100vh' }}>
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
         className="text-center mb-12"
       >
-        <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">Informes Eléctricos</h1>
-        <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+        <h1 className="text-3xl md:text-4xl font-bold mb-4" style={{ fontFamily: 'var(--font-orbitron)', color: '#ff00ff', textShadow: '0 0 10px rgba(255, 0, 255, 0.5), 0 0 20px rgba(255, 0, 255, 0.3)' }}>Informes Eléctricos</h1>
+        <p className="text-lg max-w-2xl mx-auto" style={{ color: 'rgba(226, 232, 240, 0.7)' }}>
           Selecciona uno de nuestros generadores de informes especializados para crear documentos eléctricos profesionales y detallados.
         </p>
       </motion.div>

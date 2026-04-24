@@ -25,7 +25,7 @@ export default function LoginPage() {
 
     setIsLoading(false);
     if (response.ok) {
-      router.push('/signup'); // Redirige al usuario a la página de registro
+      router.push('/signup');
     } else {
       const data = await response.json();
       setError(data.error || 'Ocurrió un error al iniciar sesión.');
@@ -33,11 +33,22 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900">
-      <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-md dark:bg-gray-800">
+    <div className="flex items-center justify-center min-h-screen grid-bg">
+      <div 
+        className="w-full max-w-md p-8 space-y-6"
+        style={{
+          background: 'rgba(10, 15, 30, 0.9)',
+          borderRadius: '1rem',
+          border: '1px solid rgba(0, 255, 255, 0.3)',
+          boxShadow: '0 0 30px rgba(0, 255, 255, 0.2), inset 0 0 30px rgba(0, 255, 255, 0.03)'
+        }}
+      >
         <div className="flex items-center justify-center gap-2">
-          <LogoIcon className="h-8 w-8 text-blue-500" />
-          <h1 className="text-2xl font-bold text-center text-gray-900 dark:text-white">
+          <LogoIcon className="h-8 w-8" style={{ color: '#00ffff', filter: 'drop-shadow(0 0 10px #00ffff)' }} />
+          <h1 
+            className="text-2xl font-bold text-center"
+            style={{ fontFamily: 'var(--font-orbitron)', color: '#00ffff', textShadow: '0 0 10px rgba(0, 255, 255, 0.5)' }}
+          >
             Login
           </h1>
         </div>
@@ -50,7 +61,17 @@ export default function LoginPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="tu@email.com"
-              className="w-full px-4 py-2 mt-2 text-gray-900 bg-gray-200 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white dark:border-gray-600"
+              style={{
+                width: '100%',
+                padding: '0.75rem 1rem',
+                marginTop: '0.5rem',
+                background: 'rgba(10, 15, 30, 0.8)',
+                border: '1px solid rgba(0, 255, 255, 0.2)',
+                borderRadius: '0.5rem',
+                color: '#e2e8f0',
+                boxShadow: 'inset 0 0 10px rgba(0, 0, 0, 0.3)',
+                outline: 'none'
+              }}
             />
           </div>
           <div className="relative">
@@ -61,11 +82,22 @@ export default function LoginPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Tu contraseña"
-              className="w-full px-4 py-2 mt-2 text-gray-900 bg-gray-200 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white dark:border-gray-600"
+              style={{
+                width: '100%',
+                padding: '0.75rem 1rem',
+                marginTop: '0.5rem',
+                background: 'rgba(10, 15, 30, 0.8)',
+                border: '1px solid rgba(0, 255, 255, 0.2)',
+                borderRadius: '0.5rem',
+                color: '#e2e8f0',
+                boxShadow: 'inset 0 0 10px rgba(0, 0, 0, 0.3)',
+                outline: 'none'
+              }}
             />
             <button
               type="button"
-              className="absolute inset-y-0 right-0 flex items-center px-4 text-gray-500 top-7"
+              className="absolute inset-y-0 flex items-center px-4"
+              style={{ right: 0, top: '1.5rem', color: 'rgba(0, 255, 255, 0.6)' }}
               onClick={() => setShowPassword(!showPassword)}
             >
               {showPassword ? (
@@ -77,7 +109,14 @@ export default function LoginPage() {
           </div>
 
           {error && (
-            <div className="p-3 bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-200 rounded-md text-sm">
+            <div 
+              className="p-3 rounded-md text-sm"
+              style={{
+                background: 'rgba(255, 0, 64, 0.1)',
+                border: '1px solid rgba(255, 0, 64, 0.3)',
+                color: '#ff0040'
+              }}
+            >
               <p>{error}</p>
             </div>
           )}
@@ -87,11 +126,15 @@ export default function LoginPage() {
               <input
                 id="remember-me"
                 type="checkbox"
-                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                style={{
+                  width: '1rem',
+                  height: '1rem',
+                  accentColor: '#00ffff'
+                }}
               />
               <Label
                 htmlFor="remember-me"
-                className="ml-2 block text-sm text-gray-900 dark:text-white"
+                style={{ marginLeft: '0.5rem', fontSize: '0.875rem', color: 'rgba(226, 232, 240, 0.7)', fontFamily: 'var(--font-rajdhani)' }}
               >
                 Recordar credenciales
               </Label>
@@ -101,17 +144,30 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full px-4 py-2 font-bold text-white bg-blue-500 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:bg-gray-400 dark:focus:ring-offset-gray-800"
+              style={{
+                width: '100%',
+                padding: '0.75rem 1rem',
+                fontWeight: 600,
+                borderRadius: '0.5rem',
+                background: 'transparent',
+                border: '2px solid #00ffff',
+                color: '#00ffff',
+                fontFamily: 'var(--font-orbitron)',
+                boxShadow: '0 0 15px rgba(0, 255, 255, 0.3), inset 0 0 10px rgba(0, 255, 255, 0.1)',
+                textShadow: '0 0 10px rgba(0, 255, 255, 0.5)',
+                cursor: isLoading ? 'not-allowed' : 'pointer',
+                opacity: isLoading ? 0.5 : 1
+              }}
             >
               {isLoading ? 'Iniciando sesión...' : 'Login'}
             </button>
           </div>
         </form>
 
-        <div className="text-center text-sm">
-          <p className="text-gray-600 dark:text-gray-400">
+        <div className="text-center text-sm" style={{ color: 'rgba(226, 232, 240, 0.6)' }}>
+          <p>
             ¿Problemas para ingresar?{' '}
-            <Link href="/contacto" className="font-medium text-blue-500 hover:underline">Contáctanos</Link>
+            <Link href="/contacto" style={{ color: '#ff00ff', textShadow: '0 0 10px rgba(255, 0, 255, 0.5)' }}>Contáctanos</Link>
           </p>
         </div>
 

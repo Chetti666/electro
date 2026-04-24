@@ -82,15 +82,15 @@ export default function Calculadoras() {
   };
 
   return (
-    <div className="container mx-auto px-4 pt-24 pb-12 md:pt-32">
+    <div className="container mx-auto px-4 pt-24 pb-12 md:pt-32 grid-bg" style={{ minHeight: '100vh' }}>
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
         className="text-center mb-12"
       >
-        <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">Calculadoras Eléctricas</h1>
-        <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+        <h1 className="text-3xl md:text-4xl font-bold mb-4" style={{ fontFamily: 'var(--font-orbitron)', color: '#00ffff', textShadow: '0 0 10px rgba(0, 255, 255, 0.5), 0 0 20px rgba(0, 255, 255, 0.3)' }}>Calculadoras Eléctricas</h1>
+        <p className="text-lg max-w-2xl mx-auto" style={{ color: 'rgba(226, 232, 240, 0.7)' }}>
           Selecciona una de nuestras calculadoras especializadas para realizar tus cálculos eléctricos de manera precisa y eficiente.
         </p>
       </motion.div>
