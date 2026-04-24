@@ -140,74 +140,118 @@ export default function SignupPage() {
     setRole('USER');
   };
 
-  return (
-    <div className="container mx-auto px-4 py-8">
+return (
+    <div className="container mx-auto px-4 py-8 grid-bg" style={{ minHeight: '100vh' }}>
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-12">
         {/* Columna del Formulario */}
         <div className="lg:col-span-2">
-          <div className="w-full p-8 space-y-6 bg-white rounded-lg shadow-md dark:bg-gray-800">
+          <div 
+            className="w-full p-8 space-y-6"
+            style={{
+              background: 'rgba(10, 15, 30, 0.9)',
+              borderRadius: '1rem',
+              border: '1px solid rgba(0, 255, 255, 0.3)',
+              boxShadow: '0 0 30px rgba(0, 255, 255, 0.2)'
+            }}
+          >
             <div className="text-center">
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Crear Usuario</h1>
-              <p className="text-gray-600 dark:text-gray-400">Ingresa los datos para registrar un nuevo usuario.</p>
+              <h1 className="text-2xl font-bold mb-2" style={{ fontFamily: 'var(--font-orbitron)', color: '#00ffff', textShadow: '0 0 10px rgba(0, 255, 255, 0.5)' }}>Crear Usuario</h1>
+              <p style={{ color: 'rgba(226, 232, 240, 0.6)' }}>Ingresa los datos para registrar un nuevo usuario.</p>
             </div>
             
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
-                <label htmlFor="name" className="form-label">Nombre (Opcional)</label>
+                <label htmlFor="name" style={{ display: 'block', fontSize: '0.75rem', fontFamily: 'var(--font-orbitron)', color: '#00ffff', textShadow: '0 0 10px rgba(0, 255, 255, 0.3)', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '0.5rem' }}>Nombre (Opcional)</label>
                 <input
                   id="name"
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Nombre del usuario"
-                  className="form-input"
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem 1rem',
+                    background: 'rgba(10, 15, 30, 0.8)',
+                    border: '1px solid rgba(0, 255, 255, 0.2)',
+                    borderRadius: '0.5rem',
+                    color: '#e2e8f0',
+                    boxShadow: 'inset 0 0 10px rgba(0, 0, 0, 0.3)',
+                    outline: 'none'
+                  }}
                 />
               </div>
               <div>
-                <label htmlFor="email" className="form-label">Email</label>
+                <label htmlFor="email" style={{ display: 'block', fontSize: '0.75rem', fontFamily: 'var(--font-orbitron)', color: '#00ffff', textShadow: '0 0 10px rgba(0, 255, 255, 0.3)', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '0.5rem' }}>Email</label>
                 <input
                   id="email"
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="usuario@email.com"
-                  className="form-input"
                   required
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem 1rem',
+                    background: 'rgba(10, 15, 30, 0.8)',
+                    border: '1px solid rgba(0, 255, 255, 0.2)',
+                    borderRadius: '0.5rem',
+                    color: '#e2e8f0',
+                    boxShadow: 'inset 0 0 10px rgba(0, 0, 0, 0.3)',
+                    outline: 'none'
+                  }}
                 />
               </div>
               <div>
-                <label htmlFor="password" className="form-label">Contraseña</label>
+                <label htmlFor="password" style={{ display: 'block', fontSize: '0.75rem', fontFamily: 'var(--font-orbitron)', color: '#00ffff', textShadow: '0 0 10px rgba(0, 255, 255, 0.3)', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '0.5rem' }}>Contraseña</label>
                 <input
                   id="password"
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-              placeholder='Crea una contraseña segura'
-                  className="form-input"
-              required
+                  placeholder='Crea una contraseña segura'
+                  required
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem 1rem',
+                    background: 'rgba(10, 15, 30, 0.8)',
+                    border: '1px solid rgba(0, 255, 255, 0.2)',
+                    borderRadius: '0.5rem',
+                    color: '#e2e8f0',
+                    boxShadow: 'inset 0 0 10px rgba(0, 0, 0, 0.3)',
+                    outline: 'none'
+                  }}
                 />
               </div>
               <div>
-                <label htmlFor="role" className="form-label">Rol</label>
+                <label htmlFor="role" style={{ display: 'block', fontSize: '0.75rem', fontFamily: 'var(--font-orbitron)', color: '#00ffff', textShadow: '0 0 10px rgba(0, 255, 255, 0.3)', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '0.5rem' }}>Rol</label>
                 <select
                   id="role"
                   value={role}
                   onChange={(e) => setRole(e.target.value)}
-                  className="form-input"
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem 1rem',
+                    background: 'rgba(10, 15, 30, 0.8)',
+                    border: '1px solid rgba(0, 255, 255, 0.2)',
+                    borderRadius: '0.5rem',
+                    color: '#e2e8f0',
+                    boxShadow: 'inset 0 0 10px rgba(0, 0, 0, 0.3)',
+                    outline: 'none'
+                  }}
                 >
-                  <option value="USER">Usuario</option>
-                  <option value="ADMIN">Administrador</option>
+                  <option value="USER" style={{ background: '#0a0f1a' }}>Usuario</option>
+                  <option value="ADMIN" style={{ background: '#0a0f1a' }}>Administrador</option>
                 </select>
               </div>
               
               {error && (
-                <div className="p-3 bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-200 rounded-md text-sm">
+                <div className="p-3 rounded-md text-sm" style={{ background: 'rgba(255, 0, 64, 0.1)', border: '1px solid rgba(255, 0, 64, 0.3)', color: '#ff0040' }}>
                   <p>{error}</p>
                 </div>
               )}
 
               {success && (
-                <div className="p-3 bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-200 rounded-md text-sm">
+                <div className="p-3 rounded-md text-sm" style={{ background: 'rgba(0, 255, 80, 0.1)', border: '1px solid rgba(0, 255, 80, 0.3)', color: '#00ff50' }}>
                   <p>{success}</p>
                 </div>
               )}
@@ -216,7 +260,20 @@ export default function SignupPage() {
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full px-4 py-2 font-bold text-white bg-blue-500 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:bg-gray-400 dark:focus:ring-offset-gray-800"
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem 1rem',
+                    fontWeight: 600,
+                    borderRadius: '0.5rem',
+                    background: 'transparent',
+                    border: '2px solid #00ffff',
+                    color: '#00ffff',
+                    fontFamily: 'var(--font-orbitron)',
+                    boxShadow: '0 0 15px rgba(0, 255, 255, 0.3), inset 0 0 10px rgba(0, 255, 255, 0.1)',
+                    textShadow: '0 0 10px rgba(0, 255, 255, 0.5)',
+                    cursor: isLoading ? 'not-allowed' : 'pointer',
+                    opacity: isLoading ? 0.5 : 1
+                  }}
                 >
                   {isLoading ? 'Creando...' : 'Crear Usuario'}
                 </button>
@@ -227,33 +284,50 @@ export default function SignupPage() {
 
         {/* Columna de la Lista de Usuarios */}
         <div className="lg:col-span-3">
-          <div className="p-8 bg-white rounded-lg shadow-md dark:bg-gray-800">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Usuarios Registrados</h2>
+          <div 
+            className="p-8"
+            style={{
+              background: 'rgba(10, 15, 30, 0.9)',
+              borderRadius: '1rem',
+              border: '1px solid rgba(255, 0, 255, 0.3)',
+              boxShadow: '0 0 30px rgba(255, 0, 255, 0.2)'
+            }}
+          >
+            <h2 className="text-2xl font-bold mb-6" style={{ fontFamily: 'var(--font-orbitron)', color: '#ff00ff', textShadow: '0 0 10px rgba(255, 0, 255, 0.5)' }}>Usuarios Registrados</h2>
             <div className="overflow-x-auto">
               <table className="w-full text-sm text-left">
-                <thead className="bg-gray-100 dark:bg-gray-700">
-                  <tr>
-                    <th className="px-4 py-2">Nombre</th>
-                    <th className="px-4 py-2">Email</th>
-                    <th className="px-4 py-2">Rol</th>
-                    <th className="px-4 py-2">Fecha Creación</th>
-                    <th className="px-4 py-2">Acciones</th>
+                <thead>
+                  <tr style={{ background: 'rgba(0, 255, 255, 0.1)' }}>
+                    <th className="px-4 py-3" style={{ color: '#00ffff', fontFamily: 'var(--font-orbitron)', fontSize: '0.75rem', letterSpacing: '1px' }}>Nombre</th>
+                    <th className="px-4 py-3" style={{ color: '#00ffff', fontFamily: 'var(--font-orbitron)', fontSize: '0.75rem', letterSpacing: '1px' }}>Email</th>
+                    <th className="px-4 py-3" style={{ color: '#00ffff', fontFamily: 'var(--font-orbitron)', fontSize: '0.75rem', letterSpacing: '1px' }}>Rol</th>
+                    <th className="px-4 py-3" style={{ color: '#00ffff', fontFamily: 'var(--font-orbitron)', fontSize: '0.75rem', letterSpacing: '1px' }}>Fecha</th>
+                    <th className="px-4 py-3" style={{ color: '#00ffff', fontFamily: 'var(--font-orbitron)', fontSize: '0.75rem', letterSpacing: '1px' }}>Acciones</th>
                   </tr>
                 </thead>
                 <tbody>
                   {users.map((user) => (
-                    <tr key={user.id} className="border-b dark:border-gray-700">
-                      <td className="px-4 py-2">{user.name || <span className="text-gray-500">N/A</span>}</td>
-                      <td className="px-4 py-2">{user.email}</td>
-                      <td className="px-4 py-2">
-                        <span className={`px-2 py-1 text-xs font-semibold rounded-full ${user.role === 'ADMIN' ? 'bg-red-200 text-red-800 dark:bg-red-900 dark:text-red-200' : 'bg-blue-200 text-blue-800 dark:bg-blue-900 dark:text-blue-200'}`}>
+                    <tr key={user.id} style={{ borderBottom: '1px solid rgba(0, 255, 255, 0.1)' }}>
+                      <td className="px-4 py-3" style={{ color: '#e2e8f0' }}>{user.name || <span style={{ color: 'rgba(226, 232, 240, 0.4)' }}>N/A</span>}</td>
+                      <td className="px-4 py-3" style={{ color: '#e2e8f0' }}>{user.email}</td>
+                      <td className="px-4 py-3">
+                        <span 
+                          className="px-2 py-1 text-xs font-semibold rounded-full"
+                          style={{
+                            background: user.role === 'ADMIN' ? 'rgba(255, 0, 64, 0.2)' : 'rgba(0, 255, 255, 0.2)',
+                            border: `1px solid ${user.role === 'ADMIN' ? 'rgba(255, 0, 64, 0.5)' : 'rgba(0, 255, 255, 0.5)'}`,
+                            color: user.role === 'ADMIN' ? '#ff0040' : '#00ffff',
+                            fontFamily: 'var(--font-orbitron)',
+                            fontSize: '0.65rem'
+                          }}
+                        >
                           {user.role}
                         </span>
                       </td>
-                      <td className="px-4 py-2">{new Date(user.createdAt).toLocaleDateString()}</td>
-                      <td className="px-4 py-2 flex gap-2">
-                        <button onClick={() => handleEdit(user)} className="text-blue-500 hover:underline text-xs">Editar</button>
-                        <button onClick={() => handleDelete(user.id)} className="text-red-500 hover:underline text-xs">Eliminar</button>
+                      <td className="px-4 py-3" style={{ color: 'rgba(226, 232, 240, 0.6)' }}>{new Date(user.createdAt).toLocaleDateString()}</td>
+                      <td className="px-4 py-3 flex gap-2">
+                        <button onClick={() => handleEdit(user)} style={{ color: '#00ffff', textShadow: '0 0 5px rgba(0, 255, 255, 0.5)', fontSize: '0.75rem' }}>Editar</button>
+                        <button onClick={() => handleDelete(user.id)} style={{ color: '#ff0040', textShadow: '0 0 5px rgba(255, 0, 64, 0.5)', fontSize: '0.75rem' }}>Eliminar</button>
                       </td>
                     </tr>
                   ))}
@@ -264,58 +338,101 @@ export default function SignupPage() {
         </div>
       </div>
 
-      {/* Modal de Edición */}
+{/* Modal de Edición */}
       {isModalOpen && editingUser && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-          <div className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-xl w-full max-w-md">
-            <h2 className="text-2xl font-bold mb-4 dark:text-white">Editar Usuario</h2>
+        <div className="fixed inset-0 flex justify-center items-center z-50" style={{ background: 'rgba(0, 0, 0, 0.8)', backdropFilter: 'blur(5px)' }}>
+          <div 
+            className="p-8 rounded-lg shadow-xl w-full max-w-md"
+            style={{
+              background: 'rgba(10, 15, 30, 0.98)',
+              border: '1px solid rgba(0, 255, 255, 0.3)',
+              boxShadow: '0 0 50px rgba(0, 255, 255, 0.3)'
+            }}
+          >
+            <h2 className="text-2xl font-bold mb-6" style={{ fontFamily: 'var(--font-orbitron)', color: '#00ffff', textShadow: '0 0 10px rgba(0, 255, 255, 0.5)' }}>Editar Usuario</h2>
             <form onSubmit={handleUpdate} className="space-y-4">
               <div>
-                <label htmlFor="edit-name" className="form-label">Nombre</label>
+                <label htmlFor="edit-name" style={{ display: 'block', fontSize: '0.75rem', fontFamily: 'var(--font-orbitron)', color: '#00ffff', textShadow: '0 0 10px rgba(0, 255, 255, 0.3)', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '0.5rem' }}>Nombre</label>
                 <input
                   id="edit-name"
- type="text"
+                  type="text"
                   value={editingUser.name || ''}
                   onChange={(e) => setEditingUser({ ...editingUser, name: e.target.value })}
-                  className="form-input"
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem 1rem',
+                    background: 'rgba(10, 15, 30, 0.8)',
+                    border: '1px solid rgba(0, 255, 255, 0.2)',
+                    borderRadius: '0.5rem',
+                    color: '#e2e8f0',
+                    boxShadow: 'inset 0 0 10px rgba(0, 0, 0, 0.3)',
+                    outline: 'none'
+                  }}
                 />
               </div>
               <div>
-                <label htmlFor="edit-email" className="form-label">Email</label>
+                <label htmlFor="edit-email" style={{ display: 'block', fontSize: '0.75rem', fontFamily: 'var(--font-orbitron)', color: '#00ffff', textShadow: '0 0 10px rgba(0, 255, 255, 0.3)', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '0.5rem' }}>Email</label>
                 <input
                   id="edit-email"
                   type="email"
                   value={editingUser.email}
                   onChange={(e) => setEditingUser({ ...editingUser, email: e.target.value })}
-                  className="form-input"
                   required
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem 1rem',
+                    background: 'rgba(10, 15, 30, 0.8)',
+                    border: '1px solid rgba(0, 255, 255, 0.2)',
+                    borderRadius: '0.5rem',
+                    color: '#e2e8f0',
+                    boxShadow: 'inset 0 0 10px rgba(0, 0, 0, 0.3)',
+                    outline: 'none'
+                  }}
                 />
               </div>
               <div>
-                <label htmlFor="edit-password" className="form-label">Nueva Contraseña</label>
+                <label htmlFor="edit-password" style={{ display: 'block', fontSize: '0.75rem', fontFamily: 'var(--font-orbitron)', color: '#00ffff', textShadow: '0 0 10px rgba(0, 255, 255, 0.3)', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '0.5rem' }}>Nueva Contraseña</label>
                 <input
                   id="edit-password"
                   type="password"
                   placeholder="(Dejar en blanco para no cambiar)"
- onChange={(e) => setEditingUser({ ...editingUser, password: e.target.value })}
-                  className="form-input"
+                  onChange={(e) => setEditingUser({ ...editingUser, password: e.target.value })}
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem 1rem',
+                    background: 'rgba(10, 15, 30, 0.8)',
+                    border: '1px solid rgba(0, 255, 255, 0.2)',
+                    borderRadius: '0.5rem',
+                    color: '#e2e8f0',
+                    boxShadow: 'inset 0 0 10px rgba(0, 0, 0, 0.3)',
+                    outline: 'none'
+                  }}
                 />
               </div>
               <div>
-                <label htmlFor="edit-role" className="form-label">Rol</label>
+                <label htmlFor="edit-role" style={{ display: 'block', fontSize: '0.75rem', fontFamily: 'var(--font-orbitron)', color: '#00ffff', textShadow: '0 0 10px rgba(0, 255, 255, 0.3)', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '0.5rem' }}>Rol</label>
                 <select
                   id="edit-role"
                   value={editingUser.role}
- onChange={(e) => setEditingUser({ ...editingUser, role: e.target.value as 'USER' | 'ADMIN' })}
-                  className="form-input"
+                  onChange={(e) => setEditingUser({ ...editingUser, role: e.target.value as 'USER' | 'ADMIN' })}
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem 1rem',
+                    background: 'rgba(10, 15, 30, 0.8)',
+                    border: '1px solid rgba(0, 255, 255, 0.2)',
+                    borderRadius: '0.5rem',
+                    color: '#e2e8f0',
+                    boxShadow: 'inset 0 0 10px rgba(0, 0, 0, 0.3)',
+                    outline: 'none'
+                  }}
                 >
-                  <option value="USER">Usuario</option>
-                  <option value="ADMIN">Administrador</option>
+                  <option value="USER" style={{ background: '#0a0f1a' }}>Usuario</option>
+                  <option value="ADMIN" style={{ background: '#0a0f1a' }}>Administrador</option>
                 </select>
               </div>
 
               {error && (
-                <div className="p-3 bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-200 rounded-md text-sm">
+                <div className="p-3 rounded-md text-sm" style={{ background: 'rgba(255, 0, 64, 0.1)', border: '1px solid rgba(255, 0, 64, 0.3)', color: '#ff0040' }}>
                   <p>{error}</p>
                 </div>
               )}
@@ -324,14 +441,32 @@ export default function SignupPage() {
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 dark:bg-gray-600 dark:text-gray-200 dark:hover:bg-gray-500"
+                  style={{
+                    padding: '0.5rem 1rem',
+                    borderRadius: '0.5rem',
+                    background: 'transparent',
+                    border: '1px solid rgba(226, 232, 240, 0.3)',
+                    color: 'rgba(226, 232, 240, 0.7)'
+                  }}
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="px-4 py-2 font-bold text-white bg-blue-500 rounded-md hover:bg-blue-600 disabled:bg-gray-400"
+                  style={{
+                    padding: '0.5rem 1rem',
+                    fontWeight: 600,
+                    borderRadius: '0.5rem',
+                    background: 'transparent',
+                    border: '2px solid #00ffff',
+                    color: '#00ffff',
+                    fontFamily: 'var(--font-orbitron)',
+                    boxShadow: '0 0 10px rgba(0, 255, 255, 0.3)',
+                    textShadow: '0 0 10px rgba(0, 255, 255, 0.5)',
+                    cursor: isLoading ? 'not-allowed' : 'pointer',
+                    opacity: isLoading ? 0.5 : 1
+                  }}
                 >
                   {isLoading ? 'Guardando...' : 'Guardar Cambios'}
                 </button>

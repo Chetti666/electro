@@ -15,11 +15,9 @@ import InformeCard, { ColorType as InformeColor } from '@/components/InformeCard
 import { Calculator, FileText, BarChart3, Zap, Activity, Camera, ClipboardCheck, Search, Loader2 } from 'lucide-react';
 import { sendGAEvent } from '@next/third-parties/google';
 
-// --- Datos ---
-
 const SampleDocumentsViewer = dynamic(
   () => import('@/components/SampleDocumentsViewer'),
-  { ssr: false, loading: () => <div className="h-[788px] w-full bg-gray-50 dark:bg-gray-900/50 flex items-center justify-center"><Loader2 className="h-12 w-12 text-blue-500 animate-spin" /></div> }
+  { ssr: false, loading: () => <div className="h-[788px] w-full flex items-center justify-center" style={{ background: 'rgba(3, 7, 18, 0.5)', border: '1px solid rgba(0, 255, 255, 0.2)' }}><Loader2 className="h-12 w-12 animate-spin" style={{ color: '#00ffff', filter: 'drop-shadow(0 0 10px #00ffff)' }} /></div> }
 );
 
 type Calculadora = {
@@ -114,7 +112,6 @@ const informes: Informe[] = [
   }
 ];
 
-// Icono auxiliar
 function ShieldCheckIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg
@@ -134,8 +131,6 @@ function ShieldCheckIcon(props: React.SVGProps<SVGSVGElement>) {
     </svg>
   )
 }
-
-// --- Componentes de Animación ---
 
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
@@ -166,11 +161,11 @@ export default function Home() {
 
   return (
     <>
-      {/* Hero Section con Carrusel */}
-      <section className="relative pt-20 pb-8 md:pt-28 md:pb-12 overflow-hidden">
-        {/* Fondo decorativo */}
-        <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-100 via-white to-white dark:from-blue-950 dark:via-gray-950 dark:to-gray-950 opacity-70"></div>
-
+      <section className="relative pt-20 pb-8 md:pt-28 md:pb-12 overflow-hidden grid-bg">
+        <div className="absolute inset-0 -z-10" style={{
+          background: 'radial-gradient(ellipse at 50% 0%, rgba(0, 128, 255, 0.15) 0%, transparent 60%)'
+        }}></div>
+        
         <div className="container mx-auto px-4">
           <motion.div
             initial={{ opacity: 0, y: -20 }}
@@ -178,10 +173,17 @@ export default function Home() {
             transition={{ duration: 0.6 }}
             className="max-w-4xl mx-auto text-center mb-8"
           >
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-gray-900 dark:text-white mb-6">
-              Herramientas Eléctricas <span className="text-blue-600 dark:text-blue-400">Profesionales</span>
+            <h1 
+              className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight mb-6"
+              style={{
+                fontFamily: 'var(--font-orbitron)',
+                color: '#fff',
+                textShadow: '0 0 10px rgba(0, 255, 255, 0.5), 0 0 20px rgba(0, 255, 255, 0.3), 0 0 40px rgba(0, 255, 255, 0.2), 0 0 80px rgba(0, 255, 255, 0.1)'
+              }}
+            >
+              Herramientas Eléctricas <span style={{ color: '#00ffff', textShadow: '0 0 20px #00ffff, 0 0 40px #00ffff' }}>Profesionales</span>
             </h1>
-            <p className="text-lg sm:text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto leading-relaxed">
+            <p className="text-lg sm:text-xl max-w-2xl mx-auto leading-relaxed" style={{ color: 'rgba(226, 232, 240, 0.8)' }}>
               Potencia tu trabajo en terreno. Desde cálculos de sección hasta informes normativos detallados, todo en una sola plataforma moderna.
             </p>
           </motion.div>
@@ -192,28 +194,50 @@ export default function Home() {
             opts={{ loop: true, align: 'center' }}
           >
             <CarouselContent className="-ml-4">
-              {/* Slide 1: Calculadoras */}
               <CarouselItem className="pl-4 md:basis-1/1 lg:basis-1/1">
                 <div className="p-1">
-                  <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 text-white shadow-2xl h-[400px] flex flex-col justify-center items-center text-center p-8 md:p-12">
-                    <div className="absolute top-0 left-0 w-full h-full bg-white/10 backdrop-blur-[2px] z-0"></div>
+                  <div 
+                    className="relative overflow-hidden rounded-2xl h-[400px] flex flex-col justify-center items-center text-center p-8 md:p-12"
+                    style={{
+                      background: 'linear-gradient(135deg, rgba(0, 128, 255, 0.2) 0%, rgba(0, 255, 255, 0.1) 50%, rgba(0, 128, 255, 0.2) 100%)',
+                      border: '1px solid rgba(0, 255, 255, 0.3)',
+                      boxShadow: '0 0 30px rgba(0, 255, 255, 0.2), inset 0 0 50px rgba(0, 255, 255, 0.05)'
+                    }}
+                  >
+                    <div className="absolute top-0 left-0 w-full h-1" style={{ background: 'linear-gradient(90deg, transparent, #00ffff, transparent)', boxShadow: '0 0 20px #00ffff' }} />
+                    <div className="absolute top-0 left-0 w-full h-full" style={{
+                      background: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 255, 255, 0.03) 2px, rgba(0, 255, 255, 0.03) 4px)'
+                    }} />
                     <div className="relative z-10 max-w-2xl">
                       <motion.div
                         initial={{ scale: 0.8, opacity: 0 }}
                         whileInView={{ scale: 1, opacity: 1 }}
                         transition={{ duration: 0.5 }}
-                        className="h-20 w-20 bg-white/20 rounded-full flex items-center justify-center mb-6 mx-auto backdrop-blur-sm"
+                        className="h-20 w-20 rounded-full flex items-center justify-center mb-6 mx-auto"
+                        style={{
+                          background: 'rgba(0, 255, 255, 0.1)',
+                          border: '2px solid rgba(0, 255, 255, 0.5)',
+                          boxShadow: '0 0 30px rgba(0, 255, 255, 0.3), inset 0 0 20px rgba(0, 255, 255, 0.1)'
+                        }}
                       >
-                        <Calculator className="h-10 w-10 text-white" />
+                        <Calculator className="h-10 w-10" style={{ color: '#00ffff', filter: 'drop-shadow(0 0 10px #00ffff)' }} />
                       </motion.div>
-                      <h3 className="text-3xl sm:text-4xl font-bold mb-4">Calculadoras Precisas</h3>
-                      <p className="text-lg sm:text-xl text-blue-100 mb-8">
+                      <h3 className="text-3xl sm:text-4xl font-bold mb-4" style={{ fontFamily: 'var(--font-orbitron)', color: '#fff', textShadow: '0 0 10px rgba(0, 255, 255, 0.5)' }}>Calculadoras Precisas</h3>
+                      <p className="text-lg sm:text-xl mb-8" style={{ color: 'rgba(226, 232, 240, 0.8)' }}>
                         Realiza cálculos complejos de forma rápida. Sección de conductores, caída de tensión y más, cumpliendo normativa RIC.
                       </p>
                       <Link 
                         href="/calculadoras" 
                         onClick={() => sendGAEvent({ event: 'click_cta', value: 'hero_calculadoras' })}
-                        className="inline-flex items-center justify-center px-8 py-3 text-base font-medium text-blue-700 bg-white rounded-full hover:bg-blue-50 transition-colors shadow-lg"
+                        className="inline-flex items-center justify-center px-8 py-3 text-base font-medium rounded-full transition-all"
+                        style={{
+                          fontFamily: 'var(--font-orbitron)',
+                          background: 'transparent',
+                          border: '2px solid #00ffff',
+                          color: '#00ffff',
+                          boxShadow: '0 0 20px rgba(0, 255, 255, 0.3), inset 0 0 10px rgba(0, 255, 255, 0.1)',
+                          textShadow: '0 0 10px rgba(0, 255, 255, 0.5)'
+                        }}
                       >
                         Explorar Calculadoras
                       </Link>
@@ -222,28 +246,50 @@ export default function Home() {
                 </div>
               </CarouselItem>
 
-              {/* Slide 2: Informes */}
               <CarouselItem className="pl-4 md:basis-1/1 lg:basis-1/1">
                 <div className="p-1">
-                  <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-700 text-white shadow-2xl h-[400px] flex flex-col justify-center items-center text-center p-8 md:p-12">
-                    <div className="absolute top-0 left-0 w-full h-full bg-white/10 backdrop-blur-[2px] z-0"></div>
+                  <div 
+                    className="relative overflow-hidden rounded-2xl h-[400px] flex flex-col justify-center items-center text-center p-8 md:p-12"
+                    style={{
+                      background: 'linear-gradient(135deg, rgba(255, 0, 255, 0.2) 0%, rgba(255, 0, 128, 0.1) 50%, rgba(255, 0, 255, 0.2) 100%)',
+                      border: '1px solid rgba(255, 0, 255, 0.3)',
+                      boxShadow: '0 0 30px rgba(255, 0, 255, 0.2), inset 0 0 50px rgba(255, 0, 255, 0.05)'
+                    }}
+                  >
+                    <div className="absolute top-0 left-0 w-full h-1" style={{ background: 'linear-gradient(90deg, transparent, #ff00ff, transparent)', boxShadow: '0 0 20px #ff00ff' }} />
+                    <div className="absolute top-0 left-0 w-full h-full" style={{
+                      background: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255, 0, 255, 0.03) 2px, rgba(255, 0, 255, 0.03) 4px)'
+                    }} />
                     <div className="relative z-10 max-w-2xl">
                       <motion.div
                         initial={{ scale: 0.8, opacity: 0 }}
                         whileInView={{ scale: 1, opacity: 1 }}
                         transition={{ duration: 0.5 }}
-                        className="h-20 w-20 bg-white/20 rounded-full flex items-center justify-center mb-6 mx-auto backdrop-blur-sm"
+                        className="h-20 w-20 rounded-full flex items-center justify-center mb-6 mx-auto"
+                        style={{
+                          background: 'rgba(255, 0, 255, 0.1)',
+                          border: '2px solid rgba(255, 0, 255, 0.5)',
+                          boxShadow: '0 0 30px rgba(255, 0, 255, 0.3), inset 0 0 20px rgba(255, 0, 255, 0.1)'
+                        }}
                       >
-                        <FileText className="h-10 w-10 text-white" />
+                        <FileText className="h-10 w-10" style={{ color: '#ff00ff', filter: 'drop-shadow(0 0 10px #ff00ff)' }} />
                       </motion.div>
-                      <h3 className="text-3xl sm:text-4xl font-bold mb-4">Informes Profesionales</h3>
-                      <p className="text-lg sm:text-xl text-emerald-100 mb-8">
+                      <h3 className="text-3xl sm:text-4xl font-bold mb-4" style={{ fontFamily: 'var(--font-orbitron)', color: '#fff', textShadow: '0 0 10px rgba(255, 0, 255, 0.5)' }}>Informes Profesionales</h3>
+                      <p className="text-lg sm:text-xl mb-8" style={{ color: 'rgba(226, 232, 240, 0.8)' }}>
                         Genera informes de Sondeos Eléctricos Verticales (SEV) y fotográficos. Exporta a PDF listos para entregar.
                       </p>
                       <Link 
                         href="/informes" 
                         onClick={() => sendGAEvent({ event: 'click_cta', value: 'hero_informes' })}
-                        className="inline-flex items-center justify-center px-8 py-3 text-base font-medium text-emerald-700 bg-white rounded-full hover:bg-emerald-50 transition-colors shadow-lg"
+                        className="inline-flex items-center justify-center px-8 py-3 text-base font-medium rounded-full transition-all"
+                        style={{
+                          fontFamily: 'var(--font-orbitron)',
+                          background: 'transparent',
+                          border: '2px solid #ff00ff',
+                          color: '#ff00ff',
+                          boxShadow: '0 0 20px rgba(255, 0, 255, 0.3), inset 0 0 10px rgba(255, 0, 255, 0.1)',
+                          textShadow: '0 0 10px rgba(255, 0, 255, 0.5)'
+                        }}
                       >
                         Explorar Informes
                       </Link>
@@ -252,28 +298,47 @@ export default function Home() {
                 </div>
               </CarouselItem>
 
-              {/* Slide 3: Gráficos */}
               <CarouselItem className="pl-4 md:basis-1/1 lg:basis-1/1">
                 <div className="p-1">
-                  <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 text-white shadow-2xl h-[400px] flex flex-col justify-center items-center text-center p-8 md:p-12">
-                    <div className="absolute top-0 left-0 w-full h-full bg-white/10 backdrop-blur-[2px] z-0"></div>
+                  <div 
+                    className="relative overflow-hidden rounded-2xl h-[400px] flex flex-col justify-center items-center text-center p-8 md:p-12"
+                    style={{
+                      background: 'linear-gradient(135deg, rgba(255, 128, 0, 0.2) 0%, rgba(255, 255, 0, 0.1) 50%, rgba(255, 128, 0, 0.2) 100%)',
+                      border: '1px solid rgba(255, 200, 0, 0.3)',
+                      boxShadow: '0 0 30px rgba(255, 200, 0, 0.2), inset 0 0 50px rgba(255, 200, 0, 0.05)'
+                    }}
+                  >
+                    <div className="absolute top-0 left-0 w-full h-1" style={{ background: 'linear-gradient(90deg, transparent, #ffff00, transparent)', boxShadow: '0 0 20px #ffff00' }} />
                     <div className="relative z-10 max-w-2xl">
                       <motion.div
                         initial={{ scale: 0.8, opacity: 0 }}
                         whileInView={{ scale: 1, opacity: 1 }}
                         transition={{ duration: 0.5 }}
-                        className="h-20 w-20 bg-white/20 rounded-full flex items-center justify-center mb-6 mx-auto backdrop-blur-sm"
+                        className="h-20 w-20 rounded-full flex items-center justify-center mb-6 mx-auto"
+                        style={{
+                          background: 'rgba(255, 255, 0, 0.1)',
+                          border: '2px solid rgba(255, 255, 0, 0.5)',
+                          boxShadow: '0 0 30px rgba(255, 255, 0, 0.3), inset 0 0 20px rgba(255, 255, 0, 0.1)'
+                        }}
                       >
-                        <BarChart3 className="h-10 w-10 text-white" />
+                        <BarChart3 className="h-10 w-10" style={{ color: '#ffff00', filter: 'drop-shadow(0 0 10px #ffff00)' }} />
                       </motion.div>
-                      <h3 className="text-3xl sm:text-4xl font-bold mb-4">Visualización de Datos</h3>
-                      <p className="text-lg sm:text-xl text-amber-100 mb-8">
+                      <h3 className="text-3xl sm:text-4xl font-bold mb-4" style={{ fontFamily: 'var(--font-orbitron)', color: '#fff', textShadow: '0 0 10px rgba(255, 255, 0, 0.5)' }}>Visualización de Datos</h3>
+                      <p className="text-lg sm:text-xl mb-8" style={{ color: 'rgba(226, 232, 240, 0.8)' }}>
                         Interpreta tus mediciones con gráficos interactivos. Visualiza curvas de campo para un análisis preciso.
                       </p>
                       <Link 
                         href="/calculadoras" 
                         onClick={() => sendGAEvent({ event: 'click_cta', value: 'hero_graficos' })}
-                        className="inline-flex items-center justify-center px-8 py-3 text-base font-medium text-amber-700 bg-white rounded-full hover:bg-amber-50 transition-colors shadow-lg"
+                        className="inline-flex items-center justify-center px-8 py-3 text-base font-medium rounded-full transition-all"
+                        style={{
+                          fontFamily: 'var(--font-orbitron)',
+                          background: 'transparent',
+                          border: '2px solid #ffff00',
+                          color: '#ffff00',
+                          boxShadow: '0 0 20px rgba(255, 255, 0, 0.3), inset 0 0 10px rgba(255, 255, 0, 0.1)',
+                          textShadow: '0 0 10px rgba(255, 255, 0, 0.5)'
+                        }}
                       >
                         Ver Herramientas
                       </Link>
@@ -286,8 +351,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Calculadoras Section */}
-      <section className="py-16 bg-gray-50 dark:bg-gray-900/50">
+      <section className="py-16" style={{ background: 'rgba(3, 7, 18, 0.8)' }}>
         <div className="container mx-auto px-4">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -296,10 +360,10 @@ export default function Home() {
             transition={{ duration: 0.5 }}
             className="text-center mb-12"
           >
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4" style={{ fontFamily: 'var(--font-orbitron)', color: '#00ffff', textShadow: '0 0 10px rgba(0, 255, 255, 0.5)' }}>
               Calculadoras Disponibles
             </h2>
-            <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+            <p className="text-lg max-w-2xl mx-auto" style={{ color: 'rgba(226, 232, 240, 0.7)' }}>
               Herramientas especializadas para realizar tus cálculos eléctricos de manera precisa y eficiente.
             </p>
           </motion.div>
@@ -320,8 +384,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Informes Section */}
-      <section className="py-16">
+      <section className="py-16" style={{ background: 'rgba(3, 7, 18, 0.5)' }}>
         <div className="container mx-auto px-4">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -330,10 +393,10 @@ export default function Home() {
             transition={{ duration: 0.5 }}
             className="text-center mb-12"
           >
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4" style={{ fontFamily: 'var(--font-orbitron)', color: '#ff00ff', textShadow: '0 0 10px rgba(255, 0, 255, 0.5)' }}>
               Informes Disponibles
             </h2>
-            <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+            <p className="text-lg max-w-2xl mx-auto" style={{ color: 'rgba(226, 232, 240, 0.7)' }}>
               Genera documentos eléctricos profesionales y detallados de manera rápida y sencilla.
             </p>
           </motion.div>
@@ -354,7 +417,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Sample Documents Section */}
       <SampleDocumentsViewer />
     </>
   );

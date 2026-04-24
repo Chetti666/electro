@@ -16,64 +16,131 @@ export interface CalculadoraCardProps {
 }
 
 const CalculadoraCard = React.forwardRef<HTMLAnchorElement, CalculadoraCardProps>(({ className, id, title, description, icon, color }, ref) => {
-  // Mapeo de colores para clases de Tailwind
   const colorClasses = {
     blue: {
-      border: 'border-blue-500 hover:border-blue-600',
-      bg: 'bg-blue-100 dark:bg-blue-900',
-      text: 'text-blue-500 hover:text-blue-600'
+      border: 'rgba(0, 255, 255, 0.3)',
+      borderHover: 'rgba(0, 255, 255, 0.6)',
+      bg: 'rgba(0, 128, 255, 0.1)',
+      icon: '#00ffff',
+      text: '#e2e8f0',
+      shadow: 'rgba(0, 255, 255, 0.2)'
     },
     emerald: {
-      border: 'border-emerald-500 hover:border-emerald-600',
-      bg: 'bg-emerald-100 dark:bg-emerald-900',
-      text: 'text-emerald-500 hover:text-emerald-600'
+      border: 'rgba(0, 255, 128, 0.3)',
+      borderHover: 'rgba(0, 255, 128, 0.6)',
+      bg: 'rgba(0, 255, 128, 0.1)',
+      icon: '#00ff80',
+      text: '#e2e8f0',
+      shadow: 'rgba(0, 255, 128, 0.2)'
     },
     amber: {
-      border: 'border-amber-500 hover:border-amber-600',
-      bg: 'bg-amber-100 dark:bg-amber-900',
-      text: 'text-amber-500 hover:text-amber-600'
+      border: 'rgba(255, 255, 0, 0.3)',
+      borderHover: 'rgba(255, 255, 0, 0.6)',
+      bg: 'rgba(255, 255, 0, 0.1)',
+      icon: '#ffff00',
+      text: '#e2e8f0',
+      shadow: 'rgba(255, 255, 0, 0.2)'
     },
     purple: {
-      border: 'border-purple-500 hover:border-purple-600',
-      bg: 'bg-purple-100 dark:bg-purple-900',
-      text: 'text-purple-500 hover:text-purple-600'
+      border: 'rgba(128, 0, 255, 0.3)',
+      borderHover: 'rgba(128, 0, 255, 0.6)',
+      bg: 'rgba(128, 0, 255, 0.1)',
+      icon: '#8000ff',
+      text: '#e2e8f0',
+      shadow: 'rgba(128, 0, 255, 0.2)'
     },
     green: {
-      border: 'border-green-500 hover:border-green-600',
-      bg: 'bg-green-100 dark:bg-green-900',
-      text: 'text-green-500 hover:text-green-600'
+      border: 'rgba(0, 255, 80, 0.3)',
+      borderHover: 'rgba(0, 255, 80, 0.6)',
+      bg: 'rgba(0, 255, 80, 0.1)',
+      icon: '#00ff50',
+      text: '#e2e8f0',
+      shadow: 'rgba(0, 255, 80, 0.2)'
     },
     red: {
-      border: 'border-red-500 hover:border-red-600',
-      bg: 'bg-red-100 dark:bg-red-900',
-      text: 'text-red-500 hover:text-red-600'
+      border: 'rgba(255, 0, 64, 0.3)',
+      borderHover: 'rgba(255, 0, 64, 0.6)',
+      bg: 'rgba(255, 0, 64, 0.1)',
+      icon: '#ff0040',
+      text: '#e2e8f0',
+      shadow: 'rgba(255, 0, 64, 0.2)'
     }
   };
+
+  const colors = colorClasses[color];
 
   return (
     <Link
       href={`/calculadoras/${id}`}
       ref={ref}
-      className={cn(
-        "card hover:shadow-lg transition-shadow border-t-4 text-center sm:text-left h-full flex flex-col justify-between p-6",
-        colorClasses[color].border,
-        className
-      )}
+      className={cn("block h-full", className)}
+      style={{ textDecoration: 'none' }}
     >
-      <div>
-        <div className={`h-12 w-12 ${colorClasses[color].bg} rounded-lg flex items-center justify-center mb-4 mx-auto sm:mx-0`}>
-          <div className={colorClasses[color].text}>
-            {icon}
+      <div
+        className="h-full p-6 rounded-lg transition-all duration-300 cursor-pointer relative overflow-hidden group"
+        style={{
+          background: 'rgba(10, 15, 30, 0.8)',
+          border: `1px solid ${colors.border}`,
+          boxShadow: `0 0 10px ${colors.shadow}, inset 0 0 20px rgba(0, 0, 0, 0.3)`
+        }}
+      >
+        <div
+          className="absolute top-0 left-0 w-full h-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+          style={{
+            background: `linear-gradient(90deg, transparent, ${colors.icon}, transparent)`,
+            boxShadow: `0 0 20px ${colors.icon}`
+          }}
+        />
+        
+        <div
+          className="absolute top-0 right-0 w-20 h-20 opacity-20 group-hover:opacity-30 transition-opacity duration-300"
+          style={{
+            background: `radial-gradient(circle at center, ${colors.icon} 0%, transparent 70%)`,
+            transform: 'translate(30%, -30%)'
+          }}
+        />
+
+        <div>
+          <div
+            className="h-12 w-12 rounded-lg flex items-center justify-center mb-4 mx-auto sm:mx-0 transition-all duration-300 group-hover:scale-110"
+            style={{
+              background: colors.bg,
+              border: `1px solid ${colors.border}`,
+              boxShadow: `0 0 15px ${colors.shadow}`
+            }}
+          >
+            <div style={{ color: colors.icon, filter: `drop-shadow(0 0 5px ${colors.icon})` }}>
+              {icon}
+            </div>
           </div>
+          <h2 
+            className="text-lg sm:text-xl font-semibold mb-2" 
+            style={{ 
+              fontFamily: 'var(--font-orbitron)', 
+              color: colors.text,
+              textShadow: `0 0 10px ${colors.shadow}`
+            }}
+          >
+            {title}
+          </h2>
+          <p className="mb-4" style={{ color: 'rgba(226, 232, 240, 0.6)', fontSize: '0.9rem', lineHeight: '1.6' }}>{description}</p>
         </div>
-        <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white mb-2">{title}</h2>
-        <p className="text-gray-600 dark:text-gray-400 mb-4">{description}</p>
-      </div>
-      <div className={`${colorClasses[color].text} font-medium inline-flex items-center mt-4`}>
-        Abrir calculadora
-        <svg className="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-        </svg>
+        
+        <div 
+          className="font-medium inline-flex items-center mt-4 transition-all duration-300 group-hover:translate-x-2"
+          style={{ 
+            color: colors.icon, 
+            textShadow: `0 0 10px ${colors.icon}`,
+            fontFamily: 'var(--font-orbitron)',
+            fontSize: '0.75rem',
+            letterSpacing: '1px'
+          }}
+        >
+          ABRIR CALCULADORA
+          <svg className="w-4 h-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" style={{ filter: `drop-shadow(0 0 5px ${colors.icon})` }}>
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
+        </div>
       </div>
     </Link>
   );
