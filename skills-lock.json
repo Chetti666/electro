@@ -1,6 +1,12 @@
 {
   "version": 1,
   "skills": {
+    "hyperframes": {
+      "source": "heygen-com/hyperframes",
+      "sourceType": "github",
+      "skillPath": "skills/hyperframes/SKILL.md",
+      "computedHash": "fa55ee1c1e271852b4dbf0c8db58aff61fbbc0f8ed9f67c5f707a5db2fe42d50"
+    },
     "next-best-practices": {
       "source": "vercel-labs/next-skills",
       "sourceType": "github",
