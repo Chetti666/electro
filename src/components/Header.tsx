@@ -28,6 +28,7 @@ export default function Header() {
     { name: 'Calculadoras', href: '/calculadoras' },
     { name: 'Informes', href: '/informes' },
     { name: 'Acerca de', href: '/about' },
+    { name: 'Contacto', href: '/contact' },
   ];
 
   return (
