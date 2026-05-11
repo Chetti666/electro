@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Zap, Github, Twitter, Linkedin, Heart, Mail, MapPin, MessageCircle } from "lucide-react";
+import VisitCounter from "./VisitCounter";
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
@@ -178,11 +179,15 @@ export default function Footer() {
           style={{ color: 'rgba(226, 232, 240, 0.4)' }}
         >
           <p>&copy; {currentYear} VMElectric. Todos los derechos reservados.</p>
-          <p className="flex items-center gap-1">
-            Hecho con 
-            <Heart className="w-4 h-4" style={{ color: '#ff0040', fill: '#ff0040', filter: 'drop-shadow(0 0 5px #ff0040)' }} /> 
-            por el equipo de VMElectric
-          </p>
+          <div className="flex items-center gap-4">
+            <VisitCounter />
+            <span className="hidden md:inline" style={{ color: 'rgba(226, 232, 240, 0.2)' }}>|</span>
+            <p className="flex items-center gap-1">
+              Hecho con 
+              <Heart className="w-4 h-4" style={{ color: '#ff0040', fill: '#ff0040', filter: 'drop-shadow(0 0 5px #ff0040)' }} /> 
+              por el equipo de VMElectric
+            </p>
+          </div>
         </motion.div>
       </div>
     </footer>

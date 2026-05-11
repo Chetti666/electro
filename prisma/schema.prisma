@@ -14,7 +14,6 @@ enum Role {
   ADMIN
 }
 
-// Example data model
 model User {
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
@@ -23,4 +22,9 @@ model User {
   name      String?
   password  String
   role      Role     @default(USER)
+}
+
+model SiteMetric {
+  id     Int @id @default(autoincrement())
+  visits Int @default(0)
 }
