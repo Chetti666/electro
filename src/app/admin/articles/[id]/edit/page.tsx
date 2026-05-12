@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
+import Image from 'next/image';
 import RichTextEditor from '@/components/RichTextEditor';
 import { slugify } from '@/lib/slugify';
 
@@ -161,8 +162,8 @@ export default function EditArticlePage() {
             className="form-input"
           />
           {imageUrl && (
-            <div className="mt-2 rounded-lg overflow-hidden w-48 h-32">
-              <img src={imageUrl} alt="Preview" className="w-full h-full object-cover" onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+            <div className="mt-2 rounded-lg overflow-hidden w-48 h-32 relative">
+              <Image src={imageUrl} alt="Preview" fill className="object-cover" unoptimized onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
             </div>
           )}
         </div>

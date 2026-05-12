@@ -25,7 +25,7 @@ export default function LoginPage() {
 
     setIsLoading(false);
     if (response.ok) {
-      router.push('/signup');
+      router.push('/admin');
     } else {
       const data = await response.json();
       setError(data.error || 'Ocurrió un error al iniciar sesión.');

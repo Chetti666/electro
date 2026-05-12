@@ -22,9 +22,40 @@ model User {
   name      String?
   password  String
   role      Role     @default(USER)
+  articles  Article[]
 }
 
 model SiteMetric {
   id     Int @id @default(autoincrement())
   visits Int @default(0)
+}
+
+enum ArticleStatus {
+  DRAFT
+  PUBLISHED
+}
+
+model Category {
+  id        Int       @id @default(autoincrement())
+  name      String    @unique
+  slug      String    @unique
+  createdAt DateTime  @default(now())
+  articles  Article[]
+}
+
+model Article {
+  id         Int           @id @default(autoincrement())
+  title      String
+  slug       String        @unique
+  excerpt    String?
+  content    String
+  imageUrl   String?
+  status     ArticleStatus @default(DRAFT)
+  authorId   Int
+  categoryId Int?
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+
+  author   User      @relation(fields: [authorId], references: [id], onDelete: Restrict)
+  category Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
 }
