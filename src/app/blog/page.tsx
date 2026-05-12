@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import Link from 'next/link';
 import { prisma } from '@/lib/prisma';
 import { Calendar, User } from 'lucide-react';
@@ -23,68 +24,96 @@ export default async function BlogPage() {
   });
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-12">
-      <div className="text-center mb-10">
-        <h1
-          className="text-xl sm:text-2xl font-bold text-foreground tracking-tight"
-          style={{ fontFamily: 'var(--font-display)' }}
-        >
-          Blog Técnico
-        </h1>
-        <p className="text-sm sm:text-base text-muted-foreground mt-1 max-w-lg mx-auto">
-          Artículos, guías y noticias sobre instalaciones eléctricas, normativas vigentes y mejores prácticas del sector.
-        </p>
-      </div>
-
-      {categories.length > 0 && (
-        <div className="flex flex-wrap justify-center gap-2 mb-8">
-          {categories.map(cat => (
-            <span
-              key={cat.id}
-              className="px-3 py-1 rounded-lg text-xs font-medium bg-primary/10 text-primary border border-primary/20"
-            >
-              {cat.name} ({cat._count.articles})
-            </span>
-          ))}
+    <section className="pt-24 pb-12 md:pt-32">
+      <div className="container mx-auto px-4">
+        <div className="text-center mb-12">
+          <h1
+            className="section-title"
+          >
+            Blog Técnico
+          </h1>
+          <p className="section-subtitle">
+            Artículos, guías y noticias sobre instalaciones eléctricas, normativas vigentes y mejores prácticas del sector.
+          </p>
         </div>
-      )}
 
-      {articles.length === 0 ? (
-        <div className="text-center py-20">
-          <p className="text-muted-foreground">No hay artículos publicados todavía. Vuelve pronto.</p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {articles.map(article => (
-            <Link
-              key={article.id}
-              href={`/blog/${article.slug}`}
-              className="group rounded-xl overflow-hidden border border-border bg-card hover:bg-card-hover transition-all duration-200"
-            >
-              {article.imageUrl && (
-                <div className="h-44 overflow-hidden">
-                  <img
-                    src={article.imageUrl}
-                    alt={article.title}
-                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                  />
-                </div>
-              )}
-              <div className="p-5">
+        {categories.length > 0 && (
+          <div className="flex flex-wrap justify-center gap-2 mb-10">
+            {categories.map(cat => (
+              <span
+                key={cat.id}
+                className="px-3 py-1 rounded-lg text-xs font-medium"
+                style={{
+                  background: 'rgba(37, 99, 235, 0.1)',
+                  border: '1px solid rgba(37, 99, 235, 0.2)',
+                  color: 'var(--primary-light)',
+                }}
+              >
+                {cat.name} ({cat._count.articles})
+              </span>
+            ))}
+          </div>
+        )}
+
+        {articles.length === 0 ? (
+          <div className="text-center py-20">
+            <p style={{ color: 'var(--foreground-muted)' }}>
+              No hay artículos publicados todavía. Vuelve pronto.
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {articles.map(article => (
+              <Link
+                key={article.id}
+                href={`/blog/${article.slug}`}
+                className="group card"
+              >
+                {article.imageUrl && (
+                  <div className="h-44 -mx-6 -mt-6 mb-5 overflow-hidden rounded-t-xl relative">
+                    <Image
+                      src={article.imageUrl}
+                      alt={article.title}
+                      fill
+                      className="object-cover transition-transform duration-300 group-hover:scale-105"
+                      unoptimized
+                    />
+                  </div>
+                )}
                 {article.category && (
-                  <span className="inline-block px-2.5 py-0.5 rounded text-xs font-medium bg-primary/10 text-primary border border-primary/20 mb-3">
+                  <span
+                    className="inline-block px-2.5 py-0.5 rounded text-xs font-medium mb-3"
+                    style={{
+                      background: 'rgba(37, 99, 235, 0.1)',
+                      border: '1px solid rgba(37, 99, 235, 0.2)',
+                      color: 'var(--primary-light)',
+                    }}
+                  >
                     {article.category.name}
                   </span>
                 )}
-                <h2 className="text-base font-bold text-foreground mb-2 leading-snug group-hover:text-primary transition-colors">
+                <h2
+                  className="text-lg font-bold mb-2 leading-snug transition-colors group-hover:text-primary-light"
+                  style={{
+                    color: 'var(--foreground)',
+                    fontFamily: 'var(--font-rajdhani)',
+                    letterSpacing: '0.5px',
+                  }}
+                >
                   {article.title}
                 </h2>
                 {article.excerpt && (
-                  <p className="text-sm text-muted-foreground mb-4 line-clamp-3 leading-relaxed">
+                  <p
+                    className="text-sm mb-4 line-clamp-3 leading-relaxed"
+                    style={{ color: 'var(--foreground-dim)' }}
+                  >
                     {article.excerpt}
                   </p>
                 )}
-                <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                <div
+                  className="flex items-center gap-4 text-xs"
+                  style={{ color: 'var(--foreground-muted)' }}
+                >
                   <span className="flex items-center gap-1">
                     <Calendar className="w-3.5 h-3.5" />
                     {new Date(article.createdAt).toLocaleDateString('es-CL', {
@@ -98,11 +127,11 @@ export default async function BlogPage() {
                     </span>
                   )}
                 </div>
-              </div>
-            </Link>
-          ))}
-        </div>
-      )}
-    </div>
+              </Link>
+            ))}
+          </div>
+        )}
+      </div>
+    </section>
   );
 }

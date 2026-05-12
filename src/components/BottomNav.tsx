@@ -3,10 +3,11 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { Home, Calculator, FileText, User } from 'lucide-react';
+import { Home, Calculator, FileText, User, Newspaper } from 'lucide-react';
 
 const navItems = [
   { label: 'Inicio', href: '/', icon: Home },
+  { label: 'Blog', href: '/blog', icon: Newspaper },
   { label: 'Calculadoras', href: '/calculadoras', icon: Calculator },
   { label: 'Informes', href: '/informes', icon: FileText },
   { label: 'Perfil', href: '/about', icon: User },

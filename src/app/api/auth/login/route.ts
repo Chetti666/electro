@@ -36,9 +36,14 @@ export async function POST(request: Request) {
       );
     }
 
-    // 3. Crear un token de sesión (esto es un placeholder)
-    // En una aplicación real, usarías JWT (JSON Web Tokens) o una librería similar.
-    const sessionToken = 'este-es-un-token-de-sesion-secreto';
+    // 3. Crear sesión codificando datos del usuario en base64
+    const sessionData = {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      role: user.role,
+    };
+    const sessionToken = Buffer.from(JSON.stringify(sessionData)).toString('base64');
 
     // Excluir la contraseña de la respuesta
     const userWithoutPassword = { ...user };
