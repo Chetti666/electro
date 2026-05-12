@@ -5,14 +5,6 @@ import { motion, Variants } from 'framer-motion';
 import { InfoCard } from '../../components/InfoCard';
 import { ClipboardList, Eye, TrendingUp, User, ChevronDown, ChevronUp } from 'lucide-react';
 
-export const metadata = {
-  title: 'Sobre Nosotros - Herramientas Eléctricas Profesionales | VMElectric',
-  description: 'Conócenos. VMElectric ofrece calculadoras eléctricas y generadores de informes para profesionales del sector. Nuestra misión es simplificar el trabajo en terreno.',
-  alternates: {
-    canonical: 'https://vmelectric.cl/about',
-  },
-};
-
 // Datos del equipo actualizados
 const teamMembers = [
     {

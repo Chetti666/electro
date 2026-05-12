@@ -5,14 +5,6 @@ import { ReactNode } from 'react';
 import { motion, Variants } from 'framer-motion';
 import { Zap, Activity, ShieldCheck, Search, Calculator, ClipboardCheck } from 'lucide-react';
 
-export const metadata = {
-  title: 'Calculadoras Eléctricas - Cálculos de Sección, Caída de Tensión | VMElectric',
-  description: 'Utiliza nuestras calculadoras eléctricas profesionales: cálculo de sección de conductores, caída de tensión, corriente admisible RIC, empalmes normativos y más.',
-  alternates: {
-    canonical: 'https://vmelectric.cl/calculadoras',
-  },
-};
-
 export default function Calculadoras() {
   type Calculadora = {
     id: string;
