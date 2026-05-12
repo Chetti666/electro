@@ -3,18 +3,24 @@
 ## Dev Commands
 
 ```bash
-npm run dev       # Start dev server with Turbopack
+npm run dev       # Start dev server on http://localhost:3000 (Turbopack)
 npm run build     # Run migrations, seed, then build
 npm run lint      # ESLint
 ```
 
-**Build order matters**: `prisma migrate deploy` → `prisma generate` → `prisma:seed` → `next build`
+**Build order matters** (in package.json scripts):
+1. `prisma migrate deploy`
+2. `prisma generate`
+3. `npm run prisma:seed`
+4. `next build`
+
+**No typecheck script** - Run `npx tsc --noEmit` manually if needed.
 
 ## Database
 
-- Prisma with PostgreSQL (`DATABASE_URL` env var required)
-- Schema at `prisma/schema.prisma`
-- Seed script at `prisma/seed.ts`
+- Prisma with PostgreSQL - **`DATABASE_URL` env var required**
+- Schema: `prisma/schema.prisma`
+- Seed: `prisma/seed.ts` (uses bcrypt)
 
 ## Stack
 
@@ -28,6 +34,7 @@ npm run lint      # ESLint
 - ESLint flat config (`eslint.config.mjs`)
 - Framer Motion for animations
 - Chart.js for graphs
+- Tiptap for rich text editing
 
 ## Project Structure
 
@@ -59,4 +66,4 @@ The app uses a **neon retro-futuristic theme**:
 - Users stored in PostgreSQL via Prisma
 - Passwords hashed with bcrypt
 - Login API: `src/app/api/auth/login/route.ts`
-- Session via cookies (middleware protects routes)
+- Session via `session_token` cookie (middleware redirects unauthenticated /signup to /login)

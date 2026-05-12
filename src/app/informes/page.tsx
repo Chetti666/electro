@@ -5,6 +5,14 @@ import { ReactNode } from 'react';
 import { motion, Variants } from 'framer-motion';
 import { Activity, FileText, Camera, Search } from 'lucide-react';
 
+export const metadata = {
+  title: 'Generadores de Informes Eléctricos - SEV, Presupuesto, Inspección | VMElectric',
+  description: 'Crea informes eléctricos profesionales: Sondeos Eléctricos Verticales (SEV), presupuestos, informes fotográficos RIC N°18 e inspecciones. Exporta a PDF.',
+  alternates: {
+    canonical: 'https://vmelectric.cl/informes',
+  },
+};
+
 export default function Informes() {
   type Informe = {
     id: string;

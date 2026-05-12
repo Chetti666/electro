@@ -1,0 +1,12 @@
+# robots.txt
+User-agent: *
+Allow: /
+
+# Block admin/private areas
+Disallow: /admin/
+Disallow: /api/
+Disallow: /login
+Disallow: /signup
+Disallow: /admin/articles/new
+
+Sitemap: https://vmelectric.cl/sitemap.xml

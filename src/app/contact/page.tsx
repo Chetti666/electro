@@ -4,6 +4,14 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Send, Mail, User, MessageSquare, AlertCircle, CheckCircle, Zap } from 'lucide-react';
 
+export const metadata = {
+  title: 'Contacto - Contáctanos | VMElectric',
+  description: '¿Tienes preguntas sobre nuestras calculadoras o informes eléctricos? Contáctanos para soporte técnico, consultas o sugerencias.',
+  alternates: {
+    canonical: 'https://vmelectric.cl/contact',
+  },
+};
+
 type FormData = {
   name: string;
   email: string;
