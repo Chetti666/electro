@@ -18,7 +18,7 @@ export default function Calculadoras() {
     {
       id: 'seccion',
       title: 'Cálculo de Sección de Conductores',
-      description: 'Calcula la sección minima del conductor. Determina la sección necesaria para imitar la Caída de Tensión y asegurar que el voltaje que llega a la carga final (💡) sea suficiente.',
+      description: 'Calcula la sección minima del conductor. Determina la sección necesaria para imitar la Caída de Tensión y asegurar que el voltaje que llega a la carga final sea suficiente.',
       icon: <Zap className="h-6 w-6" />,
       color: 'blue'
     },
@@ -82,15 +82,15 @@ export default function Calculadoras() {
   };
 
   return (
-    <div className="container mx-auto px-4 pt-24 pb-12 md:pt-32 grid-bg" style={{ minHeight: '100vh' }}>
+    <div className="page-container">
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
         className="text-center mb-12"
       >
-        <h1 className="text-3xl md:text-4xl font-bold mb-4" style={{ fontFamily: 'var(--font-orbitron)', color: '#00ffff', textShadow: '0 0 10px rgba(0, 255, 255, 0.5), 0 0 20px rgba(0, 255, 255, 0.3)' }}>Calculadoras Eléctricas</h1>
-        <p className="text-lg max-w-2xl mx-auto" style={{ color: 'rgba(226, 232, 240, 0.7)' }}>
+        <h1 className="section-title">Calculadoras Eléctricas</h1>
+        <p className="section-subtitle">
           Selecciona una de nuestras calculadoras especializadas para realizar tus cálculos eléctricos de manera precisa y eficiente.
         </p>
       </motion.div>

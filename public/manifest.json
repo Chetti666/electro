@@ -1,0 +1,18 @@
+{
+  "name": "VMElectric",
+  "short_name": "VMElectric",
+  "description": "Herramientas eléctricas profesionales para cálculos e informes técnicos",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0b1121",
+  "theme_color": "#0b1121",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/electrocalc-logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

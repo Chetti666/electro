@@ -32,7 +32,7 @@ export default function VisitCounter() {
 
   return (
     <span className="inline-flex items-center gap-1.5">
-      <Eye className="w-3.5 h-3.5" style={{ color: '#00ffff' }} />
+      <Eye className="w-3.5 h-3.5 text-primary-light" />
       <span>{visits.toLocaleString('es-CL')} visitas</span>
     </span>
   );

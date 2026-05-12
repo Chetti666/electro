@@ -1,4 +1,3 @@
-// src/app/about/InfoCard.tsx
 import React from 'react';
 
 interface InfoCardProps {
@@ -7,7 +6,7 @@ interface InfoCardProps {
   children: React.ReactNode;
   iconBgClass: string;
   iconTextClass: string;
-  isCard?: boolean; // Prop opcional para aplicar estilo de tarjeta
+  isCard?: boolean;
 }
 
 export const InfoCard: React.FC<InfoCardProps> = ({
@@ -16,10 +15,10 @@ export const InfoCard: React.FC<InfoCardProps> = ({
   children,
   iconBgClass,
   iconTextClass,
-  isCard = false, // Valor por defecto
+  isCard = false,
 }) => {
-  const cardClasses = isCard 
-    ? 'card rounded-lg p-6 lg:p-8 transition-all duration-300 hover:bg-gray-800/60 hover:-translate-y-1' 
+  const cardClasses = isCard
+    ? 'card rounded-xl p-6 lg:p-8 transition-all duration-200 hover:-translate-y-1'
     : '';
 
   return (
@@ -30,8 +29,8 @@ export const InfoCard: React.FC<InfoCardProps> = ({
         {React.cloneElement(icon, { className: `h-5 w-5 ${iconTextClass}` })}
       </div>
       <div>
-        <h3 className="text-2xl font-semibold text-white">{title}</h3>
-        <p className="text-md mt-2 leading-relaxed text-gray-300">
+        <h3 className="text-xl font-semibold" style={{ color: 'var(--foreground)' }}>{title}</h3>
+        <p className="text-sm mt-2 leading-relaxed" style={{ color: 'var(--foreground-muted)' }}>
           {children}
         </p>
       </div>

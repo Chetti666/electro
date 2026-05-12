@@ -33,21 +33,20 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen grid-bg">
-      <div 
+    <div className="flex items-center justify-center min-h-screen" style={{ background: 'var(--background)' }}>
+      <div
         className="w-full max-w-md p-8 space-y-6"
         style={{
-          background: 'rgba(10, 15, 30, 0.9)',
+          background: 'var(--card-bg)',
           borderRadius: '1rem',
-          border: '1px solid rgba(0, 255, 255, 0.3)',
-          boxShadow: '0 0 30px rgba(0, 255, 255, 0.2), inset 0 0 30px rgba(0, 255, 255, 0.03)'
+          border: '1px solid var(--card-border)',
         }}
       >
         <div className="flex items-center justify-center gap-2">
-          <LogoIcon className="h-8 w-8" style={{ color: '#00ffff', filter: 'drop-shadow(0 0 10px #00ffff)' }} />
-          <h1 
+          <LogoIcon className="h-8 w-8 text-primary-light" />
+          <h1
             className="text-2xl font-bold text-center"
-            style={{ fontFamily: 'var(--font-orbitron)', color: '#00ffff', textShadow: '0 0 10px rgba(0, 255, 255, 0.5)' }}
+            style={{ fontFamily: 'var(--font-rajdhani)', color: 'var(--foreground)', letterSpacing: '1px' }}
           >
             Login
           </h1>
@@ -61,17 +60,8 @@ export default function LoginPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="tu@email.com"
-              style={{
-                width: '100%',
-                padding: '0.75rem 1rem',
-                marginTop: '0.5rem',
-                background: 'rgba(10, 15, 30, 0.8)',
-                border: '1px solid rgba(0, 255, 255, 0.2)',
-                borderRadius: '0.5rem',
-                color: '#e2e8f0',
-                boxShadow: 'inset 0 0 10px rgba(0, 0, 0, 0.3)',
-                outline: 'none'
-              }}
+              className="form-input"
+              style={{ marginTop: '0.5rem' }}
             />
           </div>
           <div className="relative">
@@ -82,22 +72,13 @@ export default function LoginPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Tu contraseña"
-              style={{
-                width: '100%',
-                padding: '0.75rem 1rem',
-                marginTop: '0.5rem',
-                background: 'rgba(10, 15, 30, 0.8)',
-                border: '1px solid rgba(0, 255, 255, 0.2)',
-                borderRadius: '0.5rem',
-                color: '#e2e8f0',
-                boxShadow: 'inset 0 0 10px rgba(0, 0, 0, 0.3)',
-                outline: 'none'
-              }}
+              className="form-input"
+              style={{ marginTop: '0.5rem' }}
             />
             <button
               type="button"
-              className="absolute inset-y-0 flex items-center px-4"
-              style={{ right: 0, top: '1.5rem', color: 'rgba(0, 255, 255, 0.6)' }}
+              className="absolute flex items-center px-4"
+              style={{ right: 0, top: '1.5rem', color: 'var(--foreground-dim)' }}
               onClick={() => setShowPassword(!showPassword)}
             >
               {showPassword ? (
@@ -109,12 +90,12 @@ export default function LoginPage() {
           </div>
 
           {error && (
-            <div 
-              className="p-3 rounded-md text-sm"
+            <div
+              className="p-3 rounded-lg text-sm"
               style={{
-                background: 'rgba(255, 0, 64, 0.1)',
-                border: '1px solid rgba(255, 0, 64, 0.3)',
-                color: '#ff0040'
+                background: 'rgba(239, 68, 68, 0.1)',
+                border: '1px solid rgba(239, 68, 68, 0.3)',
+                color: 'var(--danger)'
               }}
             >
               <p>{error}</p>
@@ -129,12 +110,12 @@ export default function LoginPage() {
                 style={{
                   width: '1rem',
                   height: '1rem',
-                  accentColor: '#00ffff'
+                  accentColor: 'var(--primary)'
                 }}
               />
               <Label
                 htmlFor="remember-me"
-                style={{ marginLeft: '0.5rem', fontSize: '0.875rem', color: 'rgba(226, 232, 240, 0.7)', fontFamily: 'var(--font-rajdhani)' }}
+                style={{ marginLeft: '0.5rem', fontSize: '0.875rem', color: 'var(--foreground-dim)' }}
               >
                 Recordar credenciales
               </Label>
@@ -149,12 +130,9 @@ export default function LoginPage() {
                 padding: '0.75rem 1rem',
                 fontWeight: 600,
                 borderRadius: '0.5rem',
-                background: 'transparent',
-                border: '2px solid #00ffff',
-                color: '#00ffff',
-                fontFamily: 'var(--font-orbitron)',
-                boxShadow: '0 0 15px rgba(0, 255, 255, 0.3), inset 0 0 10px rgba(0, 255, 255, 0.1)',
-                textShadow: '0 0 10px rgba(0, 255, 255, 0.5)',
+                background: 'var(--primary)',
+                border: '1px solid var(--primary)',
+                color: '#fff',
                 cursor: isLoading ? 'not-allowed' : 'pointer',
                 opacity: isLoading ? 0.5 : 1
               }}
@@ -164,10 +142,10 @@ export default function LoginPage() {
           </div>
         </form>
 
-        <div className="text-center text-sm" style={{ color: 'rgba(226, 232, 240, 0.6)' }}>
+        <div className="text-center text-sm" style={{ color: 'var(--foreground-dim)' }}>
           <p>
             ¿Problemas para ingresar?{' '}
-            <Link href="/contacto" style={{ color: '#ff00ff', textShadow: '0 0 10px rgba(255, 0, 255, 0.5)' }}>Contáctanos</Link>
+            <Link href="/contacto" style={{ color: 'var(--primary-light)' }}>Contáctanos</Link>
           </p>
         </div>
 
