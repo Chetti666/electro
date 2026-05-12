@@ -48,7 +48,6 @@ export default function SignupPage() {
     setError(null);
     setSuccess(null);
 
-    // Lógica para crear un nuevo usuario (POST)
     if (!password) {
       setError('La contraseña es obligatoria.');
       setIsLoading(false);
@@ -72,7 +71,7 @@ export default function SignupPage() {
 
       setSuccess(`¡Usuario creado con éxito! Email: ${data.email}`);
       resetForm();
-      fetchUsers(); // Recargar la lista de usuarios
+      fetchUsers();
 
     } catch (err: unknown) {
       if (err instanceof Error) {
@@ -141,47 +140,29 @@ export default function SignupPage() {
   };
 
 return (
-    <div className="container mx-auto px-4 py-8 grid-bg" style={{ minHeight: '100vh' }}>
+    <div className="container mx-auto px-4 py-8" style={{ minHeight: '100vh' }}>
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-12">
-        {/* Columna del Formulario */}
         <div className="lg:col-span-2">
-          <div 
-            className="w-full p-8 space-y-6"
-            style={{
-              background: 'rgba(10, 15, 30, 0.9)',
-              borderRadius: '1rem',
-              border: '1px solid rgba(0, 255, 255, 0.3)',
-              boxShadow: '0 0 30px rgba(0, 255, 255, 0.2)'
-            }}
-          >
+          <div className="w-full p-8 space-y-6 card">
             <div className="text-center">
-              <h1 className="text-2xl font-bold mb-2" style={{ fontFamily: 'var(--font-orbitron)', color: '#00ffff', textShadow: '0 0 10px rgba(0, 255, 255, 0.5)' }}>Crear Usuario</h1>
-              <p style={{ color: 'rgba(226, 232, 240, 0.6)' }}>Ingresa los datos para registrar un nuevo usuario.</p>
+              <h1 className="text-2xl font-bold mb-2" style={{ fontFamily: 'var(--font-rajdhani)', color: 'var(--foreground)', letterSpacing: '1px' }}>Crear Usuario</h1>
+              <p style={{ color: 'var(--foreground-dim)' }}>Ingresa los datos para registrar un nuevo usuario.</p>
             </div>
-            
+
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
-                <label htmlFor="name" style={{ display: 'block', fontSize: '0.75rem', fontFamily: 'var(--font-orbitron)', color: '#00ffff', textShadow: '0 0 10px rgba(0, 255, 255, 0.3)', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '0.5rem' }}>Nombre (Opcional)</label>
+                <label htmlFor="name" className="form-label">Nombre (Opcional)</label>
                 <input
                   id="name"
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Nombre del usuario"
-                  style={{
-                    width: '100%',
-                    padding: '0.75rem 1rem',
-                    background: 'rgba(10, 15, 30, 0.8)',
-                    border: '1px solid rgba(0, 255, 255, 0.2)',
-                    borderRadius: '0.5rem',
-                    color: '#e2e8f0',
-                    boxShadow: 'inset 0 0 10px rgba(0, 0, 0, 0.3)',
-                    outline: 'none'
-                  }}
+                  className="form-input"
                 />
               </div>
               <div>
-                <label htmlFor="email" style={{ display: 'block', fontSize: '0.75rem', fontFamily: 'var(--font-orbitron)', color: '#00ffff', textShadow: '0 0 10px rgba(0, 255, 255, 0.3)', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '0.5rem' }}>Email</label>
+                <label htmlFor="email" className="form-label">Email</label>
                 <input
                   id="email"
                   type="email"
@@ -189,69 +170,42 @@ return (
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="usuario@email.com"
                   required
-                  style={{
-                    width: '100%',
-                    padding: '0.75rem 1rem',
-                    background: 'rgba(10, 15, 30, 0.8)',
-                    border: '1px solid rgba(0, 255, 255, 0.2)',
-                    borderRadius: '0.5rem',
-                    color: '#e2e8f0',
-                    boxShadow: 'inset 0 0 10px rgba(0, 0, 0, 0.3)',
-                    outline: 'none'
-                  }}
+                  className="form-input"
                 />
               </div>
               <div>
-                <label htmlFor="password" style={{ display: 'block', fontSize: '0.75rem', fontFamily: 'var(--font-orbitron)', color: '#00ffff', textShadow: '0 0 10px rgba(0, 255, 255, 0.3)', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '0.5rem' }}>Contraseña</label>
+                <label htmlFor="password" className="form-label">Contraseña</label>
                 <input
                   id="password"
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder='Crea una contraseña segura'
+                  placeholder="Crea una contraseña segura"
                   required
-                  style={{
-                    width: '100%',
-                    padding: '0.75rem 1rem',
-                    background: 'rgba(10, 15, 30, 0.8)',
-                    border: '1px solid rgba(0, 255, 255, 0.2)',
-                    borderRadius: '0.5rem',
-                    color: '#e2e8f0',
-                    boxShadow: 'inset 0 0 10px rgba(0, 0, 0, 0.3)',
-                    outline: 'none'
-                  }}
+                  className="form-input"
                 />
               </div>
               <div>
-                <label htmlFor="role" style={{ display: 'block', fontSize: '0.75rem', fontFamily: 'var(--font-orbitron)', color: '#00ffff', textShadow: '0 0 10px rgba(0, 255, 255, 0.3)', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '0.5rem' }}>Rol</label>
+                <label htmlFor="role" className="form-label">Rol</label>
                 <select
                   id="role"
                   value={role}
                   onChange={(e) => setRole(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '0.75rem 1rem',
-                    background: 'rgba(10, 15, 30, 0.8)',
-                    border: '1px solid rgba(0, 255, 255, 0.2)',
-                    borderRadius: '0.5rem',
-                    color: '#e2e8f0',
-                    boxShadow: 'inset 0 0 10px rgba(0, 0, 0, 0.3)',
-                    outline: 'none'
-                  }}
+                  className="form-select"
                 >
-                  <option value="USER" style={{ background: '#0a0f1a' }}>Usuario</option>
-                  <option value="ADMIN" style={{ background: '#0a0f1a' }}>Administrador</option>
+                  <option value="USER">Usuario</option>
+                  <option value="ADMIN">Administrador</option>
                 </select>
               </div>
-              
+
               {error && (
-                <div className="p-3 rounded-md text-sm" style={{ background: 'rgba(255, 0, 64, 0.1)', border: '1px solid rgba(255, 0, 64, 0.3)', color: '#ff0040' }}>
+                <div className="p-3 rounded-lg text-sm" style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.3)', color: 'var(--danger)' }}>
                   <p>{error}</p>
                 </div>
               )}
 
               {success && (
-                <div className="p-3 rounded-md text-sm" style={{ background: 'rgba(0, 255, 80, 0.1)', border: '1px solid rgba(0, 255, 80, 0.3)', color: '#00ff50' }}>
+                <div className="p-3 rounded-lg text-sm" style={{ background: 'rgba(34, 197, 94, 0.1)', border: '1px solid rgba(34, 197, 94, 0.3)', color: 'var(--success)' }}>
                   <p>{success}</p>
                 </div>
               )}
@@ -260,20 +214,7 @@ return (
                 <button
                   type="submit"
                   disabled={isLoading}
-                  style={{
-                    width: '100%',
-                    padding: '0.75rem 1rem',
-                    fontWeight: 600,
-                    borderRadius: '0.5rem',
-                    background: 'transparent',
-                    border: '2px solid #00ffff',
-                    color: '#00ffff',
-                    fontFamily: 'var(--font-orbitron)',
-                    boxShadow: '0 0 15px rgba(0, 255, 255, 0.3), inset 0 0 10px rgba(0, 255, 255, 0.1)',
-                    textShadow: '0 0 10px rgba(0, 255, 255, 0.5)',
-                    cursor: isLoading ? 'not-allowed' : 'pointer',
-                    opacity: isLoading ? 0.5 : 1
-                  }}
+                  className="btn btn-primary w-full"
                 >
                   {isLoading ? 'Creando...' : 'Crear Usuario'}
                 </button>
@@ -282,52 +223,41 @@ return (
           </div>
         </div>
 
-        {/* Columna de la Lista de Usuarios */}
         <div className="lg:col-span-3">
-          <div 
-            className="p-8"
-            style={{
-              background: 'rgba(10, 15, 30, 0.9)',
-              borderRadius: '1rem',
-              border: '1px solid rgba(255, 0, 255, 0.3)',
-              boxShadow: '0 0 30px rgba(255, 0, 255, 0.2)'
-            }}
-          >
-            <h2 className="text-2xl font-bold mb-6" style={{ fontFamily: 'var(--font-orbitron)', color: '#ff00ff', textShadow: '0 0 10px rgba(255, 0, 255, 0.5)' }}>Usuarios Registrados</h2>
+          <div className="p-8 card">
+            <h2 className="text-2xl font-bold mb-6" style={{ fontFamily: 'var(--font-rajdhani)', color: 'var(--foreground)', letterSpacing: '1px' }}>Usuarios Registrados</h2>
             <div className="overflow-x-auto">
               <table className="w-full text-sm text-left">
                 <thead>
-                  <tr style={{ background: 'rgba(0, 255, 255, 0.1)' }}>
-                    <th className="px-4 py-3" style={{ color: '#00ffff', fontFamily: 'var(--font-orbitron)', fontSize: '0.75rem', letterSpacing: '1px' }}>Nombre</th>
-                    <th className="px-4 py-3" style={{ color: '#00ffff', fontFamily: 'var(--font-orbitron)', fontSize: '0.75rem', letterSpacing: '1px' }}>Email</th>
-                    <th className="px-4 py-3" style={{ color: '#00ffff', fontFamily: 'var(--font-orbitron)', fontSize: '0.75rem', letterSpacing: '1px' }}>Rol</th>
-                    <th className="px-4 py-3" style={{ color: '#00ffff', fontFamily: 'var(--font-orbitron)', fontSize: '0.75rem', letterSpacing: '1px' }}>Fecha</th>
-                    <th className="px-4 py-3" style={{ color: '#00ffff', fontFamily: 'var(--font-orbitron)', fontSize: '0.75rem', letterSpacing: '1px' }}>Acciones</th>
+                  <tr style={{ borderBottom: '1px solid var(--card-border)' }}>
+                    <th className="px-4 py-3 font-semibold" style={{ color: 'var(--foreground-muted)' }}>Nombre</th>
+                    <th className="px-4 py-3 font-semibold" style={{ color: 'var(--foreground-muted)' }}>Email</th>
+                    <th className="px-4 py-3 font-semibold" style={{ color: 'var(--foreground-muted)' }}>Rol</th>
+                    <th className="px-4 py-3 font-semibold" style={{ color: 'var(--foreground-muted)' }}>Fecha</th>
+                    <th className="px-4 py-3 font-semibold" style={{ color: 'var(--foreground-muted)' }}>Acciones</th>
                   </tr>
                 </thead>
                 <tbody>
                   {users.map((user) => (
-                    <tr key={user.id} style={{ borderBottom: '1px solid rgba(0, 255, 255, 0.1)' }}>
-                      <td className="px-4 py-3" style={{ color: '#e2e8f0' }}>{user.name || <span style={{ color: 'rgba(226, 232, 240, 0.4)' }}>N/A</span>}</td>
-                      <td className="px-4 py-3" style={{ color: '#e2e8f0' }}>{user.email}</td>
+                    <tr key={user.id} style={{ borderBottom: '1px solid var(--card-border)' }}>
+                      <td className="px-4 py-3" style={{ color: 'var(--foreground)' }}>{user.name || <span style={{ color: 'var(--foreground-dim)' }}>N/A</span>}</td>
+                      <td className="px-4 py-3" style={{ color: 'var(--foreground)' }}>{user.email}</td>
                       <td className="px-4 py-3">
-                        <span 
-                          className="px-2 py-1 text-xs font-semibold rounded-full"
+                        <span
+                          className="badge"
                           style={{
-                            background: user.role === 'ADMIN' ? 'rgba(255, 0, 64, 0.2)' : 'rgba(0, 255, 255, 0.2)',
-                            border: `1px solid ${user.role === 'ADMIN' ? 'rgba(255, 0, 64, 0.5)' : 'rgba(0, 255, 255, 0.5)'}`,
-                            color: user.role === 'ADMIN' ? '#ff0040' : '#00ffff',
-                            fontFamily: 'var(--font-orbitron)',
-                            fontSize: '0.65rem'
+                            background: user.role === 'ADMIN' ? 'rgba(239, 68, 68, 0.15)' : 'rgba(37, 99, 235, 0.15)',
+                            border: `1px solid ${user.role === 'ADMIN' ? 'rgba(239, 68, 68, 0.3)' : 'rgba(37, 99, 235, 0.3)'}`,
+                            color: user.role === 'ADMIN' ? 'var(--danger)' : 'var(--primary-light)',
                           }}
                         >
                           {user.role}
                         </span>
                       </td>
-                      <td className="px-4 py-3" style={{ color: 'rgba(226, 232, 240, 0.6)' }}>{new Date(user.createdAt).toLocaleDateString()}</td>
+                      <td className="px-4 py-3" style={{ color: 'var(--foreground-dim)' }}>{new Date(user.createdAt).toLocaleDateString()}</td>
                       <td className="px-4 py-3 flex gap-2">
-                        <button onClick={() => handleEdit(user)} style={{ color: '#00ffff', textShadow: '0 0 5px rgba(0, 255, 255, 0.5)', fontSize: '0.75rem' }}>Editar</button>
-                        <button onClick={() => handleDelete(user.id)} style={{ color: '#ff0040', textShadow: '0 0 5px rgba(255, 0, 64, 0.5)', fontSize: '0.75rem' }}>Eliminar</button>
+                        <button onClick={() => handleEdit(user)} className="text-sm font-medium" style={{ color: 'var(--primary-light)' }}>Editar</button>
+                        <button onClick={() => handleDelete(user.id)} className="text-sm font-medium" style={{ color: 'var(--danger)' }}>Eliminar</button>
                       </td>
                     </tr>
                   ))}
@@ -338,101 +268,57 @@ return (
         </div>
       </div>
 
-{/* Modal de Edición */}
       {isModalOpen && editingUser && (
         <div className="fixed inset-0 flex justify-center items-center z-50" style={{ background: 'rgba(0, 0, 0, 0.8)', backdropFilter: 'blur(5px)' }}>
-          <div 
-            className="p-8 rounded-lg shadow-xl w-full max-w-md"
-            style={{
-              background: 'rgba(10, 15, 30, 0.98)',
-              border: '1px solid rgba(0, 255, 255, 0.3)',
-              boxShadow: '0 0 50px rgba(0, 255, 255, 0.3)'
-            }}
-          >
-            <h2 className="text-2xl font-bold mb-6" style={{ fontFamily: 'var(--font-orbitron)', color: '#00ffff', textShadow: '0 0 10px rgba(0, 255, 255, 0.5)' }}>Editar Usuario</h2>
+          <div className="p-8 rounded-xl shadow-xl w-full max-w-md card">
+            <h2 className="text-2xl font-bold mb-6" style={{ fontFamily: 'var(--font-rajdhani)', color: 'var(--foreground)', letterSpacing: '1px' }}>Editar Usuario</h2>
             <form onSubmit={handleUpdate} className="space-y-4">
               <div>
-                <label htmlFor="edit-name" style={{ display: 'block', fontSize: '0.75rem', fontFamily: 'var(--font-orbitron)', color: '#00ffff', textShadow: '0 0 10px rgba(0, 255, 255, 0.3)', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '0.5rem' }}>Nombre</label>
+                <label htmlFor="edit-name" className="form-label">Nombre</label>
                 <input
                   id="edit-name"
                   type="text"
                   value={editingUser.name || ''}
                   onChange={(e) => setEditingUser({ ...editingUser, name: e.target.value })}
-                  style={{
-                    width: '100%',
-                    padding: '0.75rem 1rem',
-                    background: 'rgba(10, 15, 30, 0.8)',
-                    border: '1px solid rgba(0, 255, 255, 0.2)',
-                    borderRadius: '0.5rem',
-                    color: '#e2e8f0',
-                    boxShadow: 'inset 0 0 10px rgba(0, 0, 0, 0.3)',
-                    outline: 'none'
-                  }}
+                  className="form-input"
                 />
               </div>
               <div>
-                <label htmlFor="edit-email" style={{ display: 'block', fontSize: '0.75rem', fontFamily: 'var(--font-orbitron)', color: '#00ffff', textShadow: '0 0 10px rgba(0, 255, 255, 0.3)', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '0.5rem' }}>Email</label>
+                <label htmlFor="edit-email" className="form-label">Email</label>
                 <input
                   id="edit-email"
                   type="email"
                   value={editingUser.email}
                   onChange={(e) => setEditingUser({ ...editingUser, email: e.target.value })}
                   required
-                  style={{
-                    width: '100%',
-                    padding: '0.75rem 1rem',
-                    background: 'rgba(10, 15, 30, 0.8)',
-                    border: '1px solid rgba(0, 255, 255, 0.2)',
-                    borderRadius: '0.5rem',
-                    color: '#e2e8f0',
-                    boxShadow: 'inset 0 0 10px rgba(0, 0, 0, 0.3)',
-                    outline: 'none'
-                  }}
+                  className="form-input"
                 />
               </div>
               <div>
-                <label htmlFor="edit-password" style={{ display: 'block', fontSize: '0.75rem', fontFamily: 'var(--font-orbitron)', color: '#00ffff', textShadow: '0 0 10px rgba(0, 255, 255, 0.3)', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '0.5rem' }}>Nueva Contraseña</label>
+                <label htmlFor="edit-password" className="form-label">Nueva Contraseña</label>
                 <input
                   id="edit-password"
                   type="password"
                   placeholder="(Dejar en blanco para no cambiar)"
                   onChange={(e) => setEditingUser({ ...editingUser, password: e.target.value })}
-                  style={{
-                    width: '100%',
-                    padding: '0.75rem 1rem',
-                    background: 'rgba(10, 15, 30, 0.8)',
-                    border: '1px solid rgba(0, 255, 255, 0.2)',
-                    borderRadius: '0.5rem',
-                    color: '#e2e8f0',
-                    boxShadow: 'inset 0 0 10px rgba(0, 0, 0, 0.3)',
-                    outline: 'none'
-                  }}
+                  className="form-input"
                 />
               </div>
               <div>
-                <label htmlFor="edit-role" style={{ display: 'block', fontSize: '0.75rem', fontFamily: 'var(--font-orbitron)', color: '#00ffff', textShadow: '0 0 10px rgba(0, 255, 255, 0.3)', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '0.5rem' }}>Rol</label>
+                <label htmlFor="edit-role" className="form-label">Rol</label>
                 <select
                   id="edit-role"
                   value={editingUser.role}
                   onChange={(e) => setEditingUser({ ...editingUser, role: e.target.value as 'USER' | 'ADMIN' })}
-                  style={{
-                    width: '100%',
-                    padding: '0.75rem 1rem',
-                    background: 'rgba(10, 15, 30, 0.8)',
-                    border: '1px solid rgba(0, 255, 255, 0.2)',
-                    borderRadius: '0.5rem',
-                    color: '#e2e8f0',
-                    boxShadow: 'inset 0 0 10px rgba(0, 0, 0, 0.3)',
-                    outline: 'none'
-                  }}
+                  className="form-select"
                 >
-                  <option value="USER" style={{ background: '#0a0f1a' }}>Usuario</option>
-                  <option value="ADMIN" style={{ background: '#0a0f1a' }}>Administrador</option>
+                  <option value="USER">Usuario</option>
+                  <option value="ADMIN">Administrador</option>
                 </select>
               </div>
 
               {error && (
-                <div className="p-3 rounded-md text-sm" style={{ background: 'rgba(255, 0, 64, 0.1)', border: '1px solid rgba(255, 0, 64, 0.3)', color: '#ff0040' }}>
+                <div className="p-3 rounded-lg text-sm" style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.3)', color: 'var(--danger)' }}>
                   <p>{error}</p>
                 </div>
               )}
@@ -441,32 +327,14 @@ return (
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  style={{
-                    padding: '0.5rem 1rem',
-                    borderRadius: '0.5rem',
-                    background: 'transparent',
-                    border: '1px solid rgba(226, 232, 240, 0.3)',
-                    color: 'rgba(226, 232, 240, 0.7)'
-                  }}
+                  className="btn btn-secondary"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={isLoading}
-                  style={{
-                    padding: '0.5rem 1rem',
-                    fontWeight: 600,
-                    borderRadius: '0.5rem',
-                    background: 'transparent',
-                    border: '2px solid #00ffff',
-                    color: '#00ffff',
-                    fontFamily: 'var(--font-orbitron)',
-                    boxShadow: '0 0 10px rgba(0, 255, 255, 0.3)',
-                    textShadow: '0 0 10px rgba(0, 255, 255, 0.5)',
-                    cursor: isLoading ? 'not-allowed' : 'pointer',
-                    opacity: isLoading ? 0.5 : 1
-                  }}
+                  className="btn btn-primary"
                 >
                   {isLoading ? 'Guardando...' : 'Guardar Cambios'}
                 </button>

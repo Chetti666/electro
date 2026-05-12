@@ -95,16 +95,6 @@ export default function ContactPage() {
     }
   };
 
-  const inputStyles = (hasError: boolean) => `
-    w-full px-4 py-3 rounded-lg transition-all duration-300 outline-none
-    bg-black/40 border backdrop-blur-sm
-    ${hasError
-      ? 'border-red-500 focus:border-red-500 focus:shadow-[0_0_15px_rgba(239,68,68,0.3)]'
-      : 'border-cyan-500/30 focus:border-cyan-400 focus:shadow-[0_0_15px_rgba(0,255,255,0.3)]'
-    }
-    text-gray-100 placeholder-gray-500
-  `;
-
   return (
     <section className="pt-24 pb-12 md:pt-32 min-h-screen">
       <div className="container mx-auto px-4">
@@ -114,15 +104,14 @@ export default function ContactPage() {
           transition={{ duration: 0.5 }}
           className="text-center mb-12"
         >
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full mb-6"
-            style={{ background: 'rgba(0,255,255,0.1)', border: '1px solid rgba(0,255,255,0.3)' }}>
-            <Zap className="w-8 h-8" style={{ color: '#00ffff' }} />
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-xl mb-6"
+            style={{ background: 'rgba(37, 99, 235, 0.1)', border: '1px solid rgba(37, 99, 235, 0.3)' }}>
+            <Zap className="w-8 h-8 text-primary-light" />
           </div>
-          <h1 className="text-3xl md:text-4xl font-bold mb-4"
-            style={{ fontFamily: 'var(--font-orbitron)', color: '#fff' }}>
+          <h1 className="text-3xl md:text-4xl font-bold mb-4" style={{ color: 'var(--foreground)' }}>
             Contacto
           </h1>
-          <p className="text-lg max-w-2xl mx-auto" style={{ color: 'rgba(226,232,240,0.7)' }}>
+          <p className="text-lg max-w-2xl mx-auto" style={{ color: 'var(--foreground-muted)' }}>
             ¿Tienes consultas o sugerencias sobre nuestras herramientas? Estamos aquí para ayudarte.
           </p>
         </motion.div>
@@ -133,12 +122,7 @@ export default function ContactPage() {
           transition={{ duration: 0.5, delay: 0.1 }}
           className="max-w-2xl mx-auto"
         >
-          <div className="rounded-2xl p-8 md:p-10"
-            style={{
-              background: 'linear-gradient(135deg, rgba(10,10,20,0.9) 0%, rgba(26,26,46,0.9) 100%)',
-              border: '1px solid rgba(0,255,255,0.2)',
-              boxShadow: '0 0 40px rgba(0,255,255,0.1), 0 25px 50px rgba(0,0,0,0.5)'
-            }}
+          <div className="rounded-2xl p-8 md:p-10 card"
           >
             {submitStatus !== 'idle' && (
               <motion.div
@@ -161,57 +145,59 @@ export default function ContactPage() {
 
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
-                <label className="block mb-2 text-sm font-medium" style={{ color: '#00ffff' }}>
+                <label className="form-label">
                   Nombre
                 </label>
                 <div className="relative">
-                  <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+                  <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5" style={{ color: 'var(--foreground-dim)' }} />
                   <input
                     type="text"
                     name="name"
                     value={formData.name}
                     onChange={handleChange}
                     placeholder="Tu nombre completo"
-                    className={`${inputStyles(!!errors.name)} pl-12`}
+                    className="form-input pl-12"
+                    style={errors.name ? { borderColor: 'var(--danger)' } : {}}
                   />
                 </div>
                 {errors.name && (
-                  <p className="mt-1 text-sm text-red-400">{errors.name}</p>
+                  <p className="mt-1 text-sm" style={{ color: 'var(--danger)' }}>{errors.name}</p>
                 )}
               </div>
 
               <div>
-                <label className="block mb-2 text-sm font-medium" style={{ color: '#00ffff' }}>
+                <label className="form-label">
                   Correo Electrónico
                 </label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5" style={{ color: 'var(--foreground-dim)' }} />
                   <input
                     type="email"
                     name="email"
                     value={formData.email}
                     onChange={handleChange}
                     placeholder="tu@correo.com"
-                    className={`${inputStyles(!!errors.email)} pl-12`}
+                    className="form-input pl-12"
+                    style={errors.email ? { borderColor: 'var(--danger)' } : {}}
                   />
                 </div>
                 {errors.email && (
-                  <p className="mt-1 text-sm text-red-400">{errors.email}</p>
+                  <p className="mt-1 text-sm" style={{ color: 'var(--danger)' }}>{errors.email}</p>
                 )}
               </div>
 
               <div>
-                <label className="block mb-2 text-sm font-medium" style={{ color: '#00ffff' }}>
+                <label className="form-label">
                   Tipo de Consulta
                 </label>
                 <div className="relative">
-                  <MessageSquare className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 pointer-events-none" />
+                  <MessageSquare className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 pointer-events-none" style={{ color: 'var(--foreground-dim)' }} />
                   <select
                     name="type"
                     value={formData.type}
                     onChange={handleChange}
-                    className={`${inputStyles(!!errors.type)} pl-12 appearance-none cursor-pointer`}
-                    style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 12px center', backgroundSize: '20px' }}
+                    className="form-input pl-12 appearance-none cursor-pointer"
+                    style={{ ...(errors.type ? { borderColor: 'var(--danger)' } : {}) }}
                   >
                     <option value="">Selecciona una opción</option>
                     <option value="consulta">Consulta</option>
@@ -221,12 +207,12 @@ export default function ContactPage() {
                   </select>
                 </div>
                 {errors.type && (
-                  <p className="mt-1 text-sm text-red-400">{errors.type}</p>
+                  <p className="mt-1 text-sm" style={{ color: 'var(--danger)' }}>{errors.type}</p>
                 )}
               </div>
 
               <div>
-                <label className="block mb-2 text-sm font-medium" style={{ color: '#00ffff' }}>
+                <label className="form-label">
                   Mensaje
                 </label>
                 <textarea
@@ -235,10 +221,11 @@ export default function ContactPage() {
                   onChange={handleChange}
                   rows={5}
                   placeholder="Describe tu consulta o sugerencia..."
-                  className={`${inputStyles(!!errors.message)} resize-none`}
+                  className="form-input resize-none"
+                  style={errors.message ? { borderColor: 'var(--danger)' } : {}}
                 />
                 {errors.message && (
-                  <p className="mt-1 text-sm text-red-400">{errors.message}</p>
+                  <p className="mt-1 text-sm" style={{ color: 'var(--danger)' }}>{errors.message}</p>
                 )}
               </div>
 
@@ -247,14 +234,10 @@ export default function ContactPage() {
                 disabled={isSubmitting}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                className="w-full py-4 rounded-lg font-semibold text-white transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full py-4 rounded-lg font-semibold text-white transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 style={{
-                  fontFamily: 'var(--font-orbitron)',
-                  background: isSubmitting
-                    ? 'rgba(255,0,255,0.3)'
-                    : 'linear-gradient(135deg, #ff00ff 0%, #ff44aa 100%)',
-                  boxShadow: '0 0 20px rgba(255,0,255,0.4)',
-                  border: '1px solid rgba(255,0,255,0.5)'
+                  background: isSubmitting ? 'var(--primary-dark)' : 'var(--primary)',
+                  border: '1px solid var(--primary)',
                 }}
               >
                 {isSubmitting ? (
@@ -280,18 +263,14 @@ export default function ContactPage() {
           className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto text-center"
         >
           {[
-            { icon: Mail, title: 'Email', desc: 'contacto@electrocalc.com', color: 'cyan' },
-            { icon: Zap, title: 'Respuesta', desc: 'En menos de 48h', color: 'magenta' },
-            { icon: MessageSquare, title: 'Soporte', desc: 'Para consultas técnicas', color: 'amber' }
+            { icon: Mail, title: 'Email', desc: 'contacto@electrocalc.com' },
+            { icon: Zap, title: 'Respuesta', desc: 'En menos de 48h' },
+            { icon: MessageSquare, title: 'Soporte', desc: 'Para consultas técnicas' }
           ].map((item, i) => (
-            <div key={i} className="p-6 rounded-xl"
-              style={{
-                background: 'rgba(10,10,20,0.6)',
-                border: `1px solid rgba(${item.color === 'cyan' ? '0,255,255' : item.color === 'magenta' ? '255,0,255' : '251,191,36'},0.2)`
-              }}>
-              <item.icon className="w-8 h-8 mx-auto mb-3" style={{ color: item.color === 'cyan' ? '#00ffff' : item.color === 'magenta' ? '#ff00ff' : '#fbbf24' }} />
-              <h3 className="font-semibold text-white mb-1">{item.title}</h3>
-              <p style={{ color: 'rgba(226,232,240,0.6)' }}>{item.desc}</p>
+            <div key={i} className="p-6 rounded-xl card">
+              <item.icon className="w-8 h-8 mx-auto mb-3 text-primary-light" />
+              <h3 className="font-semibold mb-1" style={{ color: 'var(--foreground)' }}>{item.title}</h3>
+              <p style={{ color: 'var(--foreground-dim)' }}>{item.desc}</p>
             </div>
           ))}
         </motion.div>

@@ -9,9 +9,9 @@ export default function Footer() {
   const currentYear = new Date().getFullYear();
 
   const socialLinks = [
-    { icon: <Github className="w-5 h-5" />, href: "#", label: "Github", color: "#00ffff" },
-    { icon: <Twitter className="w-5 h-5" />, href: "#", label: "Twitter", color: "#ff00ff" },
-    { icon: <Linkedin className="w-5 h-5" />, href: "#", label: "LinkedIn", color: "#0080ff" },
+    { icon: <Github className="w-5 h-5" />, href: "#", label: "Github" },
+    { icon: <Twitter className="w-5 h-5" />, href: "#", label: "Twitter" },
+    { icon: <Linkedin className="w-5 h-5" />, href: "#", label: "LinkedIn" },
   ];
 
   const footerLinks = [
@@ -22,21 +22,13 @@ export default function Footer() {
   ];
 
   return (
-    <footer 
-      className="relative mt-20 overflow-hidden"
+    <footer
+      className="hidden md:block relative mt-20 overflow-hidden"
       style={{
-        background: 'linear-gradient(180deg, rgba(3, 7, 18, 0.9) 0%, rgba(3, 7, 18, 1) 100%)',
-        borderTop: '1px solid rgba(0, 255, 255, 0.2)'
+        background: 'linear-gradient(180deg, rgba(11, 17, 33, 0.95) 0%, rgba(11, 17, 33, 1) 100%)',
+        borderTop: '1px solid var(--card-border)'
       }}
     >
-      <div 
-        className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-px"
-        style={{
-          background: 'linear-gradient(90deg, transparent, #00ffff, transparent)',
-          boxShadow: '0 0 20px rgba(0, 255, 255, 0.5)'
-        }}
-      />
-
       <div className="container mx-auto px-4 py-12">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -47,41 +39,36 @@ export default function Footer() {
         >
           <div className="space-y-4">
             <Link href="/" className="flex items-center gap-3 group w-fit">
-              <div 
-                className="relative w-8 h-8 overflow-hidden rounded-lg bg-black flex items-center justify-center transition-all duration-300"
-                style={{
-                  border: '1px solid rgba(0, 255, 255, 0.5)',
-                  boxShadow: '0 0 15px rgba(0, 255, 255, 0.3)'
-                }}
+              <div
+                className="w-8 h-8 rounded-lg bg-primary/10 border border-primary/30 flex items-center justify-center"
               >
-                <Zap className="w-4 h-4 text-cyan-400 fill-current" />
+                <Zap className="w-4 h-4 text-primary" />
               </div>
-              <span 
-                className="text-xl font-bold tracking-wider"
+              <span
+                className="text-xl font-bold tracking-tight"
                 style={{
-                  fontFamily: 'var(--font-orbitron)',
-                  color: '#00ffff',
-                  textShadow: '0 0 10px rgba(0, 255, 255, 0.5)'
+                  fontFamily: 'var(--font-rajdhani)',
+                  color: 'var(--foreground)',
+                  letterSpacing: '1px'
                 }}
               >
                 VMElectric
               </span>
             </Link>
-            <p className="leading-relaxed" style={{ color: 'rgba(226, 232, 240, 0.6)' }}>
+            <p className="leading-relaxed text-sm" style={{ color: 'var(--foreground-dim)' }}>
               Tu compañero digital en el terreno. Simplificamos cálculos complejos y generamos informes profesionales para el sector eléctrico.
             </p>
-            <div className="flex gap-4 pt-2">
+            <div className="flex gap-3 pt-2">
               {socialLinks.map((social, index) => (
                 <a
                   key={index}
                   href={social.href}
                   aria-label={social.label}
-                  className="p-2 rounded-lg transition-all duration-300"
+                  className="p-2 rounded-lg transition-all duration-200"
                   style={{
-                    background: 'rgba(0, 0, 0, 0.5)',
-                    color: social.color,
-                    border: `1px solid ${social.color}33`,
-                    boxShadow: `0 0 10px ${social.color}22`
+                    background: 'var(--card-bg)',
+                    color: 'var(--foreground-muted)',
+                    border: '1px solid var(--card-border)'
                   }}
                 >
                   {social.icon}
@@ -91,41 +78,29 @@ export default function Footer() {
           </div>
 
           <div>
-            <h3 
-              className="text-lg font-semibold mb-6 flex items-center gap-2"
+            <h3
+              className="text-base font-semibold mb-5"
               style={{
-                fontFamily: 'var(--font-orbitron)',
-                color: '#00ffff',
-                textShadow: '0 0 10px rgba(0, 255, 255, 0.5)'
+                fontFamily: 'var(--font-rajdhani)',
+                color: 'var(--foreground)',
+                letterSpacing: '1px'
               }}
             >
               Navegación
-              <span 
-                className="h-px flex-1 ml-2"
-                style={{
-                  background: 'linear-gradient(90deg, rgba(0, 255, 255, 0.5), transparent)',
-                  boxShadow: '0 0 10px rgba(0, 255, 255, 0.3)'
-                }}
-              />
             </h3>
             <ul className="space-y-3">
               {footerLinks.map((link) => (
                 <li key={link.name}>
                   <Link
                     href={link.href}
-                    className="transition-all duration-300 flex items-center gap-2 group"
-                    style={{ color: 'rgba(226, 232, 240, 0.6)' }}
+                    className="transition-all duration-200 flex items-center gap-2 group text-sm"
+                    style={{ color: 'var(--foreground-dim)' }}
                   >
-                    <span 
-                      className="w-1.5 h-1.5 rounded-full transition-all duration-300"
-                      style={{
-                        background: 'rgba(0, 255, 255, 0.3)',
-                        boxShadow: '0 0 5px rgba(0, 255, 255, 0.3)'
-                      }}
+                    <span
+                      className="w-1.5 h-1.5 rounded-full transition-all duration-200"
+                      style={{ background: 'var(--foreground-dim)' }}
                     />
-                    <span className="group-hover:text-cyan-400" style={{ textShadow: '0 0 5px rgba(0, 255, 255, 0.3)' }}>
-                      {link.name}
-                    </span>
+                    <span className="group-hover:text-primary-light">{link.name}</span>
                   </Link>
                 </li>
               ))}
@@ -133,37 +108,30 @@ export default function Footer() {
           </div>
 
           <div>
-            <h3 
-              className="text-lg font-semibold mb-6 flex items-center gap-2"
+            <h3
+              className="text-base font-semibold mb-5"
               style={{
-                fontFamily: 'var(--font-orbitron)',
-                color: '#ff00ff',
-                textShadow: '0 0 10px rgba(255, 0, 255, 0.5)'
+                fontFamily: 'var(--font-rajdhani)',
+                color: 'var(--foreground)',
+                letterSpacing: '1px'
               }}
             >
               Contacto
-              <span 
-                className="h-px flex-1 ml-2"
-                style={{
-                  background: 'linear-gradient(90deg, rgba(255, 0, 255, 0.5), transparent)',
-                  boxShadow: '0 0 10px rgba(255, 0, 255, 0.3)'
-                }}
-              />
             </h3>
             <ul className="space-y-4">
-              <li className="flex items-start gap-3" style={{ color: 'rgba(226, 232, 240, 0.6)' }}>
-                <Mail className="w-5 h-5 mt-0.5 shrink-0" style={{ color: '#00ffff' }} />
+              <li className="flex items-start gap-3 text-sm" style={{ color: 'var(--foreground-dim)' }}>
+                <Mail className="w-4 h-4 mt-0.5 shrink-0 text-primary-light" />
                 <span>vmelectric2025@gmail.com</span>
               </li>
-              <li className="flex items-start gap-3" style={{ color: 'rgba(226, 232, 240, 0.6)' }}>
-                <MessageCircle className="w-5 h-5 mt-0.5 shrink-0" style={{ color: '#ff00ff' }} />
+              <li className="flex items-start gap-3 text-sm" style={{ color: 'var(--foreground-dim)' }}>
+                <MessageCircle className="w-4 h-4 mt-0.5 shrink-0 text-secondary" />
                 <div className="flex flex-col">
                   <span>+56 9 4038 1316</span>
                   <span>+56 9 3303 8620</span>
                 </div>
               </li>
-              <li className="flex items-start gap-3" style={{ color: 'rgba(226, 232, 240, 0.6)' }}>
-                <MapPin className="w-5 h-5 mt-0.5 shrink-0" style={{ color: '#ff0080' }} />
+              <li className="flex items-start gap-3 text-sm" style={{ color: 'var(--foreground-dim)' }}>
+                <MapPin className="w-4 h-4 mt-0.5 shrink-0 text-accent" />
                 <span>Santiago, Chile</span>
               </li>
             </ul>
@@ -176,15 +144,15 @@ export default function Footer() {
           viewport={{ once: true }}
           transition={{ delay: 0.2, duration: 0.6 }}
           className="mt-12 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-sm"
-          style={{ color: 'rgba(226, 232, 240, 0.4)' }}
+          style={{ borderTop: '1px solid var(--card-border)', color: 'var(--foreground-dim)' }}
         >
           <p>&copy; {currentYear} VMElectric. Todos los derechos reservados.</p>
           <div className="flex items-center gap-4">
             <VisitCounter />
-            <span className="hidden md:inline" style={{ color: 'rgba(226, 232, 240, 0.2)' }}>|</span>
+            <span className="hidden md:inline" style={{ color: 'var(--foreground-dim)' }}>|</span>
             <p className="flex items-center gap-1">
-              Hecho con 
-              <Heart className="w-4 h-4" style={{ color: '#ff0040', fill: '#ff0040', filter: 'drop-shadow(0 0 5px #ff0040)' }} /> 
+              Hecho con
+              <Heart className="w-4 h-4 text-danger" />
               por el equipo de VMElectric
             </p>
           </div>
