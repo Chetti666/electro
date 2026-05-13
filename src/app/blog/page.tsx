@@ -3,6 +3,8 @@ import Link from 'next/link';
 import { prisma } from '@/lib/prisma';
 import { Calendar, User } from 'lucide-react';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata = {
   title: 'Blog - VMElectric',
   description: 'Artículos, noticias e información relevante sobre instalaciones eléctricas',
