@@ -154,18 +154,55 @@ export default function EditArticlePage() {
         </div>
 
         <div>
-          <label className="form-label">URL de imagen de portada</label>
-          <input
-            value={imageUrl}
-            onChange={e => setImageUrl(e.target.value)}
-            placeholder="https://ejemplo.com/imagen.jpg"
-            className="form-input"
-          />
-          {imageUrl && (
-            <div className="mt-2 rounded-lg overflow-hidden w-48 h-32 relative">
-              <Image src={imageUrl} alt="Preview" fill className="object-cover" unoptimized onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+          <label className="form-label">Imagen de portada</label>
+          <div className="flex flex-col gap-3">
+            <div className="flex gap-2 items-center">
+              <input
+                type="text"
+                value={imageUrl}
+                onChange={e => setImageUrl(e.target.value)}
+                placeholder="https://ejemplo.com/imagen.jpg"
+                className="form-input flex-1"
+              />
+              <span className="text-xs" style={{ color: 'var(--foreground-dim)' }}>o</span>
+              <label className="btn btn-secondary cursor-pointer text-sm py-2 px-3">
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp,image/gif"
+                  className="hidden"
+                  onChange={async e => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    const formData = new FormData();
+                    formData.append('file', file);
+                    try {
+                      const res = await fetch('/api/upload', {
+                        method: 'POST',
+                        body: formData,
+                      });
+                      if (res.ok) {
+                        const data = await res.json();
+                        setImageUrl(data.url);
+                      } else {
+                        alert('Error al subir imagen');
+                      }
+                    } catch {
+                      alert('Error al subir imagen');
+                    }
+                  }}
+                />
+                Subir archivo
+              </label>
             </div>
-          )}
+            <p className="text-xs" style={{ color: 'var(--foreground-dim)' }}>
+              Formatos recomendados: WebP, JPEG, PNG. Tamaño máximo: 5MB
+            </p>
+            {imageUrl && (
+              <div className="mt-2 rounded-lg overflow-hidden w-48 h-32 relative">
+                <Image src={imageUrl} alt="Preview" fill className="object-cover" unoptimized onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="flex gap-4">
