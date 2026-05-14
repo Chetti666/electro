@@ -22,6 +22,7 @@ const rajdhani = Rajdhani({
 export const metadata: Metadata = {
   title: "VMElectric - Herramientas Eléctricas Profesionales",
   description: "Plataforma integral para cálculos eléctricos, informes técnicos y herramientas normativas para profesionales en Chile.",
+  keywords: ["RIC", "TE1", "PLIEGO", "SEC", "4/2003", "calculadora eléctrica", "informe eléctrico", "normativa chilena", "instalaciones eléctricas"],
   icons: {
     icon: '/electrocalc-logo.svg',
   },

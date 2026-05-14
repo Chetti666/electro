@@ -8,6 +8,7 @@ export const dynamic = 'force-dynamic';
 export const metadata = {
   title: 'Blog - VMElectric',
   description: 'Artículos, noticias e información relevante sobre instalaciones eléctricas',
+  keywords: ['RIC', 'TE1', 'PLIEGO', 'SEC', '4/2003', 'blog eléctrico', 'normativa eléctrica Chile', 'instalaciones eléctricas'],
 };
 
 export default async function BlogPage() {
