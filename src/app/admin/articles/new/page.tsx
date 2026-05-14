@@ -163,7 +163,7 @@ export default function NewArticlePage() {
               </label>
             </div>
             <p className="text-xs" style={{ color: 'var(--foreground-dim)' }}>
-              Formatos recomendados: WebP, JPEG, PNG. Tamaño máximo: 5MB
+              Formatos recomendados: WebP, JPEG, PNG. Tamaño máximo: 2MB
             </p>
             {imageUrl && (
               <div className="mt-2 rounded-lg overflow-hidden w-48 h-32 relative">
