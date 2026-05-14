@@ -72,12 +72,13 @@ export default async function BlogPage() {
                 className="group card"
               >
                 {article.imageUrl && (
-                  <div className="h-44 -mx-6 -mt-6 mb-5 overflow-hidden rounded-t-xl relative">
+                  <div className="-mx-6 -mt-6 mb-5 overflow-hidden rounded-t-xl relative bg-black/20" style={{ aspectRatio: '16/9' }}>
                     <Image
                       src={article.imageUrl}
                       alt={article.title}
                       fill
-                      className="object-cover transition-transform duration-300 group-hover:scale-105"
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                      className="object-contain transition-transform duration-300 group-hover:scale-105"
                       unoptimized
                     />
                   </div>

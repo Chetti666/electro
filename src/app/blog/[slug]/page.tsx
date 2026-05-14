@@ -53,12 +53,13 @@ export default async function ArticlePage({ params }: Props) {
 
         <article>
           {article.imageUrl && (
-            <div className="rounded-xl overflow-hidden mb-8 h-64 sm:h-80 relative">
+            <div className="rounded-xl overflow-hidden mb-8 relative bg-black/20" style={{ aspectRatio: '16/9' }}>
               <Image
                 src={article.imageUrl}
                 alt={article.title}
                 fill
-                className="object-cover"
+                sizes="(max-width: 768px) 100vw, 800px"
+                className="object-contain"
                 unoptimized
               />
             </div>
@@ -115,16 +116,22 @@ export default async function ArticlePage({ params }: Props) {
             </p>
           )}
 
-          <div
-            className="article-content leading-relaxed"
-            style={{
-              fontFamily: 'var(--font-body), sans-serif',
-              fontSize: '1.05rem',
-              lineHeight: '1.9',
-              color: 'var(--foreground)',
-            }}
-            dangerouslySetInnerHTML={{ __html: article.content }}
-          />
+          {article.content ? (
+            <div
+              className="article-content leading-relaxed"
+              style={{
+                fontFamily: 'var(--font-body), sans-serif',
+                fontSize: '1.05rem',
+                lineHeight: '1.9',
+                color: 'var(--foreground)',
+              }}
+              dangerouslySetInnerHTML={{ __html: article.content }}
+            />
+          ) : (
+            <p style={{ color: 'var(--foreground-muted)' }} className="italic">
+              Este artículo no tiene contenido publicado.
+            </p>
+          )}
         </article>
 
         <div
