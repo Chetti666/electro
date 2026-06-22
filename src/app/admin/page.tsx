@@ -3,7 +3,7 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { getSessionUserFromCookie } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
-import { Newspaper, Tags, FileText, Eye } from 'lucide-react';
+import { Newspaper, Tags, FileText, Eye, BarChart3 } from 'lucide-react';
 
 export default async function AdminDashboard() {
   const cookieStore = await cookies();
@@ -15,6 +15,8 @@ export default async function AdminDashboard() {
   const articleCount = await prisma.article.count();
   const publishedCount = await prisma.article.count({ where: { status: 'PUBLISHED' } });
   const categoryCount = await prisma.category.count();
+  const siteMetric = await prisma.siteMetric.findFirst();
+  const visitCount = siteMetric?.visits ?? 0;
 
   return (
     <div>
@@ -32,11 +34,12 @@ export default async function AdminDashboard() {
         Bienvenido, {user.name || user.email}
       </p>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10">
+      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-10">
         {[
           { label: 'Total artículos', value: articleCount, color: 'var(--primary-light)' },
           { label: 'Publicados', value: publishedCount, color: 'var(--success)' },
           { label: 'Categorías', value: categoryCount, color: 'var(--secondary)' },
+          { label: 'Visitas totales', value: visitCount, color: 'var(--warning)' },
         ].map(stat => (
           <div
             key={stat.label}
@@ -152,6 +155,29 @@ export default async function AdminDashboard() {
             </div>
             <div className="text-xs mt-1" style={{ color: 'var(--foreground-dim)' }}>
               Vista previa del blog público
+            </div>
+          </div>
+        </Link>
+
+        <Link
+          href="/admin/metrics"
+          className="flex items-center gap-4 rounded-lg p-5 transition-all hover:scale-[1.02] group card"
+        >
+          <div
+            className="w-12 h-12 rounded-lg flex items-center justify-center shrink-0"
+            style={{
+              background: 'rgba(59, 130, 246, 0.1)',
+              border: '1px solid rgba(59, 130, 246, 0.3)',
+            }}
+          >
+            <BarChart3 className="w-6 h-6 text-primary-light" />
+          </div>
+          <div>
+            <div className="font-medium" style={{ color: 'var(--foreground)', fontSize: '0.9rem' }}>
+              Tráfico y Métricas
+            </div>
+            <div className="text-xs mt-1" style={{ color: 'var(--foreground-dim)' }}>
+              Monitorear las visitas por ruta y herramienta en tiempo real
             </div>
           </div>
         </Link>

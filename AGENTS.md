@@ -3,67 +3,50 @@
 ## Dev Commands
 
 ```bash
-npm run dev       # Start dev server on http://localhost:3000 (Turbopack)
-npm run build     # Run migrations, seed, then build
-npm run lint      # ESLint
+npm run dev         # Turbopack dev server at http://localhost:3000
+npm run build       # migrate deploy → generate → seed → next build (order matters)
+npm run lint        # ESLint
+npx tsc --noEmit    # TypeScript check (no npm script exists)
 ```
 
-**Build order matters** (in package.json scripts):
-1. `prisma migrate deploy`
-2. `prisma generate`
-3. `npm run prisma:seed`
-4. `next build`
+## Stack Key Facts
 
-**No typecheck script** - Run `npx tsc --noEmit` manually if needed.
-
-## Database
-
-- Prisma with PostgreSQL - **`DATABASE_URL` env var required**
-- Schema: `prisma/schema.prisma`
-- Seed: `prisma/seed.ts` (uses bcrypt)
-
-## Stack
-
-- Next.js 15 (App Router, Turbopack)
-- React 19 / TypeScript
-- Tailwind CSS 4 (CSS-based config, uses `@midudev/tailwind-animations`)
-- Prisma + PostgreSQL
-- Radix UI primitives + shadcn/ui pattern (`src/components/ui/`)
-- jsPDF for PDF generation
-- bcrypt for passwords
-- ESLint flat config (`eslint.config.mjs`)
-- Framer Motion for animations
-- Chart.js for graphs
-- Tiptap for rich text editing
+- **Next.js 15** (App Router, Turbopack) · **React 19** · **TypeScript**
+- **Tailwind v4** via `@tailwindcss/postcss` — config is in `src/app/globals.css` (`@import "tailwindcss"` + `@theme inline`); `tailwind.config.ts` is a stale v3 leftover
+- **Prisma + PostgreSQL** with Prisma Accelerate (`@prisma/extension-accelerate`). Env: `DATABASE_URL` (direct) + `PRISMA_DATABASE_URL` (Accelerate)
+- **Auth**: base64-encoded JSON in `session_token` cookie (NOT JWT). Password hashing via bcrypt. `requireAdmin()` throws on non-admin.
+- **Styling**: `.btn`, `.card`, `.form-input`, `.badge`, `.glass-panel`, `.section-title`, `.page-container` utility classes in globals.css
+- **Animations**: `motion` (v12, the library formerly known as Framer Motion) + `@midudev/tailwind-animations` plugin
+- **PWA**: manifest.json, apple-web-app meta, `viewport-fit=cover` — mobile-first
+- **Analytics**: Google Analytics via `@next/third-parties` (GA4 ID: `G-K79465K2BD`)
+- **PDF**: jsPDF + jspdf-autotable for report generation
+- **Rich text**: Tiptap with Image, Link, Placeholder extensions
+- **Email**: Nodemailer with Gmail SMTP (credentials in `.env`)
+- **shadcn/ui**: new-york style, `@/components/ui/`, lucide-react icons. Custom registry: `@animate-ui`
+- **Spanish** app (`lang="es"`, `es_CL` locale) — Chilean electrical engineering tooling
 
 ## Project Structure
 
 ```
-src/app/           # Pages (Next.js App Router)
-src/components/    # Shared components
-src/components/ui/ # shadcn/ui primitives
-src/lib/           # Utilities, Prisma client
-prisma/            # Schema + migrations
+src/
+  app/              # App Router pages
+    blog/[slug]/     # Blog article page
+    calculadoras/    # Electrical calculators (6 sub-pages)
+    informes/        # Report generators (4 sub-pages)
+    admin/           # Admin panel (articles, categories)
+    api/             # API routes (articles, auth, categories, contact, upload, users, visits)
+  components/        # Shared React components
+  components/ui/     # shadcn/ui primitives
+  lib/               # Utilities, Prisma client singleton, auth helpers
+prisma/
+  schema.prisma      # User, Article, Category, SiteMetric models
+  seed.ts            # Creates admin@example.com / admin-password (ADMIN role)
 ```
 
-## Styling (Neon Theme)
+## Gotchas
 
-The app uses a **neon retro-futuristic theme**:
-- **Fonts**: Orbitron (display/titles), Rajdhani (body)
-- **Colors**: Dark background (#030712), neon cyan/magenta/pink accents
-- **Effects**: Glow shadows, text-shadow, grid background pattern
-- **CSS in**: `src/app/globals.css` - defines all neon variables and animations
-
-## Key Files
-
-- `src/app/layout.tsx` - Root layout with fonts
-- `src/lib/prisma.ts` - Prisma client singleton
-- `src/middleware.ts` - Auth middleware
-- `src/app/globals.css` - Tailwind + neon theme CSS
-
-## Auth
-
-- Users stored in PostgreSQL via Prisma
-- Passwords hashed with bcrypt
-- Login API: `src/app/api/auth/login/route.ts`
-- Session via `session_token` cookie (middleware redirects unauthenticated /signup to /login)
+- **Middleware only protects `/signup`** (redirects to `/login`). Other routes are public.
+- **Seed** runs via `ts-node -P prisma/tsconfig.json prisma/seed.ts` (custom tsconfig needed for module resolution).
+- **`.env` / `.env.local` contain secrets** (DB, SMTP) and are gitignored. Never commit.
+- **Build requires live PostgreSQL** (`DATABASE_URL` env var). `next build` runs migrations + seed.
+- `prisma/` is excluded from the root `tsconfig.json` — the seed script uses `prisma/tsconfig.json` which extends root with `commonjs` module.

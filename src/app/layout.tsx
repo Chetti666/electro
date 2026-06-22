@@ -6,6 +6,7 @@ import Footer from '@/components/Footer';
 import BottomNav from '@/components/BottomNav';
 import PageTransition from '@/components/PageTransition';
 import { GoogleAnalytics } from '@next/third-parties/google';
+import RouteTracker from '@/components/RouteTracker';
 
 const inter = Inter({
   variable: "--font-inter",
@@ -65,6 +66,7 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${rajdhani.variable} antialiased min-h-screen flex flex-col`}
       >
+        <RouteTracker />
         <Header />
         <main className="flex-grow pb-16 md:pb-0">
           <PageTransition>

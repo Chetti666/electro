@@ -30,6 +30,13 @@ model SiteMetric {
   visits Int @default(0)
 }
 
+model RouteMetric {
+  id        Int      @id @default(autoincrement())
+  path      String   @unique
+  visits    Int      @default(0)
+  updatedAt DateTime @updatedAt
+}
+
 enum ArticleStatus {
   DRAFT
   PUBLISHED

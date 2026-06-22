@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation';
 import { cookies } from 'next/headers';
 import Link from 'next/link';
 import { getSessionUserFromCookie } from '@/lib/auth';
+import AdminSidebarNav from '@/components/AdminSidebarNav';
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const cookieStore = await cookies();
@@ -31,51 +32,11 @@ export default async function AdminLayout({ children }: { children: React.ReactN
               Panel Admin
             </h2>
             <div className="flex flex-col space-y-1">
-              <Link
-                href="/admin"
-                className="px-3 py-2 rounded text-sm transition-all"
-                style={{
-                  color: 'var(--primary-light)',
-                  background: 'rgba(37, 99, 235, 0.1)',
-                  border: '1px solid rgba(37, 99, 235, 0.2)',
-                }}
-              >
-                Dashboard
-              </Link>
-              <Link
-                href="/admin/articles"
-                className="px-3 py-2 rounded text-sm transition-all hover:bg-primary/5"
-                style={{
-                  color: 'var(--foreground-muted)',
-                  border: '1px solid transparent',
-                }}
-              >
-                Artículos
-              </Link>
-              <Link
-                href="/admin/articles/new"
-                className="px-3 py-2 rounded text-sm transition-all hover:bg-primary/5"
-                style={{
-                  color: 'var(--foreground-muted)',
-                  border: '1px solid transparent',
-                }}
-              >
-                + Nuevo artículo
-              </Link>
-              <Link
-                href="/admin/categories"
-                className="px-3 py-2 rounded text-sm transition-all hover:bg-primary/5"
-                style={{
-                  color: 'var(--foreground-muted)',
-                  border: '1px solid transparent',
-                }}
-              >
-                Categorías
-              </Link>
+              <AdminSidebarNav />
               <div className="h-px my-3" style={{ background: 'var(--card-border)' }} />
               <Link
                 href="/"
-                className="px-3 py-2 rounded text-sm transition-all"
+                className="px-3 py-2 rounded text-sm transition-all hover:bg-slate-800/40"
                 style={{
                   color: 'var(--secondary)',
                   border: '1px solid rgba(14, 165, 233, 0.3)',
@@ -85,13 +46,13 @@ export default async function AdminLayout({ children }: { children: React.ReactN
               </Link>
               <Link
                 href="/blog"
-                className="px-3 py-2 rounded text-sm transition-all"
+                className="px-3 py-2 rounded text-sm transition-all hover:bg-slate-800/40"
                 style={{
                   color: 'var(--warning)',
                   border: '1px solid rgba(245, 158, 11, 0.3)',
                 }}
               >
-                Blog
+                Blog público
               </Link>
             </div>
           </nav>
