@@ -6,9 +6,12 @@ import { Calendar, User } from 'lucide-react';
 export const dynamic = 'force-dynamic';
 
 export const metadata = {
-  title: 'Blog - VMElectric',
-  description: 'Artículos, noticias e información relevante sobre instalaciones eléctricas',
+  title: 'Blog Técnico - Normativa y Guías Eléctricas | VMElectric',
+  description: 'Artículos, noticias e información relevante sobre instalaciones eléctricas, normativa RIC y buenas prácticas del sector.',
   keywords: ['RIC', 'TE1', 'PLIEGO', 'SEC', '4/2003', 'blog eléctrico', 'normativa eléctrica Chile', 'instalaciones eléctricas'],
+  alternates: {
+    canonical: 'https://vmelectric.cl/blog',
+  },
 };
 
 export default async function BlogPage() {

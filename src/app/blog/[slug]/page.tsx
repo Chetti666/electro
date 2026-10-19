@@ -19,8 +19,11 @@ export async function generateMetadata({ params }: Props) {
   if (!article) return { title: 'Artículo no encontrado - VMElectric' };
 
   return {
-    title: `${article.title} - VMElectric`,
+    title: `${article.title} | VMElectric`,
     description: article.excerpt || article.title,
+    alternates: {
+      canonical: `https://vmelectric.cl/blog/${slug}`,
+    },
     openGraph: article.imageUrl ? { images: [article.imageUrl] } : undefined,
   };
 }

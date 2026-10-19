@@ -21,9 +21,13 @@ const rajdhani = Rajdhani({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://vmelectric.cl'),
   title: "VMElectric - Herramientas Eléctricas Profesionales",
   description: "Plataforma integral para cálculos eléctricos, informes técnicos y herramientas normativas para profesionales en Chile.",
   keywords: ["RIC", "TE1", "PLIEGO", "SEC", "4/2003", "calculadora eléctrica", "informe eléctrico", "normativa chilena", "instalaciones eléctricas"],
+  alternates: {
+    canonical: 'https://vmelectric.cl',
+  },
   icons: {
     icon: '/electrocalc-logo.svg',
   },
