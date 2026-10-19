@@ -2,6 +2,7 @@
 
 import { useState, FormEvent } from 'react';
 import Link from 'next/link';
+import { useCalculationRecorder } from '@/hooks/useCalculationRecorder';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -54,6 +55,7 @@ export default function CalculoVpPage() {
   const [chartData, setChartData] = useState<ChartData<"line"> | null>(null);
   const [chartOptions, setChartOptions] = useState<ChartOptions<"line">>();
   const [history, setHistory] = useState<HistoryItem[]>([]);
+  const recordCalculation = useCalculationRecorder();
 
   // Función para calcular y graficar
   const calcularYGraficarVp = (e: FormEvent) => {
@@ -88,6 +90,18 @@ export default function CalculoVpPage() {
       resultadoValor: resultadoFinalStr,
     };
     setHistory([newHistoryItem, ...history]);
+
+    void recordCalculation({
+      type: 'CAIDA_TENSION',
+      title: `Caída de tensión ${resultadoFinalStr}`,
+      input: { tipoSistema, seccion, longitudMaxima, corriente },
+      result: {
+        caidaTension: vp_final,
+        unidad: 'V',
+        limiteVp,
+        cumple: vp_final <= limiteVp,
+      },
+    });
 
     let longitudCruce: number | null = null;
     if (vp_final > limiteVp) {

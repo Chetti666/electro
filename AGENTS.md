@@ -28,25 +28,31 @@ npm run seed        # ts-node -P prisma/tsconfig.json prisma/seed.ts
 src/
   app/              # App Router pages
     calculadoras/    # 6 electrical calculators
-    informes/        # 3 report generators (PDF via jsPDF)
-    admin/           # Panel (articles, categories, metrics)
-    api/             # auth, articles, categories, users, visits, upload, contact
+    informes/        # 4 report generators (PDF via jsPDF)
+    admin/           # Admin panel (articles, categories, metrics, usuarios)
+    panel/           # Client dashboard (history, saved reports, profile)
+    api/             # auth, articles, categories, users, calculations, reports, visits, upload, contact
   components/
     animate-ui/      # @animate-ui registry components
+    informes/        # SaveReportButton
+    panel/           # Client dashboard components
     ui/              # shadcn/ui primitives
-  lib/               # auth.ts, prisma.ts, metrics.ts, slugify.ts, utils.ts
-  middleware.ts      # Only protects /signup (redirects to /login)
+  hooks/             # useCalculationRecorder, useReportSaver
+  lib/               # auth.ts, prisma.ts, report-client.ts, report-types.ts, calculation-*.ts, metrics.ts, slugify.ts, utils.ts
+  middleware.ts      # Cookie check for /panel and /admin (role checks in layouts)
 prisma/
-  schema.prisma      # User, Article, Category, SiteMetric, RouteMetric
+  schema.prisma      # User, Article, Category, Calculation, SavedReport, SiteMetric, RouteMetric
   seed.ts            # Creates admin@example.com / admin-password (ADMIN role)
 ```
 
 ## Gotchas
 
-- **Middleware only protects `/signup`** — other routes are public. Admin routes are protected by AdminLayout server-side redirect, not middleware.
+- **Middleware protects `/panel` and `/admin`** (cookie presence only). Role checks live in `PanelLayout` (`USER`) and `AdminLayout` (`ADMIN`).
+- **`/signup` is public registration** (creates `USER` role). Admin user management lives at `/admin/usuarios`; `/api/users` requires admin.
+- **Client dashboard `/panel`**: auto-saved calculation history (`Calculation`) and saved reports (`SavedReport`, JSON data, no PDF storage). Report generators accept `?reportId=` to reload saved data.
 - **Seed** requires `ts-node -P prisma/tsconfig.json` (custom tsconfig with `module: commonjs`). `prisma/` is excluded from root `tsconfig.json`.
 - **Build requires live PostgreSQL** (`DATABASE_URL`). `next build` runs `prisma migrate deploy` (not `dev`), generate, seed, then build.
 - **No tests** exist — no test framework in dependencies or scripts.
-- **Key env vars**: `DATABASE_URL`, `PRISMA_DATABASE_URL`, `SMTP_USER`, `SMTP_PASS`, `CONTACT_EMAIL`. `.env*` files are gitignored.
+- **Key env vars**: `DATABASE_URL`, `PRISMA_DATABASE_URL`, `SMTP_USER`, `SMTP_PASS`, `CONTACT_EMAIL`, `MAX_REPORT_DATA_MB` (default 8). `.env*` files are gitignored.
 - **Next.js images**: `remotePatterns` allows all hostnames (`https://**`).
 - **Styling utility classes** defined in `globals.css`: `.btn`, `.card`, `.form-input`, `.badge`, `.glass-panel`, `.section-title`, `.page-container`.

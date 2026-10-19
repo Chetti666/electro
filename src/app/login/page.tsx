@@ -25,7 +25,9 @@ export default function LoginPage() {
 
     setIsLoading(false);
     if (response.ok) {
-      router.push('/admin');
+      const data = await response.json();
+      router.push(data.role === 'ADMIN' ? '/admin' : '/panel');
+      router.refresh();
     } else {
       const data = await response.json();
       setError(data.error || 'Ocurrió un error al iniciar sesión.');
@@ -142,10 +144,14 @@ export default function LoginPage() {
           </div>
         </form>
 
-        <div className="text-center text-sm" style={{ color: 'var(--foreground-dim)' }}>
+        <div className="text-center text-sm space-y-2" style={{ color: 'var(--foreground-dim)' }}>
+          <p>
+            ¿No tienes cuenta?{' '}
+            <Link href="/signup" style={{ color: 'var(--primary-light)' }}>Crear cuenta</Link>
+          </p>
           <p>
             ¿Problemas para ingresar?{' '}
-            <Link href="/contacto" style={{ color: 'var(--primary-light)' }}>Contáctanos</Link>
+            <Link href="/contact" style={{ color: 'var(--primary-light)' }}>Contáctanos</Link>
           </p>
         </div>
 

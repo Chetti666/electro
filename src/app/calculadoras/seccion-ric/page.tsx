@@ -2,6 +2,7 @@
 
 import { useState, useMemo, FormEvent } from 'react';
 import Link from 'next/link';
+import { useCalculationRecorder } from '@/hooks/useCalculationRecorder';
 import { datosConductores, tablasDeCalculo, metodosInstalacion } from './data';
 
 interface Resultado {
@@ -18,6 +19,7 @@ export default function SeccionRicPage() {
   const [metodo, setMetodo] = useState('B1');
   const [resultado, setResultado] = useState<Resultado | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const recordCalculation = useCalculationRecorder();
 
   // --- DATOS DERIVADOS ---
   const sortedConductorKeys = useMemo(() => Object.keys(datosConductores).sort(), []);
@@ -70,11 +72,23 @@ export default function SeccionRicPage() {
       const textoAWG = seccionEncontrada.awg ? ` (${seccionEncontrada.awg} AWG)` : '';
       const textoKcmil = seccionEncontrada.kcmil ? ` (${seccionEncontrada.kcmil} kcmil)` : '';
 
-      setResultado({
+      const nuevoResultado: Resultado = {
         seccion: seccionEncontrada.seccion_mm2,
         equivalente: textoAWG + textoKcmil,
         corrienteMaxima: seccionEncontrada[metodoActual] as number,
         tablaRef: selectedConductor.tabla_ref === 'movil' ? '4.5' : '4.4',
+      };
+      setResultado(nuevoResultado);
+
+      void recordCalculation({
+        type: 'SECCION_RIC',
+        title: `Sección RIC ${nuevoResultado.seccion} mm²`,
+        input: {
+          conductor: selectedConductor.nombre,
+          corriente,
+          metodo: metodoActual,
+        },
+        result: { ...nuevoResultado },
       });
     } else {
       setError(`No se encontró un conductor para ${corrienteNum} A con el método ${metodoActual}. La corriente podría ser demasiado alta.`);

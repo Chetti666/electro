@@ -2,13 +2,22 @@
 
 import React, { useEffect } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { Zap } from 'lucide-react';
+import { Zap, LogOut } from 'lucide-react';
+
+interface HeaderUser {
+  id: number;
+  email: string;
+  name: string | null;
+  role: string;
+}
 
 export default function Header() {
   const [scrolled, setScrolled] = React.useState(false);
+  const [user, setUser] = React.useState<HeaderUser | null>(null);
   const pathname = usePathname();
+  const router = useRouter();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -17,6 +26,22 @@ export default function Header() {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  useEffect(() => {
+    fetch('/api/auth/me')
+      .then((response) => (response.ok ? response.json() : null))
+      .then((data) => setUser(data))
+      .catch(() => setUser(null));
+  }, [pathname]);
+
+  const handleLogout = async () => {
+    await fetch('/api/auth/logout', { method: 'POST' });
+    setUser(null);
+    router.push('/');
+    router.refresh();
+  };
+
+  const panelHref = user?.role === 'ADMIN' ? '/admin' : '/panel';
 
   const navLinks = [
     { name: 'Inicio', href: '/' },
@@ -55,6 +80,31 @@ export default function Header() {
               VMElectric
             </span>
           </Link>
+          {user ? (
+            <Link
+              href={panelHref}
+              className="text-xs font-semibold px-3 py-1.5 rounded-md"
+              style={{
+                color: 'var(--primary-light)',
+                border: '1px solid rgba(37, 99, 235, 0.3)',
+                background: 'rgba(37, 99, 235, 0.1)',
+              }}
+            >
+              Mi Panel
+            </Link>
+          ) : (
+            <Link
+              href="/login"
+              className="text-xs font-semibold px-3 py-1.5 rounded-md"
+              style={{
+                color: 'var(--primary-light)',
+                border: '1px solid rgba(37, 99, 235, 0.3)',
+                background: 'rgba(37, 99, 235, 0.1)',
+              }}
+            >
+              Ingresar
+            </Link>
+          )}
         </div>
       </header>
 
@@ -121,17 +171,58 @@ export default function Header() {
                 className="w-px h-6 mx-2"
                 style={{ background: 'var(--card-border)' }}
               />
-              <Link
-                href="/login"
-                className="px-5 py-2 rounded-lg text-sm font-semibold transition-all duration-200"
-                style={{
-                  background: 'var(--primary)',
-                  border: '1px solid var(--primary)',
-                  color: '#fff',
-                }}
-              >
-                Login
-              </Link>
+              {user ? (
+                <>
+                  <Link
+                    href={panelHref}
+                    className="px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200"
+                    style={{
+                      background: 'rgba(37, 99, 235, 0.12)',
+                      border: '1px solid rgba(37, 99, 235, 0.3)',
+                      color: 'var(--primary-light)',
+                    }}
+                  >
+                    Mi Panel
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={handleLogout}
+                    className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200"
+                    style={{
+                      background: 'transparent',
+                      border: '1px solid var(--card-border)',
+                      color: 'var(--foreground-muted)',
+                    }}
+                  >
+                    <LogOut className="w-4 h-4" />
+                    Salir
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link
+                    href="/signup"
+                    className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200"
+                    style={{
+                      color: 'var(--foreground-muted)',
+                      border: '1px solid var(--card-border)',
+                    }}
+                  >
+                    Crear cuenta
+                  </Link>
+                  <Link
+                    href="/login"
+                    className="px-5 py-2 rounded-lg text-sm font-semibold transition-all duration-200"
+                    style={{
+                      background: 'var(--primary)',
+                      border: '1px solid var(--primary)',
+                      color: '#fff',
+                    }}
+                  >
+                    Ingresar
+                  </Link>
+                </>
+              )}
             </nav>
           </div>
         </div>

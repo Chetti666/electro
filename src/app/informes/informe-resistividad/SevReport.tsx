@@ -7,6 +7,9 @@ import Chart, { type Chart as ChartType } from 'chart.js/auto';
 import imageCompression from 'browser-image-compression';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { useReportSaver } from '@/hooks/useReportSaver';
+import { fetchSavedReport } from '@/lib/report-client';
+import SaveReportButton from '@/components/informes/SaveReportButton';
 
 // --- Definición de Tipos ---
 interface Measurement {
@@ -99,6 +102,14 @@ export default function SevReport() {
 
   // Estado para el anexo de imágenes
   const [annexImages, setAnnexImages] = useState<AnnexImage[]>([]);
+  const [reportLoadError, setReportLoadError] = useState<string | null>(null);
+  const {
+    savedId,
+    setSavedId,
+    status: saveStatus,
+    error: saveError,
+    save: saveReport,
+  } = useReportSaver();
   const [editingImage, setEditingImage] = useState<{ index: number; description: string } | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const uploadImagesRef = useRef<HTMLInputElement>(null);
@@ -687,6 +698,30 @@ export default function SevReport() {
     });
   };
 
+  const handleSaveReport = () => {
+    const title = `SEV - ${projectName || 'Sin proyecto'}`;
+    void saveReport({
+      type: 'RESISTIVIDAD_SEV',
+      title,
+      clientName: interesado,
+      reference: location,
+      data: {
+        projectName,
+        location,
+        operator,
+        equipmentBrand,
+        equipmentModel,
+        serialNumber,
+        lastCalibration,
+        interesado,
+        fecha,
+        hora,
+        measurements,
+        annexImages,
+      },
+    });
+  };
+
   // --- Lógica de Google Drive ---
   useEffect(() => {
     // Cargar script de GAPI
@@ -736,6 +771,61 @@ export default function SevReport() {
       });
     }
   }, [gisReady]);
+
+  // Cargar un informe guardado desde el panel (?reportId=)
+  useEffect(() => {
+    const reportId = new URLSearchParams(window.location.search).get('reportId');
+    if (!reportId) return;
+
+    let cancelled = false;
+
+    fetchSavedReport(reportId)
+      .then((report) => {
+        if (cancelled) return;
+        if (report.type !== 'RESISTIVIDAD_SEV') {
+          throw new Error('El informe guardado no corresponde a un informe SEV.');
+        }
+        const data = report.data as {
+          projectName?: string;
+          location?: string;
+          operator?: string;
+          equipmentBrand?: string;
+          equipmentModel?: string;
+          serialNumber?: string;
+          lastCalibration?: string;
+          interesado?: string;
+          fecha?: string;
+          hora?: string;
+          measurements?: Measurement[];
+          annexImages?: AnnexImage[];
+        };
+        if (typeof data.projectName === 'string') setProjectName(data.projectName);
+        if (typeof data.location === 'string') setLocation(data.location);
+        if (typeof data.operator === 'string') setOperator(data.operator);
+        if (typeof data.equipmentBrand === 'string') setEquipmentBrand(data.equipmentBrand);
+        if (typeof data.equipmentModel === 'string') setEquipmentModel(data.equipmentModel);
+        if (typeof data.serialNumber === 'string') setSerialNumber(data.serialNumber);
+        if (typeof data.lastCalibration === 'string') setLastCalibration(data.lastCalibration);
+        if (typeof data.interesado === 'string') setInteresado(data.interesado);
+        if (typeof data.fecha === 'string') setFecha(data.fecha);
+        if (typeof data.hora === 'string') setHora(data.hora);
+        if (Array.isArray(data.measurements)) setMeasurements(data.measurements);
+        if (Array.isArray(data.annexImages)) setAnnexImages(data.annexImages);
+        setSavedId(report.id);
+      })
+      .catch((err: unknown) => {
+        if (cancelled) return;
+        setReportLoadError(
+          err instanceof Error
+            ? err.message
+            : 'No se pudo cargar el informe guardado.'
+        );
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [setSavedId]);
 
   const handleAuthClick = () => {
     if (tokenClient.current) {
@@ -909,6 +999,11 @@ export default function SevReport() {
 
   return (
     <>
+      {reportLoadError && (
+        <div className="mb-4 p-3 rounded-lg text-sm" style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.3)', color: 'var(--danger)' }}>
+          {reportLoadError}
+        </div>
+      )}
       <style jsx>{`
         @keyframes highlight-blink {
           0%, 50%, 100% { background-color: transparent; }
@@ -1136,6 +1231,12 @@ export default function SevReport() {
             <h2 className="text-lg sm:text-xl font-semibold mb-4 text-gray-900 dark:text-white">Acciones</h2>
             <div className="flex flex-col space-y-3">
               <button type="button" className="btn btn-primary w-full justify-center" onClick={() => validateAndProceed(handleGenerateReport)}>Descargar Informe (PDF)</button>
+              <SaveReportButton
+                status={saveStatus}
+                error={saveError}
+                isUpdate={savedId !== null}
+                onSave={handleSaveReport}
+              />
               <button type="button" className="btn btn-accent w-full justify-center" onClick={handleClearAll}>Limpiar Todo</button>
             </div>
           </div>

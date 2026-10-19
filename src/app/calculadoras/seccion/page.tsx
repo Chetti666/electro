@@ -2,6 +2,7 @@
 
 import { useState, FormEvent } from 'react';
 import Link from 'next/link';
+import { useCalculationRecorder } from '@/hooks/useCalculationRecorder';
 
 // Definición del tipo para cada entrada en el historial
 type HistoryItem = {
@@ -24,6 +25,7 @@ export default function CalculoSeccionPage() {
   const [resultado, setResultado] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [history, setHistory] = useState<HistoryItem[]>([]);
+  const recordCalculation = useCalculationRecorder();
 
   // Función para calcular
   const handleCalcular = (e: FormEvent) => {
@@ -64,6 +66,13 @@ export default function CalculoSeccionPage() {
       id: Date.now(), // ID simple basado en el tiempo
     };
     setHistory([newHistoryItem, ...history]);
+
+    void recordCalculation({
+      type: 'SECCION',
+      title: `Sección ${calculo.toFixed(2)} mm²`,
+      input: { longitud, corriente, caidaTension, tipoSistema },
+      result: { seccion: calculo, tipoSistema },
+    });
   };
 
   // Función para limpiar el historial

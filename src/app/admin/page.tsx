@@ -10,7 +10,8 @@ export default async function AdminDashboard() {
   const token = cookieStore.get('session_token')?.value;
   const user = token ? getSessionUserFromCookie(token) : null;
 
-  if (!user || user.role !== 'ADMIN') redirect('/login');
+  if (!user) redirect('/login');
+  if (user.role !== 'ADMIN') redirect('/panel');
 
   const articleCount = await prisma.article.count();
   const publishedCount = await prisma.article.count({ where: { status: 'PUBLISHED' } });

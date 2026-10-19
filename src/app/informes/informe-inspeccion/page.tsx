@@ -6,6 +6,9 @@ import autoTable from 'jspdf-autotable';
 import jsPDF from 'jspdf';
 import Link from 'next/link';
 import NextImage from 'next/image';
+import { useReportSaver } from '@/hooks/useReportSaver';
+import { fetchSavedReport } from '@/lib/report-client';
+import SaveReportButton from '@/components/informes/SaveReportButton';
 
 // --- Interfaces --- 
 interface ImageEvidence {
@@ -73,6 +76,14 @@ const InformeInspeccionPage: React.FC = () => {
     const [showErrorModal, setShowErrorModal] = useState(false);
     const [hasImagesError, setHasImagesError] = useState(false);
     const [hasStatusError, setHasStatusError] = useState(false);
+    const [reportLoadError, setReportLoadError] = useState<string | null>(null);
+    const {
+        savedId,
+        setSavedId,
+        status: saveStatus,
+        error: saveError,
+        save: saveReport,
+    } = useReportSaver();
     const [formErrors, setFormErrors] = useState({
         clientName: false,
         clientAddress: false,
@@ -86,6 +97,45 @@ const InformeInspeccionPage: React.FC = () => {
             inspectionDate: new Date().toISOString().split('T')[0]
         }));
     }, []);
+
+    // Cargar un informe guardado desde el panel (?reportId=)
+    useEffect(() => {
+        const reportId = new URLSearchParams(window.location.search).get('reportId');
+        if (!reportId) return;
+
+        let cancelled = false;
+
+        fetchSavedReport(reportId)
+            .then((report) => {
+                if (cancelled) return;
+                if (report.type !== 'INSPECCION') {
+                    throw new Error('El informe guardado no corresponde a un informe de inspección.');
+                }
+                const data = report.data as {
+                    reportDetails?: Partial<typeof reportDetails>;
+                    inspectionPoints?: InspectionPoint[];
+                };
+                if (data.reportDetails) {
+                    setReportDetails(prev => ({ ...prev, ...data.reportDetails }));
+                }
+                if (Array.isArray(data.inspectionPoints)) {
+                    setInspectionPoints(data.inspectionPoints);
+                }
+                setSavedId(report.id);
+            })
+            .catch((err: unknown) => {
+                if (cancelled) return;
+                setReportLoadError(
+                    err instanceof Error
+                        ? err.message
+                        : 'No se pudo cargar el informe guardado.'
+                );
+            });
+
+        return () => {
+            cancelled = true;
+        };
+    }, [setSavedId]);
 
     // --- Manejadores de Cambios --- 
     const handleDataChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -579,6 +629,22 @@ const InformeInspeccionPage: React.FC = () => {
         }
     };
 
+    const handleSaveReport = () => {
+        const title = `Inspección - ${
+            reportDetails.clientName || reportDetails.reference || 'Sin cliente'
+        }`;
+        void saveReport({
+            type: 'INSPECCION',
+            title,
+            clientName: reportDetails.clientName,
+            reference: reportDetails.reference,
+            data: {
+                reportDetails,
+                inspectionPoints,
+            },
+        });
+    };
+
     // --- Renderizado --- 
     return (
         <div className="container mx-auto px-4 pt-24 pb-12 md:pt-32">
@@ -593,6 +659,11 @@ const InformeInspeccionPage: React.FC = () => {
             </div>
 
             <div className="card">
+                {reportLoadError && (
+                    <div className="mb-4 p-3 rounded-lg text-sm" style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.3)', color: 'var(--danger)' }}>
+                        {reportLoadError}
+                    </div>
+                )}
                 <h2 className="text-xl font-semibold mb-6 text-gray-900 dark:text-white">1. Datos de la Inspección</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 mb-6">
                     <div>
@@ -740,6 +811,12 @@ const InformeInspeccionPage: React.FC = () => {
                             Generar Informe PDF.
                         </button>
                     )}
+                    <SaveReportButton
+                        status={saveStatus}
+                        error={saveError}
+                        isUpdate={savedId !== null}
+                        onSave={handleSaveReport}
+                    />
                 </div>
 
                 {/* Modal de Validación */}

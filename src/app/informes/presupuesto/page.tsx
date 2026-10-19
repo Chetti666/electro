@@ -3,6 +3,9 @@ import React, { useState, useEffect, useMemo } from 'react';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import Link from 'next/link';
+import { useReportSaver, type SaveReportStatus } from '@/hooks/useReportSaver';
+import { fetchSavedReport } from '@/lib/report-client';
+import SaveReportButton from '@/components/informes/SaveReportButton';
 
 // Augment the jsPDF interface to include the autoTable plugin's property
 declare module 'jspdf' {
@@ -60,6 +63,14 @@ interface ApuCalculations {
     precioUnitario: number;
 }
 
+interface PresupuestoReportData {
+    yourInfo: { name: string; rut: string; address: string; phone: string };
+    clientInfo: { name: string; rut: string; address: string; phone: string };
+    quoteInfo: { number: string; date: string; reference: string };
+    terms: string;
+    items: Item[];
+}
+
 const formatCurrency = (value: number) => new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(value);
 
 const PresupuestoPage = () => {
@@ -76,6 +87,14 @@ const PresupuestoPage = () => {
     const [totals, setTotals] = useState({ neto: 0, iva: 0, total: 0 });
     const [isGenerating, setIsGenerating] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
+    const [reportLoadError, setReportLoadError] = useState<string | null>(null);
+    const {
+        savedId,
+        setSavedId,
+        status: saveStatus,
+        error: saveError,
+        save: saveReport,
+    } = useReportSaver();
 
     // --- APU States ---
     const [activeTab, setActiveTab] = useState('Cotizacion');
@@ -124,6 +143,41 @@ const PresupuestoPage = () => {
 
         setIsLoading(false);
     }, []);
+
+    // Cargar un informe guardado desde el panel (?reportId=)
+    useEffect(() => {
+        const reportId = new URLSearchParams(window.location.search).get('reportId');
+        if (!reportId) return;
+
+        let cancelled = false;
+
+        fetchSavedReport(reportId)
+            .then((report) => {
+                if (cancelled) return;
+                if (report.type !== 'PRESUPUESTO') {
+                    throw new Error('El informe guardado no corresponde a un presupuesto.');
+                }
+                const data = report.data as PresupuestoReportData;
+                if (data.yourInfo) setYourInfo(data.yourInfo);
+                if (data.clientInfo) setClientInfo(data.clientInfo);
+                if (data.quoteInfo) setQuoteInfo(data.quoteInfo);
+                if (typeof data.terms === 'string') setTerms(data.terms);
+                if (Array.isArray(data.items)) setItems(data.items);
+                setSavedId(report.id);
+            })
+            .catch((err: unknown) => {
+                if (cancelled) return;
+                setReportLoadError(
+                    err instanceof Error
+                        ? err.message
+                        : 'No se pudo cargar el informe guardado.'
+                );
+            });
+
+        return () => {
+            cancelled = true;
+        };
+    }, [setSavedId]);
 
     const handleAddItem = () => {
         if (newItem.description && newItem.quantity > 0) {
@@ -407,6 +461,25 @@ const PresupuestoPage = () => {
         }, 50);
     };
 
+    const handleSaveReport = () => {
+        const title = `Presupuesto N° ${quoteInfo.number || 'S/N'}${
+            clientInfo.name ? ` - ${clientInfo.name}` : ''
+        }`;
+        void saveReport({
+            type: 'PRESUPUESTO',
+            title,
+            clientName: clientInfo.name,
+            reference: quoteInfo.reference,
+            data: {
+                yourInfo,
+                clientInfo,
+                quoteInfo,
+                terms,
+                items,
+            },
+        });
+    };
+
     if (isLoading) {
         return <div className="container mx-auto px-4 py-8 text-center">Cargando...</div>;
     }
@@ -445,6 +518,11 @@ const PresupuestoPage = () => {
         limpiarAnalizador={limpiarAnalizador}
         guardarPartidaActual={guardarPartidaActual}
         anadirApuACotizacion={anadirApuACotizacion}
+        onSaveReport={handleSaveReport}
+        saveStatus={saveStatus}
+        saveError={saveError}
+        isSaved={savedId !== null}
+        loadError={reportLoadError}
     />;
 };
 
@@ -651,15 +729,26 @@ interface PresupuestoViewProps {
     handleItemChange: (index: number, field: keyof Item, value: string) => void;
     dbMaestroPartidas: PartidaMaestra[];
     IVA_RATE: number;
+    onSaveReport: () => void;
+    saveStatus: SaveReportStatus;
+    saveError: string | null;
+    isSaved: boolean;
+    loadError: string | null;
 }
 
 const PresupuestoView = ({
     yourInfo, setYourInfo, clientInfo, setClientInfo, quoteInfo, setQuoteInfo,
     terms, setTerms, items, newItem, setNewItem, totals, isGenerating,
     generatePdf, handleAddItem, handleDeleteItem, handleNewItemNumericChange,
-    handleItemChange, dbMaestroPartidas, IVA_RATE
+    handleItemChange, dbMaestroPartidas, IVA_RATE, onSaveReport, saveStatus,
+    saveError, isSaved, loadError
 }: PresupuestoViewProps) => (
     <div className="card">
+        {loadError && (
+            <div className="mb-4 p-3 rounded-lg text-sm" style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.3)', color: 'var(--danger)' }}>
+                {loadError}
+            </div>
+        )}
         <h2 className="text-lg sm:text-xl font-semibold mb-6 text-gray-900 dark:text-white">1. Información General</h2>
         <div className="grid md:grid-cols-2 gap-x-8 gap-y-4 mb-6 p-4 border rounded-lg dark:border-gray-700">
             <div className="space-y-4">
@@ -749,6 +838,12 @@ const PresupuestoView = ({
             ) : (
                 <div className="text-center p-4">Generando PDF...</div>
             )}
+            <SaveReportButton
+                status={saveStatus}
+                error={saveError}
+                isUpdate={isSaved}
+                onSave={onSaveReport}
+            />
         </div>
     </div>
 );

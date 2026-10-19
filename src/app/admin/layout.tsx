@@ -9,8 +9,11 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   const token = cookieStore.get('session_token')?.value;
   const user = token ? getSessionUserFromCookie(token) : null;
 
-  if (!user || user.role !== 'ADMIN') {
+  if (!user) {
     redirect('/login');
+  }
+  if (user.role !== 'ADMIN') {
+    redirect('/panel');
   }
 
   return (

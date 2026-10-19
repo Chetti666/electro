@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { useCalculationRecorder } from '@/hooks/useCalculationRecorder';
 import { empalmesData, type Empalme, type TipoInstalacion } from './data';
 
 // --- Tipos ---
@@ -36,6 +37,7 @@ export default function EmpalmesPage() {
     const [error, setError] = useState<string | null>(null);
     const [valorBuscado, setValorBuscado] = useState<string | null>(null);
     const [history, setHistory] = useState<HistoryItem[]>([]);
+    const recordCalculation = useCalculationRecorder();
 
     const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
@@ -83,6 +85,13 @@ export default function EmpalmesPage() {
                 resultado: empalme,
             };
             setHistory([newHistoryItem, ...history]);
+
+            void recordCalculation({
+                type: 'EMPALME',
+                title: `Empalme ${empalme.interruptor_termomagnetico_A} A - ${tipoInstalacion}`,
+                input: { tipoInstalacion, metodoCalculo, valorBuscado: valorInput },
+                result: { empalme },
+            });
         } else {
             const unidad = metodoCalculo === 'potencia' ? 'la potencia' : 'la corriente';
             setError(`No se encontró un empalme estandarizado para ${unidad} solicitada. Es posible que el valor sea demasiado alto para las opciones disponibles.`);

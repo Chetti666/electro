@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcrypt';
+import { serializeSessionUser, sessionCookieOptions } from '@/lib/auth';
 
 export async function POST(request: Request) {
   try {
@@ -37,13 +38,7 @@ export async function POST(request: Request) {
     }
 
     // 3. Crear sesión codificando datos del usuario en base64
-    const sessionData = {
-      id: user.id,
-      email: user.email,
-      name: user.name,
-      role: user.role,
-    };
-    const sessionToken = Buffer.from(JSON.stringify(sessionData)).toString('base64');
+    const sessionToken = serializeSessionUser(user);
 
     // Excluir la contraseña de la respuesta
     const userWithoutPassword = { ...user };
@@ -51,11 +46,11 @@ export async function POST(request: Request) {
 
     // 4. Crear la respuesta y establecer la cookie de sesión
     const response = NextResponse.json(userWithoutPassword);
-    response.cookies.set('session_token', sessionToken, {
-      httpOnly: true, // La cookie no es accesible desde el JavaScript del cliente
-      secure: process.env.NODE_ENV === 'production', // Solo enviar por HTTPS en producción
-      path: '/', // Disponible en todo el sitio
-    });
+    response.cookies.set(
+      'session_token',
+      sessionToken,
+      sessionCookieOptions
+    );
 
     return response;
 

@@ -5,6 +5,9 @@ import autoTable from 'jspdf-autotable';
 import jsPDF from 'jspdf';
 import Link from 'next/link';
 import NextImage from 'next/image';
+import { useReportSaver } from '@/hooks/useReportSaver';
+import { fetchSavedReport } from '@/lib/report-client';
+import SaveReportButton from '@/components/informes/SaveReportButton';
 
 // --- Interfaces y Datos --- 
 interface ReportImage {
@@ -55,6 +58,14 @@ const InformeFotograficoSECPage = () => {
     const [tempDescription, setTempDescription] = useState('');
     const [showErrorModal, setShowErrorModal] = useState(false);
     const [hasImagesError, setHasImagesError] = useState(false);
+    const [reportLoadError, setReportLoadError] = useState<string | null>(null);
+    const {
+        savedId,
+        setSavedId,
+        status: saveStatus,
+        error: saveError,
+        save: saveReport,
+    } = useReportSaver();
     const [formErrors, setFormErrors] = useState({
         projectName: false,
         projectAddress: false,
@@ -66,6 +77,47 @@ const InformeFotograficoSECPage = () => {
         setReportDate(new Date().toISOString().split('T')[0]);
         setSections(defaultSectionsData.map(s => ({ ...s, images: [], isOpen: false })));
     }, []);
+
+    // Cargar un informe guardado desde el panel (?reportId=)
+    useEffect(() => {
+        const reportId = new URLSearchParams(window.location.search).get('reportId');
+        if (!reportId) return;
+
+        let cancelled = false;
+
+        fetchSavedReport(reportId)
+            .then((report) => {
+                if (cancelled) return;
+                if (report.type !== 'FOTOGRAFICO_RIC18') {
+                    throw new Error('El informe guardado no corresponde a un informe fotográfico.');
+                }
+                const data = report.data as {
+                    projectName?: string;
+                    projectAddress?: string;
+                    installerName?: string;
+                    reportDate?: string;
+                    sections?: ReportSection[];
+                };
+                if (typeof data.projectName === 'string') setProjectName(data.projectName);
+                if (typeof data.projectAddress === 'string') setProjectAddress(data.projectAddress);
+                if (typeof data.installerName === 'string') setInstallerName(data.installerName);
+                if (typeof data.reportDate === 'string') setReportDate(data.reportDate);
+                if (Array.isArray(data.sections)) setSections(data.sections);
+                setSavedId(report.id);
+            })
+            .catch((err: unknown) => {
+                if (cancelled) return;
+                setReportLoadError(
+                    err instanceof Error
+                        ? err.message
+                        : 'No se pudo cargar el informe guardado.'
+                );
+            });
+
+        return () => {
+            cancelled = true;
+        };
+    }, [setSavedId]);
 
     // --- Manejadores de Estado ---
     const toggleSection = (id: string) => {
@@ -461,6 +513,23 @@ const InformeFotograficoSECPage = () => {
         }
     };
 
+    const handleSaveReport = () => {
+        const title = `Informe Fotográfico - ${projectName || 'Sin proyecto'}`;
+        void saveReport({
+            type: 'FOTOGRAFICO_RIC18',
+            title,
+            clientName: projectName,
+            reference: projectAddress,
+            data: {
+                projectName,
+                projectAddress,
+                installerName,
+                reportDate,
+                sections,
+            },
+        });
+    };
+
     // --- Renderizado del Componente ---
     return (
         <div className="container mx-auto px-4 pt-24 pb-12 md:pt-32">
@@ -477,6 +546,11 @@ const InformeFotograficoSECPage = () => {
             </div>
 
             <div className="card">
+                {reportLoadError && (
+                    <div className="mb-4 p-3 rounded-lg text-sm" style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.3)', color: 'var(--danger)' }}>
+                        {reportLoadError}
+                    </div>
+                )}
                 <h2 className="text-xl font-semibold mb-6 text-gray-900 dark:text-white">1. Datos del Proyecto</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 mb-6">
                     <div>
@@ -601,6 +675,12 @@ const InformeFotograficoSECPage = () => {
                             Generar Informe PDF.
                         </button>
                     )}
+                    <SaveReportButton
+                        status={saveStatus}
+                        error={saveError}
+                        isUpdate={savedId !== null}
+                        onSave={handleSaveReport}
+                    />
                 </div>
 
                 {/* Modal de Validación */}

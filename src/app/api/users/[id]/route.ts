@@ -1,10 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcrypt';
+import { requireAdmin } from '@/lib/auth';
+
+function unauthorizedResponse() {
+  return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+}
 
 // Función para eliminar un usuario
-export async function DELETE(request: NextRequest, context: { params: Promise<{ id: string }> }) {
+export async function DELETE(
+  request: NextRequest,
+  context: { params: Promise<{ id: string }> }
+) {
   try {
+    await requireAdmin();
+
     const { id } = await context.params;
     const userId = Number(id);
     const deletedUser = await prisma.user.delete({
@@ -12,20 +22,30 @@ export async function DELETE(request: NextRequest, context: { params: Promise<{ 
     });
 
     if (!deletedUser) {
-      return new NextResponse(JSON.stringify({ error: 'User not found' }), { status: 404 });
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    return new NextResponse(null, { status: 204 }); // No Content
-
+    return new NextResponse(null, { status: 204 });
   } catch (error) {
-    console.error("Error deleting user:", error);
-    return new NextResponse(JSON.stringify({ error: 'Error deleting user' }), { status: 500 });
+    if (error instanceof Error && error.message === 'Unauthorized') {
+      return unauthorizedResponse();
+    }
+    console.error('Error deleting user:', error);
+    return NextResponse.json(
+      { error: 'Error deleting user' },
+      { status: 500 }
+    );
   }
 }
 
 // Función para actualizar un usuario
-export async function PUT(request: NextRequest, context: { params: Promise<{ id: string }> }) {
+export async function PUT(
+  request: NextRequest,
+  context: { params: Promise<{ id: string }> }
+) {
   try {
+    await requireAdmin();
+
     const { id } = await context.params;
     const userId = Number(id);
     const { email, name, password, role } = await request.json();
@@ -38,11 +58,16 @@ export async function PUT(request: NextRequest, context: { params: Promise<{ id:
     } = {
       email,
       name,
-      role,
+      role: role === 'ADMIN' ? 'ADMIN' : 'USER',
     };
 
-    // Solo hasheamos y actualizamos la contraseña si se proporciona una nueva
     if (password) {
+      if (password.length < 8) {
+        return NextResponse.json(
+          { error: 'La contraseña debe tener al menos 8 caracteres' },
+          { status: 400 }
+        );
+      }
       dataToUpdate.password = await bcrypt.hash(password, 10);
     }
 
@@ -51,16 +76,17 @@ export async function PUT(request: NextRequest, context: { params: Promise<{ id:
       data: dataToUpdate,
     });
 
-    return NextResponse.json(updatedUser);
-
+    const userWithoutPassword = { ...updatedUser };
+    delete (userWithoutPassword as { password?: string }).password;
+    return NextResponse.json(userWithoutPassword);
   } catch (error) {
-    console.error("Error updating user:", error);
-    return new NextResponse(
-      JSON.stringify({ error: "Error updating user" }),
-      {
-        status: 500,
-        headers: { "Content-Type": "application/json" },
-      }
+    if (error instanceof Error && error.message === 'Unauthorized') {
+      return unauthorizedResponse();
+    }
+    console.error('Error updating user:', error);
+    return NextResponse.json(
+      { error: 'Error updating user' },
+      { status: 500 }
     );
   }
 }

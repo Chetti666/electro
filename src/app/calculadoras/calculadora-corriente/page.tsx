@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, FormEvent } from 'react';
 import Link from 'next/link';
+import { useCalculationRecorder } from '@/hooks/useCalculationRecorder';
 
 type TipoSistema = 'monofasico' | 'trifasico';
 
@@ -28,6 +29,7 @@ export default function CalculadoraCorrientePage() {
   const [resultado, setResultado] = useState<{ valor: number; unidad: string; etiqueta: string } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [history, setHistory] = useState<HistoryItem[]>([]);
+  const recordCalculation = useCalculationRecorder();
 
   useEffect(() => {
     if (tipoSistema === 'monofasico') {
@@ -90,6 +92,13 @@ export default function CalculadoraCorrientePage() {
         resultado: resultadoCalculado,
       };
       setHistory([newHistoryItem, ...history]);
+
+      void recordCalculation({
+        type: 'CORRIENTE_POTENCIA',
+        title: `${resultadoCalculado.etiqueta}: ${resultadoCalculado.valor.toFixed(2)} ${resultadoCalculado.unidad}`,
+        input: { calculoObjetivo, tipoSistema, potencia, voltaje, corriente, cosPhi },
+        result: resultadoCalculado,
+      });
     }
   };
 
