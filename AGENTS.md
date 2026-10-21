@@ -28,8 +28,9 @@ npm run seed        # also available as prisma:seed (ts-node -P prisma/tsconfig.
 
 ## Architecture
 
-- Routes: `/calculadoras` (6 tools), `/informes` (4 generators), `/blog/[slug]`, `/panel` (USER), `/admin` (ADMIN), plus public `/login`, `/signup`, `/about`, `/contact`.
-- Auth is a **base64-encoded JSON** cookie `session_token` — not a JWT, not signed, no DB lookup. `requireUser()` / `requireAdmin()` only decode it.
+- Public routes: `/`, `/calculadoras` (6 tools: seccion, caida-tension, calculadora-corriente, empalmes, seccion-ric, rotuladora), `/informes` (4 generators: presupuesto, informe-resistividad, informe-fotografico, informe-inspeccion), `/blog` + `/blog/[slug]`, `/donar` + `/donar/gracias`, `/login`, `/signup`, `/about`, `/contact`.
+- `/panel` (USER): index, `/perfil`, `/historial`, `/informes`. `/admin` (ADMIN): index, `/usuarios`, `/donaciones`, `/metrics`, `/categories`, `/articles` (+ `new`, `[id]/edit`).
+- Auth is a **base64-encoded JSON** cookie `session_token` — not a JWT, not signed, no DB lookup. `requireUser()` / `requireAdmin()` only decode it. Passwords are bcrypt-hashed (`login` compares with `bcrypt.compare`; `register` hashes). Editing the profile goes through `/api/auth/profile`.
 - Middleware only checks cookie presence for `/panel` and `/admin`, and is excluded from `/api`. Role checks live in layouts (`PanelLayout` → ADMIN redirected to `/admin`; `AdminLayout` → non-admins to `/panel`) and in every API route via `requireUser`/`requireAdmin`, which throw `Error('Unauthorized')`; handlers catch it and return 401.
 - `POST /api/auth/register` (public `/signup`) creates a USER and logs it in immediately. Admin user management is `/admin/usuarios` → `/api/users`.
 - Only 5 calculation types persist (`src/lib/calculation-types.ts`); the rotuladora is not recorded. `POST /api/calculations` caps input at 64 KB; `GET` returns the latest 100.
@@ -37,7 +38,8 @@ npm run seed        # also available as prisma:seed (ts-node -P prisma/tsconfig.
 - Donations (`/donar`) use Flow checkout for one-time CLP amounts (`Donation` model, HMAC signing in `src/lib/flow.ts`). `POST /api/donations` creates the order, `/api/donations/confirm` is Flow's server webhook, and `/api/donations/return` redirects the browser to `/donar/gracias`; admins review payments at `/admin/donaciones`. Flow callbacks need a public HTTPS origin (`NEXT_PUBLIC_SITE_URL`); localhost only works through a tunnel.
 - `/api/upload` returns a base64 data URL (images only, 2 MB); article images are stored inline in Postgres, not on disk.
 - `RouteTracker` (root layout) POSTs every navigation to `/api/visits`, ignoring `/admin`, `/api`, `/login`, `/signup`, and paths containing `.`. `/api/admin/metrics` is admin-only.
-- `https://vmelectric.cl` is hardcoded in `src/app/layout.tsx`, `sitemap.ts`, `robots.ts`, and section layouts — grep for it before changing domains.
+- `https://vmelectric.cl` is hardcoded in `src/app/layout.tsx`, `sitemap.ts`, `robots.ts`, `src/lib/donations.ts`, and every section's `layout.tsx` (metadata + canonical) — grep for it before changing domains.
+- GA4 runs via `<GoogleAnalytics gaId="G-K79465K2BD" />` in the root layout; the landing page fires `sendGAEvent` from `@next/third-parties/google`. The ID is hardcoded.
 - Product background lives in `Contexto.md`, `PLAN_CLIENTES_PANEL.md`, and `monetizacion.md`; they are partly stale (e.g. missing seccion-ric and presupuesto), so trust code and config over prose.
 
 ## Gotchas
