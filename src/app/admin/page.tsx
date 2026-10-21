@@ -3,7 +3,7 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { getSessionUserFromCookie } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
-import { Newspaper, Tags, FileText, Eye, BarChart3 } from 'lucide-react';
+import { Newspaper, Tags, FileText, Eye, BarChart3, Heart } from 'lucide-react';
 
 export default async function AdminDashboard() {
   const cookieStore = await cookies();
@@ -179,6 +179,29 @@ export default async function AdminDashboard() {
             </div>
             <div className="text-xs mt-1" style={{ color: 'var(--foreground-dim)' }}>
               Monitorear las visitas por ruta y herramienta en tiempo real
+            </div>
+          </div>
+        </Link>
+
+        <Link
+          href="/admin/donaciones"
+          className="flex items-center gap-4 rounded-lg p-5 transition-all hover:scale-[1.02] group card"
+        >
+          <div
+            className="w-12 h-12 rounded-lg flex items-center justify-center shrink-0"
+            style={{
+              background: 'rgba(251, 113, 133, 0.1)',
+              border: '1px solid rgba(251, 113, 133, 0.3)',
+            }}
+          >
+            <Heart className="w-6 h-6" style={{ color: '#fda4af' }} />
+          </div>
+          <div>
+            <div className="font-medium" style={{ color: 'var(--foreground)', fontSize: '0.9rem' }}>
+              Donaciones
+            </div>
+            <div className="text-xs mt-1" style={{ color: 'var(--foreground-dim)' }}>
+              Revisa los aportes recibidos por Flow y su estado
             </div>
           </div>
         </Link>

@@ -4,7 +4,7 @@ import React, { useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { Zap, LogOut } from 'lucide-react';
+import { Zap, LogOut, Heart } from 'lucide-react';
 
 interface HeaderUser {
   id: number;
@@ -80,31 +80,46 @@ export default function Header() {
               VMElectric
             </span>
           </Link>
-          {user ? (
+          <div className="flex items-center gap-2">
             <Link
-              href={panelHref}
-              className="text-xs font-semibold px-3 py-1.5 rounded-md"
+              href="/donar"
+              aria-label="Apoyar el proyecto"
+              title="Apoyar el proyecto"
+              className="flex items-center justify-center w-9 h-9 rounded-md transition-opacity active:opacity-70"
               style={{
-                color: 'var(--primary-light)',
-                border: '1px solid rgba(37, 99, 235, 0.3)',
-                background: 'rgba(37, 99, 235, 0.1)',
+                color: '#fda4af',
+                border: '1px solid rgba(251, 113, 133, 0.3)',
+                background: 'rgba(251, 113, 133, 0.08)',
               }}
             >
-              Mi Panel
+              <Heart className="w-4 h-4" />
             </Link>
-          ) : (
-            <Link
-              href="/login"
-              className="text-xs font-semibold px-3 py-1.5 rounded-md"
-              style={{
-                color: 'var(--primary-light)',
-                border: '1px solid rgba(37, 99, 235, 0.3)',
-                background: 'rgba(37, 99, 235, 0.1)',
-              }}
-            >
-              Ingresar
-            </Link>
-          )}
+            {user ? (
+              <Link
+                href={panelHref}
+                className="text-xs font-semibold px-3 py-1.5 rounded-md"
+                style={{
+                  color: 'var(--primary-light)',
+                  border: '1px solid rgba(37, 99, 235, 0.3)',
+                  background: 'rgba(37, 99, 235, 0.1)',
+                }}
+              >
+                Mi Panel
+              </Link>
+            ) : (
+              <Link
+                href="/login"
+                className="text-xs font-semibold px-3 py-1.5 rounded-md"
+                style={{
+                  color: 'var(--primary-light)',
+                  border: '1px solid rgba(37, 99, 235, 0.3)',
+                  background: 'rgba(37, 99, 235, 0.1)',
+                }}
+              >
+                Ingresar
+              </Link>
+            )}
+          </div>
         </div>
       </header>
 
@@ -167,6 +182,20 @@ export default function Header() {
                   </Link>
                 );
               })}
+              <Link
+                href="/donar"
+                aria-label="Apoyar el proyecto"
+                title="Apoyar el proyecto"
+                className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-semibold transition-all duration-200"
+                style={{
+                  color: '#fda4af',
+                  background: 'rgba(251, 113, 133, 0.08)',
+                  border: '1px solid rgba(251, 113, 133, 0.25)',
+                }}
+              >
+                <Heart className="w-4 h-4" />
+                <span className="hidden xl:inline">Apoyar</span>
+              </Link>
               <div
                 className="w-px h-6 mx-2"
                 style={{ background: 'var(--card-border)' }}

@@ -25,6 +25,7 @@ model User {
   articles     Article[]
   calculations Calculation[]
   reports      SavedReport[]
+  donations    Donation[]
 }
 
 model SiteMetric {
@@ -88,6 +89,36 @@ model Calculation {
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@index([userId, createdAt])
+}
+
+enum DonationStatus {
+  PENDING
+  PAID
+  REJECTED
+  CANCELLED
+}
+
+model Donation {
+  id            Int            @id @default(autoincrement())
+  commerceOrder String         @unique
+  token         String?        @unique
+  flowOrder     Int?
+  amount        Int
+  currency      String         @default("CLP")
+  email         String
+  name          String?
+  message       String?
+  status        DonationStatus @default(PENDING)
+  payer         String?
+  paymentData   Json?
+  userId        Int?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([status, createdAt])
   @@index([userId, createdAt])
 }
 

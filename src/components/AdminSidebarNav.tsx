@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Newspaper, PlusCircle, Tags, BarChart3, Users } from 'lucide-react';
+import { LayoutDashboard, Newspaper, PlusCircle, Tags, BarChart3, Users, Heart } from 'lucide-react';
 
 export default function AdminSidebarNav() {
   const pathname = usePathname();
@@ -43,6 +43,12 @@ export default function AdminSidebarNav() {
       label: 'Usuarios',
       icon: <Users className="w-4 h-4 shrink-0" />,
       active: pathname.startsWith('/admin/usuarios'),
+    },
+    {
+      href: '/admin/donaciones',
+      label: 'Donaciones',
+      icon: <Heart className="w-4 h-4 shrink-0" />,
+      active: pathname.startsWith('/admin/donaciones'),
     },
   ];
 

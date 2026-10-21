@@ -58,6 +58,18 @@ export default function Footer() {
             <p className="leading-relaxed text-sm" style={{ color: 'var(--foreground-dim)' }}>
               Tu compañero digital en el terreno. Simplificamos cálculos complejos y generamos informes profesionales para el sector eléctrico.
             </p>
+            <Link
+              href="/donar"
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 w-fit"
+              style={{
+                background: 'rgba(251, 113, 133, 0.08)',
+                border: '1px solid rgba(251, 113, 133, 0.3)',
+                color: '#fda4af',
+              }}
+            >
+              <Heart className="w-4 h-4" />
+              Apoyar el proyecto
+            </Link>
             <div className="flex gap-3 pt-2">
               {socialLinks.map((social, index) => (
                 <a
