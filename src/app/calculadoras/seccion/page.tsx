@@ -3,6 +3,7 @@
 import { useState, FormEvent } from 'react';
 import Link from 'next/link';
 import { useCalculationRecorder } from '@/hooks/useCalculationRecorder';
+import { DonationSupportCard } from '@/components/DonationSupportCard';
 
 // Definición del tipo para cada entrada en el historial
 type HistoryItem = {
@@ -168,6 +169,8 @@ export default function CalculoSeccionPage() {
 
         {/* Columna Derecha: Resultados e Historial */}
         <div className="space-y-6">
+          <DonationSupportCard tool="seccion" hasResult={resultado !== null} />
+
           {/* Resultados */}
           <div className="card">
             <h2 className="text-lg sm:text-xl font-semibold mb-4 text-gray-900 dark:text-white">Resultados</h2>

@@ -3,6 +3,7 @@
 import React, { useState, useEffect, FormEvent } from 'react';
 import Link from 'next/link';
 import { useCalculationRecorder } from '@/hooks/useCalculationRecorder';
+import { DonationSupportCard } from '@/components/DonationSupportCard';
 
 type TipoSistema = 'monofasico' | 'trifasico';
 
@@ -170,6 +171,8 @@ export default function CalculadoraCorrientePage() {
 
         {/* Columna de Resultados e Historial */}
         <div className="space-y-6">
+          <DonationSupportCard tool="calculadora-corriente" hasResult={resultado !== null} />
+
           <div className="card">
             <h2 className="text-lg sm:text-xl font-semibold mb-4 text-gray-900 dark:text-white">Resultados</h2>
             {!resultado && !error && (

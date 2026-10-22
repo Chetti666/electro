@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useCalculationRecorder } from '@/hooks/useCalculationRecorder';
 import { empalmesData, type Empalme, type TipoInstalacion } from './data';
+import { DonationSupportCard } from '@/components/DonationSupportCard';
 
 // --- Tipos ---
 type HistoryItem = {
@@ -210,6 +211,8 @@ export default function EmpalmesPage() {
 
                 {/* Columna de Resultados e Historial */}
                 <div className="space-y-6">
+                    <DonationSupportCard tool="empalmes" hasResult={Boolean(resultado)} />
+
                     <div className="card">
                         <h2 className="text-lg sm:text-xl font-semibold mb-4 text-gray-900 dark:text-white">Resultados</h2>
                         {!resultado && !error && (

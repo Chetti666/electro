@@ -4,6 +4,7 @@ import { useState, useMemo, FormEvent } from 'react';
 import Link from 'next/link';
 import { useCalculationRecorder } from '@/hooks/useCalculationRecorder';
 import { datosConductores, tablasDeCalculo, metodosInstalacion } from './data';
+import { DonationSupportCard } from '@/components/DonationSupportCard';
 
 interface Resultado {
   seccion: number;
@@ -191,6 +192,8 @@ export default function SeccionRicPage() {
 
         {/* Columna de Información */}
         <div className="lg:col-span-1 space-y-8">
+          <DonationSupportCard tool="seccion-ric" hasResult={Boolean(resultado)} />
+
           <div className="card">
             <h3 className="text-base sm:text-lg font-semibold mb-3 text-gray-900 dark:text-white">Secciones Mínimas (RIC N°4)</h3>
             <div className="overflow-x-auto">

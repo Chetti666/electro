@@ -3,6 +3,7 @@
 import { useState, FormEvent } from 'react';
 import Link from 'next/link';
 import { useCalculationRecorder } from '@/hooks/useCalculationRecorder';
+import { DonationSupportCard } from '@/components/DonationSupportCard';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -314,6 +315,12 @@ export default function CalculoVpPage() {
 
         {/* Columna Derecha: Resultados y Gráfico */}
         <div className="md:col-span-3">
+          <DonationSupportCard
+            tool="caida-tension"
+            hasResult={Boolean(resultadoValor)}
+            className="mb-6"
+          />
+
           <div className="card">
             <h2 className="text-lg sm:text-xl font-semibold mb-4 text-gray-900 dark:text-white">Resultados</h2>
 

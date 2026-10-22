@@ -3,6 +3,7 @@
 import { useRef, useState } from 'react';
 import html2canvas from 'html2canvas';
 import Link from 'next/link';
+import { DonationSupportCard } from '@/components/DonationSupportCard';
 
 interface LabelData {
   fabricante: string;
@@ -194,10 +195,13 @@ export default function ElectricalPanelLabelGenerator() {
           </form>
         </div>
 
-        <div className="card">
-          <h2 className="text-lg sm:text-xl font-semibold mb-4 text-gray-900 dark:text-white">
-            Vista Previa del Rótulo
-          </h2>
+        <div className="space-y-6">
+          <DonationSupportCard tool="rotuladora" hasResult={Boolean(generatedLabel)} />
+
+          <div className="card">
+            <h2 className="text-lg sm:text-xl font-semibold mb-4 text-gray-900 dark:text-white">
+              Vista Previa del Rótulo
+            </h2>
           {generatedLabel ? (
             <>
               <div className="w-full overflow-x-auto p-2 bg-gray-100 dark:bg-gray-800 rounded">
@@ -232,6 +236,7 @@ export default function ElectricalPanelLabelGenerator() {
               <p>La vista previa del rótulo aparecerá aquí.</p>
             </div>
           )}
+          </div>
         </div>
       </div>
     </div>
