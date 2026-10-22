@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { FormEvent } from 'react';
 import Link from 'next/link';
-import { Save, Trash2 } from 'lucide-react';
+import { Calculator, Save, Trash2 } from 'lucide-react';
 import { useCalculationRecorder } from '@/hooks/useCalculationRecorder';
 import {
   useCalculationHistory,
@@ -77,6 +77,7 @@ export default function CalculadoraCorrientePage() {
   const recordCalculation = useCalculationRecorder();
 
   const [saved, setSaved] = useState(false);
+  const [lastCalculated, setLastCalculated] = useState<string | null>(null);
   const savedTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
@@ -157,6 +158,19 @@ export default function CalculadoraCorrientePage() {
       : 'Todos los valores deben ser números mayores que cero.'
     : null;
 
+  // El botón dice «Calcular» hasta que se calcula; después «Guardar cálculo».
+  // Al cambiar o limpiar los datos vuelve a «Calcular».
+  const formSignature = [
+    form.calculoObjetivo,
+    form.tipoSistema,
+    form.potencia,
+    form.potenciaUnidad,
+    form.voltaje,
+    form.corriente,
+    form.cosPhi,
+  ].join('|');
+  const yaCalculado = resultado !== null && lastCalculated === formSignature;
+
   const resumen = resultado
     ? [
         `${resultado.etiqueta}: ${resultado.valor.toFixed(2)} ${resultado.unidad}`,
@@ -212,27 +226,29 @@ export default function CalculadoraCorrientePage() {
         etiqueta: resultado.etiqueta,
         aparente: resultado.aparente,
       });
+
+      void recordCalculation({
+        type: 'CORRIENTE_POTENCIA',
+        title: `${resultado.etiqueta}: ${resultado.valor.toFixed(2)} ${
+          resultado.unidad
+        }`,
+        input: {
+          calculoObjetivo: form.calculoObjetivo,
+          tipoSistema: form.tipoSistema,
+          potencia: potenciaW !== null ? String(potenciaW) : form.potencia,
+          voltaje: form.voltaje,
+          corriente: form.corriente,
+          cosPhi: form.cosPhi,
+        },
+        result: {
+          valor: resultado.valor,
+          unidad: resultado.unidad,
+          etiqueta: resultado.etiqueta,
+        },
+      });
     }
 
-    void recordCalculation({
-      type: 'CORRIENTE_POTENCIA',
-      title: `${resultado.etiqueta}: ${resultado.valor.toFixed(2)} ${
-        resultado.unidad
-      }`,
-      input: {
-        calculoObjetivo: form.calculoObjetivo,
-        tipoSistema: form.tipoSistema,
-        potencia: potenciaW !== null ? String(potenciaW) : form.potencia,
-        voltaje: form.voltaje,
-        corriente: form.corriente,
-        cosPhi: form.cosPhi,
-      },
-      result: {
-        valor: resultado.valor,
-        unidad: resultado.unidad,
-        etiqueta: resultado.etiqueta,
-      },
-    });
+    setLastCalculated(formSignature);
 
     setSaved(true);
     if (savedTimer.current) clearTimeout(savedTimer.current);
@@ -317,8 +333,8 @@ export default function CalculadoraCorrientePage() {
                 }
                 className="form-select"
               >
-                <option value="monofasico">Monofásico (220 V)</option>
-                <option value="trifasico">Trifásico (380 V)</option>
+                <option value="monofasico">Monofásico </option>
+                <option value="trifasico">Trifásico </option>
               </select>
             </div>
 
@@ -475,8 +491,12 @@ export default function CalculadoraCorrientePage() {
                 className="btn btn-primary w-full sm:w-auto disabled:opacity-50"
                 disabled={!validos}
               >
-                <Save className="h-4 w-4" aria-hidden />
-                Guardar cálculo
+                {yaCalculado ? (
+                  <Save className="h-4 w-4" aria-hidden />
+                ) : (
+                  <Calculator className="h-4 w-4" aria-hidden />
+                )}
+                {yaCalculado ? 'Guardar cálculo' : 'Calcular'}
               </button>
               <button
                 type="button"
