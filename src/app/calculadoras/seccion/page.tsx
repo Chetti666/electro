@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { FormEvent } from 'react';
 import Link from 'next/link';
-import { Save, Trash2 } from 'lucide-react';
+import { Calculator, Save, Trash2 } from 'lucide-react';
 import { useCalculationRecorder } from '@/hooks/useCalculationRecorder';
 import {
   useCalculationHistory,
@@ -68,6 +68,7 @@ export default function CalculoSeccionPage() {
   const recordCalculation = useCalculationRecorder();
 
   const [saved, setSaved] = useState(false);
+  const [lastCalculated, setLastCalculated] = useState<string | null>(null);
   const savedTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
@@ -131,6 +132,16 @@ export default function CalculoSeccionPage() {
 
   const comercial = seccion !== null ? nextCommercialSection(seccion) : null;
   const awg = seccion !== null ? minimumAwgForSection(seccion) : null;
+
+  // El botón dice «Calcular» hasta que se calcula; después «Guardar cálculo».
+  // Al cambiar o limpiar los datos vuelve a «Calcular».
+  const formSignature = [
+    form.tipoSistema,
+    form.longitud,
+    form.corriente,
+    form.caidaTension,
+  ].join('|');
+  const yaCalculado = seccion !== null && lastCalculated === formSignature;
 
   const porcentajeVp =
     longitudes.caidaTension !== null
@@ -208,19 +219,21 @@ export default function CalculoSeccionPage() {
         seccion,
         comercial,
       });
+
+      void recordCalculation({
+        type: 'SECCION',
+        title: `Sección ${seccion.toFixed(2)} mm²`,
+        input: {
+          longitud: form.longitud,
+          corriente: form.corriente,
+          caidaTension: form.caidaTension,
+          tipoSistema: form.tipoSistema,
+        },
+        result: { seccion, comercial, tipoSistema: form.tipoSistema },
+      });
     }
 
-    void recordCalculation({
-      type: 'SECCION',
-      title: `Sección ${seccion.toFixed(2)} mm²`,
-      input: {
-        longitud: form.longitud,
-        corriente: form.corriente,
-        caidaTension: form.caidaTension,
-        tipoSistema: form.tipoSistema,
-      },
-      result: { seccion, comercial, tipoSistema: form.tipoSistema },
-    });
+    setLastCalculated(formSignature);
 
     setSaved(true);
     if (savedTimer.current) clearTimeout(savedTimer.current);
@@ -369,8 +382,12 @@ export default function CalculoSeccionPage() {
                 className="btn btn-primary w-full sm:w-auto disabled:opacity-50"
                 disabled={seccion === null}
               >
-                <Save className="h-4 w-4" aria-hidden />
-                Guardar cálculo
+                {yaCalculado ? (
+                  <Save className="h-4 w-4" aria-hidden />
+                ) : (
+                  <Calculator className="h-4 w-4" aria-hidden />
+                )}
+                {yaCalculado ? 'Guardar cálculo' : 'Calcular'}
               </button>
               <button
                 type="button"

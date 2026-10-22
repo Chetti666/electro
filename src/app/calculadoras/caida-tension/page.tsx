@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { FormEvent } from 'react';
 import Link from 'next/link';
-import { Save, Trash2 } from 'lucide-react';
+import { Calculator, Save, Trash2 } from 'lucide-react';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -110,6 +110,7 @@ export default function CalculoVpPage() {
   const recordCalculation = useCalculationRecorder();
 
   const [saved, setSaved] = useState(false);
+  const [lastCalculated, setLastCalculated] = useState<string | null>(null);
   const savedTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
@@ -335,6 +336,16 @@ export default function CalculoVpPage() {
     ? 'Todos los valores deben ser números mayores que cero.'
     : null;
 
+  // El botón dice «Calcular» hasta que se calcula; después «Guardar cálculo».
+  // Al cambiar o limpiar los datos vuelve a «Calcular».
+  const formSignature = [
+    form.tipoSistema,
+    form.seccion,
+    form.longitudMaxima,
+    form.corriente,
+  ].join('|');
+  const yaCalculado = vp !== null && lastCalculated === formSignature;
+
   const resumen =
     vp !== null && porcentaje !== null
       ? [
@@ -386,24 +397,26 @@ export default function CalculoVpPage() {
         porcentaje,
         cumple,
       });
+
+      void recordCalculation({
+        type: 'CAIDA_TENSION',
+        title: `Caída de tensión ${vp.toFixed(2)} V`,
+        input: {
+          tipoSistema: form.tipoSistema,
+          seccion: form.seccion,
+          longitudMaxima: form.longitudMaxima,
+          corriente: form.corriente,
+        },
+        result: {
+          caidaTension: vp,
+          unidad: 'V',
+          limiteVp: limiteV,
+          cumple,
+        },
+      });
     }
 
-    void recordCalculation({
-      type: 'CAIDA_TENSION',
-      title: `Caída de tensión ${vp.toFixed(2)} V`,
-      input: {
-        tipoSistema: form.tipoSistema,
-        seccion: form.seccion,
-        longitudMaxima: form.longitudMaxima,
-        corriente: form.corriente,
-      },
-      result: {
-        caidaTension: vp,
-        unidad: 'V',
-        limiteVp: limiteV,
-        cumple,
-      },
-    });
+    setLastCalculated(formSignature);
 
     setSaved(true);
     if (savedTimer.current) clearTimeout(savedTimer.current);
@@ -593,8 +606,12 @@ export default function CalculoVpPage() {
                   className="btn btn-primary w-full sm:w-auto disabled:opacity-50"
                   disabled={vp === null}
                 >
-                  <Save className="h-4 w-4" aria-hidden />
-                  Guardar cálculo
+                  {yaCalculado ? (
+                    <Save className="h-4 w-4" aria-hidden />
+                  ) : (
+                    <Calculator className="h-4 w-4" aria-hidden />
+                  )}
+                  {yaCalculado ? 'Guardar cálculo' : 'Calcular'}
                 </button>
                 <button
                   type="button"
