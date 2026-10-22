@@ -1,0 +1,145 @@
+LICENCIA DE SOFTWARE PROPIETARIO
+TODOS LOS DERECHOS RESERVADOS
+
+Copyright (c) 2026 Chetti666 <a.guiachetti@gmail.com>
+Repositorio: https://github.com/Chetti666/electro
+Sitio: https://vmelectric.cl
+
+Este archivo establece los términos bajo los cuales se pone a disposición el
+código fuente, la documentación, los textos, las imágenes, los datos y demás
+contenido de este repositorio (en adelante, "el Software"). Al acceder,
+clonar, descargar o utilizar el Software, usted acepta estos términos. Si no
+está de acuerdo, no utilice el Software.
+
+1. TITULARIDAD
+
+El Software es obra original de su autor y se encuentra protegido por la Ley
+N° 17.336 sobre Propiedad Intelectual de Chile, por tratados internacionales
+de derecho de autor y por la legislación aplicable en otras jurisdicciones.
+El titular conserva la totalidad de los derechos patrimoniales y morales
+sobre el Software. No se transfiere ni se cede ningún derecho de propiedad
+intelectual por el solo acceso o uso del Software.
+
+2. ALCANCE DE LA AUTORIZACIÓN
+
+Se concede únicamente una autorización limitada, revocable, no exclusiva y no
+transferible para:
+
+  a) visualizar el código fuente con fines informativos o de evaluación; y
+  b) realizar un fork dentro de GitHub, en los términos permitidos por los
+     Términos de Servicio de GitHub, únicamente para proponer cambios
+     mediante pull requests al repositorio original.
+
+Esta autorización no incluye, en ningún caso, permiso para ejecutar el
+Software en producción, ni para usarlo total o parcialmente en un producto o
+servicio propio o de terceros. Cualquier uso distinto del expresamente
+autorizado en esta sección requiere un permiso escrito y previo del titular.
+
+3. USOS PROHIBIDOS
+
+Sin autorización previa y por escrito del titular, queda expresamente
+prohibido:
+
+  a) copiar, reproducir, distribuir, publicar, comunicar o poner a
+     disposición el Software, en todo o en parte, por cualquier medio;
+  b) modificar, adaptar, traducir, descompilar, aplicar ingeniería inversa o
+     crear obras derivadas del Software;
+  c) usar el Software, en todo o en parte, con fines comerciales, incluyendo
+     su incorporación en productos, servicios, SaaS, plantillas, cursos,
+     consultorías o proyectos que generen ingresos directos o indirectos;
+  d) sublicenciar, vender, alquilar, ceder, prestar o transferir el Software
+     o cualquier derecho sobre él;
+  e) extraer, recolectar o reutilizar de forma masiva el código, los datos o
+     los contenidos del Software mediante raspado (scraping), bots, agentes
+     automatizados u otras técnicas;
+  f) eliminar, ocultar o alterar los avisos de autoría, marcas o avisos
+     legales contenidos en el Software;
+  g) usar el Software para desarrollar o entrenar productos que compitan con
+     el Software o con los servicios del titular.
+
+4. RESERVA DE DERECHOS PARA ENTRENAMIENTO DE IA Y MINERÍA DE DATOS
+
+El titular se reserva expresamente todos los derechos sobre el Software para
+todo uso relacionado con sistemas de inteligencia artificial, incluidos, sin
+limitación:
+
+  a) el entrenamiento, ajuste fino (fine-tuning), destilación o evaluación de
+     modelos de lenguaje, modelos multimodales, modelos de código o
+     cualquier otro sistema de aprendizaje automático;
+  b) la ingesta, indexación o inclusión del Software en corpus, datasets,
+     índices vectoriales o bases de conocimiento utilizados por sistemas de
+     IA generativa;
+  c) la minería de texto y datos (text and data mining) y la extracción
+     automatizada de contenido con fines comerciales.
+
+Esta reserva comprende, en la medida permitida por la ley aplicable, la
+reserva de derechos prevista en el artículo 4, párrafo 3, de la Directiva
+(UE) 2019/790 y disposiciones equivalentes en otras jurisdicciones. Los
+términos de esta sección prevalecen sobre cualquier condición general de
+uso, licencia implícita o práctica de la industria en sentido contrario.
+
+5. MARCAS Y SIGNOS DISTINTIVOS
+
+Esta licencia no otorga derecho alguno sobre los nombres comerciales, marcas,
+logotipos, dominios ni signos distintivos del titular o del proyecto,
+incluidos "VMElectric" y "electro". Dichos signos no pueden usarse para
+identificar productos o servicios derivados sin autorización escrita.
+
+6. COMPONENTES DE TERCEROS
+
+El Software incorpora dependencias y componentes de terceros, cada uno sujeto
+a su propia licencia (por ejemplo, MIT, Apache-2.0 o ISC). Esta licencia no
+modifica ni restringe los derechos que dichas licencias otorgan sobre esos
+componentes, ni las obligaciones que imponen. Los avisos de autoría de
+terceros deben conservarse conforme a sus respectivas licencias.
+
+7. EXCLUSIÓN DE GARANTÍAS
+
+EL SOFTWARE SE PROPORCIONA "TAL CUAL" Y "SEGÚN DISPONIBILIDAD", SIN GARANTÍA
+DE NINGÚN TIPO, EXPRESA O IMPLÍCITA, INCLUIDAS, ENTRE OTRAS, LAS GARANTÍAS DE
+COMERCIABILIDAD, IDONEIDAD PARA UN FIN PARTICULAR, TITULARIDAD Y NO INFRACCIÓN.
+EL TITULAR NO GARANTIZA QUE EL SOFTWARE ESTÉ LIBRE DE ERRORES, SEA SEGURO O
+QUE SU USO PRODUZCA RESULTADOS DETERMINADOS. LOS CÁLCULOS ELÉCTRICOS Y LOS
+INFORMES GENERADOS SON HERRAMIENTAS DE APOYO Y NO SUSTITUYEN LA VERIFICACIÓN
+DE UN PROFESIONAL COMPETENTE NI EL CUMPLIMIENTO DE LA NORMATIVA VIGENTE.
+
+8. LIMITACIÓN DE RESPONSABILIDAD
+
+EN LA MÁXIMA MEDIDA PERMITIDA POR LA LEY, EL TITULAR NO SERÁ RESPONSABLE POR
+DAÑOS DIRECTOS, INDIRECTOS, INCIDENTALES, ESPECIALES, CONSECUENCIALES O
+PUNITIVOS, NI POR LUCRO CESANTE, PÉRDIDA DE DATOS O INTERRUPCIÓN DEL NEGOCIO,
+DERIVADOS DEL ACCESO, USO O IMPOSIBILIDAD DE USO DEL SOFTWARE, AUN CUANDO
+HUBIERA SIDO ADVERTIDO DE DICHA POSIBILIDAD.
+
+9. TERMINACIÓN
+
+Toda vulneración de estos términos extingue automáticamente la autorización
+limitada del punto 2. En tal caso, el infractor deberá cesar de inmediato todo
+uso del Software y destruir las copias que tenga en su poder. La terminación
+no limita el ejercicio de las acciones legales que correspondan ni la
+indemnización de los perjuicios causados.
+
+10. LEY APLICABLE Y JURISDICCIÓN
+
+Estos términos se rigen por las leyes de la República de Chile. Cualquier
+controversia se someterá a los tribunales ordinarios de justicia competentes
+de Chile, sin perjuicio de las normas imperativas que resulten aplicables en
+otras jurisdicciones.
+
+11. LICENCIAS COMERCIALES Y CONTACTO
+
+El titular puede otorgar licencias comerciales, técnicas o de otro tipo
+mediante un acuerdo escrito y firmado. Para solicitar una autorización,
+escribir a a.guiachetti@gmail.com indicando el uso previsto.
+
+------------------------------------------------------------------------------
+RESUMEN EN INGLÉS (NO VINCULANTE / NON-BINDING SUMMARY)
+
+This is proprietary software. All rights reserved. You may view the source
+code and fork it within GitHub solely to submit pull requests. Any other use
+- including copying, redistribution, modification, commercial use, or use for
+training or feeding AI/ML systems - requires prior written permission from the
+copyright holder. The Spanish text above is the legally binding version.
+
+------------------------------------------------------------------------------
+Copyright (c) 2026 Chetti666. All rights reserved.

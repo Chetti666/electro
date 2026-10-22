@@ -37,3 +37,15 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 # electro.
 
 test f
+
+## Licencia
+
+Este repositorio es **software propietario**. Todos los derechos reservados.
+
+El código se publica únicamente para consulta y evaluación. No se concede
+permiso para copiarlo, modificarlo, redistribuirlo, usarlo comercialmente ni
+para entrenar o alimentar sistemas de inteligencia artificial sin autorización
+previa y por escrito del titular. Los términos completos están en
+[`LICENSE`](./LICENSE).
+
+Para licencias comerciales o permisos especiales: a.guiachetti@gmail.com.

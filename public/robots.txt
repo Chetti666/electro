@@ -1,4 +1,66 @@
 # robots.txt
+# Contenido propietario - Todos los derechos reservados.
+# Ver LICENSE: https://github.com/Chetti666/electro/blob/main/LICENSE
+
+# --- Rastreadores de IA: bloqueados (entrenamiento / ingesta) ---
+User-agent: GPTBot
+Disallow: /
+
+User-agent: ClaudeBot
+Disallow: /
+
+User-agent: Claude-Web
+Disallow: /
+
+User-agent: anthropic-ai
+Disallow: /
+
+User-agent: Google-Extended
+Disallow: /
+
+User-agent: CCBot
+Disallow: /
+
+User-agent: Bytespider
+Disallow: /
+
+User-agent: PerplexityBot
+Disallow: /
+
+User-agent: Applebot-Extended
+Disallow: /
+
+User-agent: Amazonbot
+Disallow: /
+
+User-agent: meta-externalagent
+Disallow: /
+
+User-agent: FacebookBot
+Disallow: /
+
+User-agent: cohere-ai
+Disallow: /
+
+User-agent: Diffbot
+Disallow: /
+
+User-agent: ImagesiftBot
+Disallow: /
+
+User-agent: YouBot
+Disallow: /
+
+User-agent: Timpibot
+Disallow: /
+
+User-agent: omgili
+Disallow: /
+
+User-agent: omgilibot
+Disallow: /
+
+# --- Búsqueda general ---
 User-agent: *
 Allow: /
 
@@ -8,5 +70,6 @@ Disallow: /api/
 Disallow: /login
 Disallow: /signup
 Disallow: /admin/articles/new
+Disallow: /panel/
 
 Sitemap: https://vmelectric.cl/sitemap.xml
