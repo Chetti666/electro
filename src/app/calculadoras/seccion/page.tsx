@@ -13,6 +13,7 @@ import { usePersistentState } from '@/hooks/usePersistentState';
 import { CopyResultButton } from '@/components/calculadoras/CopyResultButton';
 import { DonationSupportCard } from '@/components/DonationSupportCard';
 import {
+  COPPER_RESISTIVITY,
   NOMINAL_VOLTAGE,
   formatAwg,
   isElectricalSystem,
@@ -22,11 +23,13 @@ import {
   type AwgSection,
   type ElectricalSystem,
 } from '@/lib/electrical';
+import { formatResultCopy, withReference } from '@/lib/copy-format';
 
 const FORM_KEY = 'vmelectric:calc:seccion:form:v1';
 const HISTORY_KEY = 'vmelectric:calc:seccion:history:v1';
 
 type SectionForm = {
+  referencia: string;
   tipoSistema: ElectricalSystem;
   longitud: string;
   corriente: string;
@@ -34,6 +37,7 @@ type SectionForm = {
 };
 
 type SectionHistoryItem = HistoryEntry & {
+  referencia: string;
   tipoSistema: ElectricalSystem;
   longitud: string;
   corriente: string;
@@ -43,6 +47,7 @@ type SectionHistoryItem = HistoryEntry & {
 };
 
 const DEFAULT_FORM: SectionForm = {
+  referencia: '',
   tipoSistema: 'monofasico',
   longitud: '',
   corriente: '',
@@ -88,6 +93,7 @@ export default function CalculoSeccionPage() {
     if (!nextLongitud && !nextCorriente && !nextVp && !nextSistema) return;
 
     setForm((previous) => ({
+      ...previous,
       tipoSistema: isElectricalSystem(nextSistema)
         ? nextSistema
         : previous.tipoSistema,
@@ -143,6 +149,16 @@ export default function CalculoSeccionPage() {
   ].join('|');
   const yaCalculado = seccion !== null && lastCalculated === formSignature;
 
+  const factorLabel = form.tipoSistema === 'monofasico' ? '2' : '√3';
+  const formulaLines =
+    seccion !== null
+      ? [
+          `S = (${factorLabel} × ρ × L × I) / Vp`,
+          `S = (${factorLabel} × ${COPPER_RESISTIVITY} Ω·mm²/m × ${form.longitud} m × ${form.corriente} A) / ${form.caidaTension} V`,
+          `S = ${seccion.toFixed(2)} mm²`,
+        ]
+      : [];
+
   const porcentajeVp =
     longitudes.caidaTension !== null
       ? (longitudes.caidaTension / NOMINAL_VOLTAGE[form.tipoSistema]) * 100
@@ -154,19 +170,44 @@ export default function CalculoSeccionPage() {
 
   const resumen =
     seccion !== null
-      ? [
-          `Sección mínima por caída de tensión: ${seccion.toFixed(2)} mm²${
-            comercial ? ` (comercial ${comercial} mm²)` : ''
-          }`,
-          `L: ${form.longitud} m · I: ${form.corriente} A · Vp: ${form.caidaTension} V (${systemLabel(
-            form.tipoSistema
-          )})`,
-          ...(awg
-            ? [`AWG mínimo que cumple: ${formatAwg(awg)} (${awg.mm2} mm²)`]
-            : []),
-          'Importante: verifica también la capacidad de corriente con la tabla de la norma (RIC N°4).',
-          'Calculado con VMElectric',
-        ].join('\n')
+      ? formatResultCopy({
+          title: withReference(
+            'CÁLCULO DE SECCIÓN POR CAÍDA DE TENSIÓN',
+            form.referencia
+          ),
+          sections: [
+            {
+              heading: 'Resultado',
+              lines: [
+                `Sección mínima: ${seccion.toFixed(2)} mm²`,
+                ...(comercial !== null
+                  ? [`Sección comercial: ${comercial} mm²`]
+                  : []),
+                ...(awg !== null
+                  ? [`AWG mínimo: ${formatAwg(awg)} (${awg.mm2} mm²)`]
+                  : []),
+              ],
+            },
+            { heading: 'Fórmula', lines: formulaLines },
+            {
+              heading: 'Datos',
+              lines: [
+                `Sistema: ${systemLabel(form.tipoSistema)} (${NOMINAL_VOLTAGE[
+                  form.tipoSistema
+                ]} V)`,
+                `Longitud: ${form.longitud} m`,
+                `Corriente: ${form.corriente} A`,
+                `Caída admisible: ${form.caidaTension} V`,
+              ],
+            },
+            {
+              heading: 'Nota',
+              lines: [
+                'Esta sección cumple la caída de tensión, pero no garantiza la capacidad de corriente. Verifica la tabla de la norma (RIC N°4).',
+              ],
+            },
+          ],
+        })
       : '';
 
   const updateField = (field: keyof SectionForm, value: string) => {
@@ -183,6 +224,7 @@ export default function CalculoSeccionPage() {
   const resetFields = () => {
     setForm((previous) => ({
       ...previous,
+      referencia: '',
       longitud: '',
       corriente: '',
       caidaTension: '',
@@ -191,6 +233,7 @@ export default function CalculoSeccionPage() {
 
   const restore = (item: SectionHistoryItem) => {
     setForm({
+      referencia: item.referencia ?? '',
       tipoSistema: item.tipoSistema,
       longitud: item.longitud,
       corriente: item.corriente,
@@ -203,8 +246,10 @@ export default function CalculoSeccionPage() {
     if (seccion === null) return;
 
     const latest = history.items[0];
+    const referencia = form.referencia.trim();
     const duplicate =
       latest !== undefined &&
+      (latest.referencia ?? '') === referencia &&
       latest.tipoSistema === form.tipoSistema &&
       latest.longitud === form.longitud &&
       latest.corriente === form.corriente &&
@@ -212,6 +257,7 @@ export default function CalculoSeccionPage() {
 
     if (!duplicate) {
       history.add({
+        referencia,
         tipoSistema: form.tipoSistema,
         longitud: form.longitud,
         corriente: form.corriente,
@@ -222,8 +268,9 @@ export default function CalculoSeccionPage() {
 
       void recordCalculation({
         type: 'SECCION',
-        title: `Sección ${seccion.toFixed(2)} mm²`,
+        title: withReference(`Sección ${seccion.toFixed(2)} mm²`, referencia),
         input: {
+          referencia,
           longitud: form.longitud,
           corriente: form.corriente,
           caidaTension: form.caidaTension,
@@ -266,6 +313,23 @@ export default function CalculoSeccionPage() {
             Datos de entrada
           </h2>
           <form onSubmit={handleCalcular} className="space-y-4">
+            <div>
+              <label htmlFor="referencia" className="form-label">
+                Referencia (opcional)
+              </label>
+              <input
+                type="text"
+                id="referencia"
+                maxLength={60}
+                className="form-input"
+                value={form.referencia}
+                onChange={(event) =>
+                  updateField('referencia', event.target.value)
+                }
+                placeholder="Ej: Circuito 1, Tablero A"
+              />
+            </div>
+
             <div>
               <label className="form-label">Tipo de Sistema</label>
               <div className="flex flex-wrap gap-4">
@@ -566,6 +630,14 @@ export default function CalculoSeccionPage() {
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div>
+                        {item.referencia ? (
+                          <p
+                            className="text-xs font-semibold"
+                            style={{ color: 'var(--secondary)' }}
+                          >
+                            {item.referencia}
+                          </p>
+                        ) : null}
                         <p
                           className="font-semibold text-base sm:text-lg"
                           style={{ color: 'var(--primary-light)' }}
