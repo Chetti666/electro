@@ -44,6 +44,7 @@ import {
   maxLengthForDrop,
   type ElectricalSystem,
 } from '@/lib/electrical';
+import { formatResultCopy, withReference } from '@/lib/copy-format';
 
 ChartJS.register(
   CategoryScale,
@@ -65,6 +66,7 @@ const CHART_TITLE = '#e2e8f0';
 const CHART_GRID = 'rgba(148, 163, 184, 0.14)';
 
 type DropForm = {
+  referencia: string;
   tipoSistema: ElectricalSystem;
   seccion: string;
   longitudMaxima: string;
@@ -72,6 +74,7 @@ type DropForm = {
 };
 
 type DropHistoryItem = HistoryEntry & {
+  referencia: string;
   tipoSistema: ElectricalSystem;
   seccion: string;
   longitudMaxima: string;
@@ -82,6 +85,7 @@ type DropHistoryItem = HistoryEntry & {
 };
 
 const DEFAULT_FORM: DropForm = {
+  referencia: '',
   tipoSistema: 'monofasico',
   seccion: '',
   longitudMaxima: '',
@@ -346,22 +350,59 @@ export default function CalculoVpPage() {
   ].join('|');
   const yaCalculado = vp !== null && lastCalculated === formSignature;
 
-  const resumen =
+  const factorLabel = form.tipoSistema === 'monofasico' ? '2' : '√3';
+  const formulaLines =
+    vp !== null
+      ? [
+          `ΔV = (${factorLabel} × ρ × L × I) / S`,
+          `ΔV = (${factorLabel} × ${COPPER_RESISTIVITY} Ω·mm²/m × ${form.longitudMaxima} m × ${form.corriente} A) / ${form.seccion} mm²`,
+          `ΔV = ${vp.toFixed(2)} V`,
+        ]
+      : [];
+  const porcentajeLines =
     vp !== null && porcentaje !== null
       ? [
-          `Caída de tensión: ${vp.toFixed(2)} V (${porcentaje.toFixed(2)} %) · ${
-            cumple ? 'Cumple' : 'Supera'
-          } el límite de 3 %`,
-          `S: ${sectionLabel(form.seccion)} · L: ${form.longitudMaxima} m · I: ${form.corriente} A (${systemLabel(
-            form.tipoSistema
-          )})`,
-          `Límite: ${limiteV.toFixed(2)} V${
-            longitudMaxima !== null
-              ? ` · Longitud máxima: ${longitudMaxima.toFixed(2)} m`
-              : ''
-          }`,
-          'Calculado con VMElectric',
-        ].join('\n')
+          `%ΔV = ΔV / Vn × 100`,
+          `%ΔV = ${vp.toFixed(2)} V / ${nominalVoltage(form.tipoSistema)} V × 100`,
+          `%ΔV = ${porcentaje.toFixed(2)} %`,
+        ]
+      : [];
+
+  const resumen =
+    vp !== null && porcentaje !== null
+      ? formatResultCopy({
+          title: withReference(
+            'CÁLCULO DE CAÍDA DE TENSIÓN',
+            form.referencia
+          ),
+          sections: [
+            {
+              heading: 'Resultado',
+              lines: [
+                `Caída de tensión: ${vp.toFixed(2)} V`,
+                `Porcentaje: ${porcentaje.toFixed(2)} %`,
+                `Estado: ${cumple ? 'cumple' : 'supera'} el límite de 3 %`,
+                `Límite: ${limiteV.toFixed(2)} V`,
+                ...(longitudMaxima !== null
+                  ? [`Longitud máxima: ${longitudMaxima.toFixed(2)} m`]
+                  : []),
+              ],
+            },
+            { heading: 'Fórmula', lines: formulaLines },
+            { heading: 'Fórmula del porcentaje', lines: porcentajeLines },
+            {
+              heading: 'Datos',
+              lines: [
+                `Sistema: ${systemLabel(form.tipoSistema)} (${nominalVoltage(
+                  form.tipoSistema
+                )} V)`,
+                `Sección: ${sectionLabel(form.seccion)}`,
+                `Longitud: ${form.longitudMaxima} m`,
+                `Corriente: ${form.corriente} A`,
+              ],
+            },
+          ],
+        })
       : '';
 
   const seccionHref = `/calculadoras/seccion?${new URLSearchParams({
@@ -380,8 +421,10 @@ export default function CalculoVpPage() {
     if (vp === null || porcentaje === null || cumple === null) return;
 
     const latest = history.items[0];
+    const referencia = form.referencia.trim();
     const duplicate =
       latest !== undefined &&
+      (latest.referencia ?? '') === referencia &&
       latest.tipoSistema === form.tipoSistema &&
       latest.seccion === form.seccion &&
       latest.longitudMaxima === form.longitudMaxima &&
@@ -389,6 +432,7 @@ export default function CalculoVpPage() {
 
     if (!duplicate) {
       history.add({
+        referencia,
         tipoSistema: form.tipoSistema,
         seccion: form.seccion,
         longitudMaxima: form.longitudMaxima,
@@ -400,8 +444,12 @@ export default function CalculoVpPage() {
 
       void recordCalculation({
         type: 'CAIDA_TENSION',
-        title: `Caída de tensión ${vp.toFixed(2)} V`,
+        title: withReference(
+          `Caída de tensión ${vp.toFixed(2)} V`,
+          referencia
+        ),
         input: {
+          referencia,
           tipoSistema: form.tipoSistema,
           seccion: form.seccion,
           longitudMaxima: form.longitudMaxima,
@@ -426,6 +474,7 @@ export default function CalculoVpPage() {
   const resetFields = () => {
     setForm((previous) => ({
       ...previous,
+      referencia: '',
       seccion: '',
       longitudMaxima: '',
       corriente: '',
@@ -434,6 +483,7 @@ export default function CalculoVpPage() {
 
   const restore = (item: DropHistoryItem) => {
     setForm({
+      referencia: item.referencia ?? '',
       tipoSistema: item.tipoSistema,
       seccion: item.seccion,
       longitudMaxima: item.longitudMaxima,
@@ -468,6 +518,23 @@ export default function CalculoVpPage() {
               Datos de entrada
             </h2>
             <form onSubmit={handleCalcular} className="space-y-4">
+              <div>
+                <label htmlFor="referencia" className="form-label">
+                  Referencia (opcional)
+                </label>
+                <input
+                  type="text"
+                  id="referencia"
+                  maxLength={60}
+                  className="form-input"
+                  value={form.referencia}
+                  onChange={(event) =>
+                    updateField('referencia', event.target.value)
+                  }
+                  placeholder="Ej: Circuito 1, Tablero A"
+                />
+              </div>
+
               <div>
                 <label htmlFor="tipoCalculo" className="form-label">
                   Tipo de sistema
@@ -668,6 +735,14 @@ export default function CalculoVpPage() {
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div>
+                        {item.referencia ? (
+                          <p
+                            className="text-xs font-semibold"
+                            style={{ color: 'var(--secondary)' }}
+                          >
+                            {item.referencia}
+                          </p>
+                        ) : null}
                         <p
                           className="font-semibold text-base sm:text-lg"
                           style={{
