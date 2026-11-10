@@ -9,6 +9,7 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { useReportSaver } from '@/hooks/useReportSaver';
 import { fetchSavedReport } from '@/lib/report-client';
+import { tryAddPdfLogo } from '@/lib/pdf-logo';
 import SaveReportButton from '@/components/informes/SaveReportButton';
 
 // --- Definición de Tipos ---
@@ -480,11 +481,13 @@ export default function SevReport() {
     const calib = lastCalibration ? new Date(lastCalibration + 'T00:00:00').toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' }) : "No especificada";
     const date = new Date().toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' });
 
-    const createPdfDocument = (chartImage: string, chartWidthMM: number, chartHeightMM: number): jsPDF => {
+    const createPdfDocument = async (chartImage: string, chartWidthMM: number, chartHeightMM: number): Promise<jsPDF> => {
       const doc = new jsPDF('p', 'mm', [210, 279]);
       const pageMargin = 15;
       const pageWidth = doc.internal.pageSize.getWidth() - pageMargin * 2;
       const pageHeight = doc.internal.pageSize.height;
+
+      await tryAddPdfLogo(doc, { height: 18, margin: pageMargin, y: 26, align: 'center' });
 
       // Función para aplicar estilo de título
       const applyTitleStyle = (text: string, y: number) => {
@@ -680,9 +683,9 @@ export default function SevReport() {
           options: reportOptions,
       });
 
-      setTimeout(() => {
+      setTimeout(async () => {
           const chartImage = offscreenCanvas.toDataURL('image/png', 1.0);
-          const doc = createPdfDocument(chartImage, chartWidthMM, chartHeightMM);
+          const doc = await createPdfDocument(chartImage, chartWidthMM, chartHeightMM);
           const blob = doc.output('blob');
           const fileName = `Informe_SEV_${proj.replace(/ /g, '_')}.pdf`;
           resolve({ doc, blob, fileName });

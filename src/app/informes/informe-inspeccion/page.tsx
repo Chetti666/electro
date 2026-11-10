@@ -8,6 +8,7 @@ import Link from 'next/link';
 import NextImage from 'next/image';
 import { useReportSaver } from '@/hooks/useReportSaver';
 import { fetchSavedReport } from '@/lib/report-client';
+import { tryAddPdfLogo } from '@/lib/pdf-logo';
 import SaveReportButton from '@/components/informes/SaveReportButton';
 
 // --- Interfaces --- 
@@ -347,6 +348,8 @@ const InformeInspeccionPage: React.FC = () => {
             const contentWidth = pageWidth - margin * 2;
             let yPosition = margin;
             let sectionCounter = 1;
+
+            await tryAddPdfLogo(doc, { height: 18, margin, y: 26, align: 'center' });
 
             const newPageIfNeeded = (requiredHeight: number) => {
                 if (yPosition + requiredHeight > pageHeight - margin) {

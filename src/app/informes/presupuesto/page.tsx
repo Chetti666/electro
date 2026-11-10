@@ -5,6 +5,7 @@ import autoTable from 'jspdf-autotable';
 import Link from 'next/link';
 import { useReportSaver, type SaveReportStatus } from '@/hooks/useReportSaver';
 import { fetchSavedReport } from '@/lib/report-client';
+import { tryAddPdfLogo } from '@/lib/pdf-logo';
 import SaveReportButton from '@/components/informes/SaveReportButton';
 
 // Augment the jsPDF interface to include the autoTable plugin's property
@@ -324,13 +325,15 @@ const PresupuestoPage = () => {
 
     const generatePdf = () => {
         setIsGenerating(true);
-        setTimeout(() => {
+        setTimeout(async () => {
             try {
                 const doc = new jsPDF({ unit: 'mm', format: 'a4' });
                 const pageWidth = doc.internal.pageSize.width;
                 const pageHeight = doc.internal.pageSize.height;
                 const margin = 15;
                 let y = 20;
+
+                await tryAddPdfLogo(doc, { height: 12, margin, y: 8 });
 
                 doc.setFontSize(20).setFont('helvetica', 'bold');
                 doc.text("PRESUPUESTO", pageWidth / 2, y, { align: 'center' });

@@ -3,8 +3,9 @@
 import React, { useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { motion } from 'framer-motion';
-import { Zap, LogOut, Heart } from 'lucide-react';
+import { LogOut, Heart } from 'lucide-react';
 
 interface HeaderUser {
   id: number;
@@ -65,20 +66,18 @@ export default function Header() {
         }}
       >
         <div className="flex items-center justify-between h-11 px-4">
-          <Link href="/" className="flex items-center gap-2 active:opacity-70 transition-opacity min-h-11">
-            <div className="w-7 h-7 rounded-md bg-primary/10 border border-primary/30 flex items-center justify-center">
-              <Zap className="w-3.5 h-3.5 text-primary" />
-            </div>
-            <span
-              className="text-base font-bold tracking-tight"
-              style={{
-                fontFamily: 'var(--font-rajdhani)',
-                color: 'var(--foreground)',
-                letterSpacing: '0.5px'
-              }}
-            >
-              VMElectric
-            </span>
+          <Link
+            href="/"
+            aria-label="VMElectric - Inicio"
+            className="flex items-center active:opacity-70 transition-opacity min-h-11"
+          >
+            <Image
+              src="/logo3.png"
+              alt="VMElectric"
+              width={348}
+              height={254}
+              className="h-8 w-auto"
+            />
           </Link>
           <div className="flex items-center gap-2">
             <Link
@@ -136,22 +135,15 @@ export default function Header() {
       >
         <div className="container mx-auto px-4">
           <div className="flex justify-between items-center">
-            <Link href="/" className="flex items-center gap-3 group">
-              <div
-                className="w-10 h-10 rounded-lg bg-primary/10 border border-primary/30 flex items-center justify-center transition-all duration-200 group-hover:bg-primary/20"
-              >
-                <Zap className="w-5 h-5 text-primary" />
-              </div>
-              <span
-                className="text-xl font-bold tracking-tight"
-                style={{
-                  fontFamily: 'var(--font-rajdhani)',
-                  color: 'var(--foreground)',
-                  letterSpacing: '1px'
-                }}
-              >
-                VMElectric
-              </span>
+            <Link href="/" aria-label="VMElectric - Inicio" className="flex items-center group">
+              <Image
+                src="/logo3.png"
+                alt="VMElectric"
+                width={348}
+                height={254}
+                priority
+                className="h-11 w-auto transition-opacity duration-200 group-hover:opacity-80"
+              />
             </Link>
 
             <nav className="flex items-center space-x-1">

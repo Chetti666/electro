@@ -28,9 +28,6 @@ export const metadata: Metadata = {
   alternates: {
     canonical: 'https://vmelectric.cl',
   },
-  icons: {
-    icon: '/electrocalc-logo.svg',
-  },
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,

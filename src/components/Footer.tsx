@@ -1,8 +1,9 @@
 'use client';
 
 import Link from "next/link";
+import Image from "next/image";
 import { motion } from "framer-motion";
-import { Zap, Github, Twitter, Linkedin, Heart, Mail, MapPin, MessageCircle } from "lucide-react";
+import { Github, Twitter, Linkedin, Heart, Mail, MapPin, MessageCircle } from "lucide-react";
 import VisitCounter from "./VisitCounter";
 
 export default function Footer() {
@@ -38,22 +39,14 @@ export default function Footer() {
           className="grid grid-cols-1 md:grid-cols-3 gap-12"
         >
           <div className="space-y-4">
-            <Link href="/" className="flex items-center gap-3 group w-fit">
-              <div
-                className="w-8 h-8 rounded-lg bg-primary/10 border border-primary/30 flex items-center justify-center"
-              >
-                <Zap className="w-4 h-4 text-primary" />
-              </div>
-              <span
-                className="text-xl font-bold tracking-tight"
-                style={{
-                  fontFamily: 'var(--font-rajdhani)',
-                  color: 'var(--foreground)',
-                  letterSpacing: '1px'
-                }}
-              >
-                VMElectric
-              </span>
+            <Link href="/" aria-label="VMElectric - Inicio" className="flex items-center group w-fit">
+              <Image
+                src="/logo3.png"
+                alt="VMElectric"
+                width={348}
+                height={254}
+                className="h-10 w-auto transition-opacity duration-200 group-hover:opacity-80"
+              />
             </Link>
             <p className="leading-relaxed text-sm" style={{ color: 'var(--foreground-dim)' }}>
               Tu compañero digital en el terreno. Simplificamos cálculos complejos y generamos informes profesionales para el sector eléctrico.
