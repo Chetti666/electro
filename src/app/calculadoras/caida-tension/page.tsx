@@ -507,11 +507,12 @@ export default function CalculoVpPage() {
           Calculadora de Caída de Tensión (V y %)
         </h1>
         <p style={{ color: 'var(--foreground-muted)' }}>
-          Calcula gratis la caída de tensión de un conductor en voltios y
-          porcentaje, el límite del {Math.round(MAX_VOLTAGE_DROP_RATIO * 100)} %
-          y la longitud máxima admisible. Sirve para instalaciones monofásicas y
-          trifásicas de Chile, México, Perú y toda Latinoamérica. El resultado se
-          actualiza mientras escribes.
+          Calcula gratis la caída de tensión (también llamada caída de voltaje o
+          pérdida de tensión) de un conductor en voltios y porcentaje, el límite
+          del {Math.round(MAX_VOLTAGE_DROP_RATIO * 100)} % y la longitud máxima
+          admisible. Sirve para instalaciones monofásicas y trifásicas de Chile,
+          México, Perú y toda Latinoamérica. El resultado se actualiza mientras
+          escribes.
         </p>
       </div>
 
@@ -992,7 +993,7 @@ export default function CalculoVpPage() {
             className="text-2xl font-bold mb-4"
             style={{ color: 'var(--foreground)' }}
           >
-            ¿Cómo calcular la caída de tensión?
+            Fórmula de caída de tensión (monofásica y trifásica)
           </h2>
           <p
             className="text-sm leading-relaxed mb-5"
@@ -1005,14 +1006,9 @@ export default function CalculoVpPage() {
             obtiene el resultado en voltios y en porcentaje, y además indica la
             longitud máxima que cumple el límite del{' '}
             {Math.round(MAX_VOLTAGE_DROP_RATIO * 100)} % tomado como referencia.
+            Las fórmulas son las mismas en Chile, México, Perú y cualquier otro
+            país.
           </p>
-
-          <h3
-            className="text-lg font-semibold mb-2"
-            style={{ color: 'var(--foreground)' }}
-          >
-            Fórmula de caída de tensión
-          </h3>
           <pre
             className="overflow-x-auto rounded-lg p-4 text-xs sm:text-sm mb-3"
             style={{
@@ -1053,7 +1049,50 @@ Porcentaje:  %ΔV = (ΔV / Vn) × 100`}
             className="text-lg font-semibold mb-2"
             style={{ color: 'var(--foreground)' }}
           >
-            Caída de tensión en Chile, México y Perú
+            Ejemplo de cálculo paso a paso
+          </h3>
+          <p
+            className="text-sm leading-relaxed mb-3"
+            style={{ color: 'var(--foreground-muted)' }}
+          >
+            Circuito monofásico de 220 V con 30 m de cable de cobre de 4 mm² y
+            una carga de 20 A:
+          </p>
+          <ol
+            className="text-sm space-y-1 list-decimal pl-5 mb-3"
+            style={{ color: 'var(--foreground-muted)' }}
+          >
+            <li>
+              Multiplica 2 × 0,018 × 30 × 20 = <strong>21,6</strong>.
+            </li>
+            <li>
+              Divide por la sección: 21,6 / 4 = <strong>5,4 V</strong> de caída de
+              tensión.
+            </li>
+            <li>
+              Obtén el porcentaje: (5,4 / 220) × 100 ={' '}
+              <strong>2,45 %</strong>.
+            </li>
+            <li>
+              Compara con el límite del 3 %: 2,45 % &lt; 3 %, por lo que el tramo{' '}
+              <strong>cumple</strong>.
+            </li>
+          </ol>
+          <p
+            className="text-sm leading-relaxed mb-5"
+            style={{ color: 'var(--foreground-dim)' }}
+          >
+            Con los mismos datos en trifásico de 380 V, la fórmula usa √3 en vez
+            de 2: la caída baja a 4,68 V, es decir, un 1,23 % de la tensión
+            nominal. Por eso, a igual sección y corriente, el trifásico sufre
+            menos pérdida porcentual que el monofásico.
+          </p>
+
+          <h3
+            className="text-lg font-semibold mb-2"
+            style={{ color: 'var(--foreground)' }}
+          >
+            Caída de tensión permitida en Chile, México y Perú
           </h3>
           <p
             className="text-sm leading-relaxed mb-3"
@@ -1067,9 +1106,11 @@ Porcentaje:  %ΔV = (ΔV / Vn) × 100`}
             style={{ color: 'var(--foreground-muted)' }}
           >
             <li>
-              <strong>Chile:</strong> el Pliego Técnico Normativo RIC N°4 y el
-              TE1 establecen los límites de caída de tensión. Las redes de
-              consumo suelen trabajar a 220 V monofásico y 380 V trifásico.
+              <strong>Chile:</strong> la caída de tensión permitida se fija en el
+              Pliego Técnico Normativo RIC N°4 y en la NCh Elec. 4/2003, que
+              distingue entre circuitos y alimentadores. Las redes de consumo
+              suelen trabajar a 220 V monofásico y 380 V trifásico, por lo que una
+              pérdida de voltaje monofásica de 3 % equivale a unos 6,6 V.
             </li>
             <li>
               <strong>México:</strong> la NOM-001-SEDE define los límites para

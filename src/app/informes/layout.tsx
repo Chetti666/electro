@@ -5,7 +5,7 @@ export const metadata: Metadata = {
   description: 'Crea informes eléctricos profesionales: Sondeos Eléctricos Verticales (SEV), presupuestos, informes fotográficos RIC N°18 e inspecciones. Exporta a PDF.',
   keywords: ['RIC', 'RIC N°18', 'TE1', 'PLIEGO', 'SEC', '4/2003', 'informe SEV', 'informe fotográfico', 'presupuesto eléctrico', 'inspección eléctrica'],
   alternates: {
-    canonical: 'https://vmelectric.cl/informes',
+    canonical: 'https://www.vmelectric.cl/informes',
   },
 };
 

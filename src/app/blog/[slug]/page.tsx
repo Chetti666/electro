@@ -22,7 +22,7 @@ export async function generateMetadata({ params }: Props) {
     title: `${article.title} | VMElectric`,
     description: article.excerpt || article.title,
     alternates: {
-      canonical: `https://vmelectric.cl/blog/${slug}`,
+      canonical: `https://www.vmelectric.cl/blog/${slug}`,
     },
     openGraph: article.imageUrl ? { images: [article.imageUrl] } : undefined,
   };

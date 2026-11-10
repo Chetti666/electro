@@ -4,7 +4,7 @@ export const metadata: Metadata = {
   title: 'Generador de Presupuestos Eléctricos en PDF | VMElectric',
   description: 'Crea presupuestos detallados y profesionales para trabajos eléctricos. Exporta a PDF listo para entregar a clientes con el desglose de materiales y mano de obra.',
   alternates: {
-    canonical: 'https://vmelectric.cl/informes/presupuesto',
+    canonical: 'https://www.vmelectric.cl/informes/presupuesto',
   },
 };
 

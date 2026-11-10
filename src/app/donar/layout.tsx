@@ -11,13 +11,13 @@ export const metadata: Metadata = {
     'Flow',
   ],
   alternates: {
-    canonical: 'https://vmelectric.cl/donar',
+    canonical: 'https://www.vmelectric.cl/donar',
   },
   openGraph: {
     title: 'Donar a VMElectric',
     description:
       'Ayúdanos a mantener las herramientas eléctricas gratuitas para profesionales en Chile.',
-    url: 'https://vmelectric.cl/donar',
+    url: 'https://www.vmelectric.cl/donar',
     siteName: 'VMElectric',
     locale: 'es_CL',
     type: 'website',

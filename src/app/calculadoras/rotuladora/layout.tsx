@@ -4,7 +4,7 @@ export const metadata: Metadata = {
   title: 'Generador de Rótulos para Tableros Eléctricos | VMElectric',
   description: 'Crea rótulos personalizados para tableros eléctricos. Genera y descarga en PDF con la información normalizada requerida por la SEC para instalaciones eléctricas.',
   alternates: {
-    canonical: 'https://vmelectric.cl/calculadoras/rotuladora',
+    canonical: 'https://www.vmelectric.cl/calculadoras/rotuladora',
   },
 };
 

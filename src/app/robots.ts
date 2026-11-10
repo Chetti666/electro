@@ -40,6 +40,6 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ['/admin/', '/panel/', '/api/', '/login', '/signup'],
       },
     ],
-    sitemap: 'https://vmelectric.cl/sitemap.xml',
+    sitemap: 'https://www.vmelectric.cl/sitemap.xml',
   };
 }

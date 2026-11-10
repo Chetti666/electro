@@ -1,12 +1,12 @@
 import type { Metadata } from 'next';
 import { CAIDA_TENSION_FAQS } from '@/lib/caida-tension-faq';
 
-const PAGE_URL = 'https://vmelectric.cl/calculadoras/caida-tension';
+const PAGE_URL = 'https://www.vmelectric.cl/calculadoras/caida-tension';
 
 export const metadata: Metadata = {
-  title: 'Calculadora de Caída de Tensión Online (Voltaje) | VMElectric',
+  title: 'Calculadora de Caída de Tensión (Voltaje) | VMElectric',
   description:
-    'Calculadora de caída de tensión gratis: obtén la pérdida de voltaje en V y % para instalaciones monofásicas y trifásicas de Chile, México, Perú y Latinoamérica.',
+    'Calculadora de caída de tensión gratis: obtén la pérdida de voltaje en V y % en circuitos monofásicos y trifásicos. Chile, México, Perú y Latinoamérica.',
   keywords: [
     'calculadora caída de tensión',
     'caída de tensión',
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     canonical: PAGE_URL,
   },
   openGraph: {
-    title: 'Calculadora de Caída de Tensión Online (Voltaje) | VMElectric',
+    title: 'Calculadora de Caída de Tensión (Voltaje) | VMElectric',
     description:
       'Calcula gratis la caída de tensión en voltios y porcentaje, la longitud máxima admisible y el cumplimiento del límite del 3 %. Fórmulas universales para Chile, México, Perú y Latinoamérica.',
     url: PAGE_URL,
@@ -73,13 +73,13 @@ const structuredData = [
         '@type': 'ListItem',
         position: 1,
         name: 'Inicio',
-        item: 'https://vmelectric.cl/',
+        item: 'https://www.vmelectric.cl/',
       },
       {
         '@type': 'ListItem',
         position: 2,
         name: 'Calculadoras',
-        item: 'https://vmelectric.cl/calculadoras',
+        item: 'https://www.vmelectric.cl/calculadoras',
       },
       {
         '@type': 'ListItem',

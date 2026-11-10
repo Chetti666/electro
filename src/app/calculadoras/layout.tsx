@@ -5,7 +5,7 @@ export const metadata: Metadata = {
   description: 'Calculadoras eléctricas gratis: sección de conductores, caída de tensión, corriente y empalmes. Fórmulas universales para profesionales de Chile, México, Perú y Latinoamérica.',
   keywords: ['calculadora eléctrica', 'calculadora caída de tensión', 'sección conductores', 'caída tensión', 'corriente admisible', 'empalme normativo', 'calculadora eléctrica México', 'calculadora eléctrica Perú'],
   alternates: {
-    canonical: 'https://vmelectric.cl/calculadoras',
+    canonical: 'https://www.vmelectric.cl/calculadoras',
   },
 };
 

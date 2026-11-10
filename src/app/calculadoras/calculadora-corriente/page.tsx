@@ -351,8 +351,11 @@ export default function CalculadoraCorrientePage() {
           Calculadora de Corriente y Potencia
         </h1>
         <p style={{ color: 'var(--foreground-muted)' }}>
-          Calcula la corriente (A) o la potencia (W) para sistemas monofásicos y
-          trifásicos. El resultado se actualiza mientras escribes.
+          Calcula la corriente en amperes (A) a partir de la potencia y el
+          voltaje, o la potencia en watts (W) y kW a partir de la corriente. Sirve
+          para circuitos monofásicos y trifásicos de 220 V, 380 V, 127 V y
+          cualquier otra tensión de Chile, México, Perú y Latinoamérica. El
+          resultado se actualiza mientras escribes.
         </p>
       </div>
 
@@ -813,6 +816,59 @@ export default function CalculadoraCorrientePage() {
           </div>
         </div>
       </div>
+
+      <section className="mt-14 space-y-6" aria-label="Fórmulas de corriente y potencia">
+        <div className="card p-6 md:p-8">
+          <h2
+            className="text-2xl font-bold mb-4"
+            style={{ color: 'var(--foreground)' }}
+          >
+            Fórmulas para calcular corriente y potencia
+          </h2>
+          <pre
+            className="overflow-x-auto rounded-lg p-4 text-xs sm:text-sm mb-4"
+            style={{
+              background: 'var(--background-secondary)',
+              border: '1px solid var(--card-border)',
+              color: 'var(--foreground)',
+            }}
+          >
+{`Monofásico:  I = P / (V × cos φ)        P = V × I × cos φ
+Trifásico:   I = P / (√3 × V × cos φ)   P = √3 × V × I × cos φ`}
+          </pre>
+          <ul
+            className="text-sm space-y-1 list-disc pl-5 mb-4"
+            style={{ color: 'var(--foreground-muted)' }}
+          >
+            <li>
+              <strong>I:</strong> corriente en amperes (A).
+            </li>
+            <li>
+              <strong>P:</strong> potencia en watts (W). Para pasar de kW a W
+              multiplica por 1.000.
+            </li>
+            <li>
+              <strong>V:</strong> tensión entre fase y neutro en monofásico, o
+              entre fases en trifásico (V).
+            </li>
+            <li>
+              <strong>cos φ:</strong> factor de potencia; usa 1 para cargas
+              resistivas como resistencias y estufas, y el valor de la placa para
+              motores.
+            </li>
+          </ul>
+          <p
+            className="text-sm leading-relaxed"
+            style={{ color: 'var(--foreground-muted)' }}
+          >
+            Ejemplo: un equipo de 3.000 W conectado a 220 V monofásico con factor
+            de potencia 1 consume 3000 / 220 = <strong>13,6 A</strong>. En
+            trifásico a 380 V la misma potencia demanda 3000 / (√3 × 380) ={' '}
+            <strong>4,6 A</strong> por fase. Las fórmulas no cambian entre países:
+            solo debes usar la tensión y la frecuencia de tu red.
+          </p>
+        </div>
+      </section>
     </div>
   );
 }

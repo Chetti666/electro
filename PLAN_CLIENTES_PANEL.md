@@ -346,7 +346,7 @@ model Donation {
 | `NEXT_PUBLIC_SITE_URL` | URL pública para construir `urlConfirmation` y `urlReturn`. |
 
 - Sandbox: `https://sandbox.flow.cl/api` · Producción: `https://www.flow.cl/api`.
-- En producción, `NEXT_PUBLIC_SITE_URL=https://vmelectric.cl`.
+- En producción, `NEXT_PUBLIC_SITE_URL=https://www.vmelectric.cl`.
 - `urlConfirmation` debe ser accesible públicamente. Para probar en local se necesita un túnel y apuntar `NEXT_PUBLIC_SITE_URL` a esa URL; `localhost` no recibe el webhook de Flow.
 - Ejemplo con Cloudflare Tunnel (gratis, sin cuenta para túneles rápidos):
 
@@ -365,7 +365,7 @@ model Donation {
   ```
 
   Reiniciar `npm run dev` después de cambiar la variable. La URL del túnel cambia cada vez que se reinicia `cloudflared`; actualizarla y reiniciar Next.
-- Si el sitio ya está desplegado en Vercel, usar la URL pública del despliegue (por ejemplo `https://vmelectric.cl` o la URL de preview) en vez del túnel.
+- Si el sitio ya está desplegado en Vercel, usar la URL pública del despliegue (por ejemplo `https://www.vmelectric.cl` o la URL de preview) en vez del túnel.
 - Las credenciales de sandbox se obtienen registrándose en `sandbox.flow.cl`, no en la cuenta de producción.
 
 ### Firma de requests

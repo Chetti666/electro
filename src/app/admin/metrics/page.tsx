@@ -149,7 +149,7 @@ export default function AdminMetricsPage() {
             Monitoreo y Métricas de Tráfico
           </h1>
           <p className="text-sm" style={{ color: 'var(--foreground-muted)' }}>
-            Monitorea en tiempo real las herramientas, calculadoras y páginas más populares de vmelectric.cl
+            Monitorea en tiempo real las herramientas, calculadoras y páginas más populares de www.vmelectric.cl
           </p>
         </div>
         <button

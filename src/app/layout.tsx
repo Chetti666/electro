@@ -24,8 +24,8 @@ const organizationSchema = {
   '@context': 'https://schema.org',
   '@type': 'Organization',
   name: 'VMElectric',
-  url: 'https://vmelectric.cl',
-  logo: 'https://vmelectric.cl/icon-512.png',
+  url: 'https://www.vmelectric.cl',
+  logo: 'https://www.vmelectric.cl/icon-512.png',
   email: 'vmelectric2025@gmail.com',
   description:
     'Herramientas eléctricas online para profesionales: calculadoras de caída de tensión, sección de conductores, corriente y generadores de informes técnicos.',
@@ -33,12 +33,12 @@ const organizationSchema = {
 };
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://vmelectric.cl'),
+  metadataBase: new URL('https://www.vmelectric.cl'),
   title: "VMElectric - Herramientas Eléctricas Profesionales",
   description: "Plataforma integral para cálculos eléctricos, informes técnicos y herramientas normativas para profesionales de Chile, México, Perú y Latinoamérica.",
   keywords: ["RIC", "TE1", "PLIEGO", "SEC", "4/2003", "calculadora eléctrica", "informe eléctrico", "normativa chilena", "instalaciones eléctricas"],
   alternates: {
-    canonical: 'https://vmelectric.cl',
+    canonical: 'https://www.vmelectric.cl',
   },
   manifest: '/manifest.json',
   appleWebApp: {
@@ -49,7 +49,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "VMElectric - Herramientas Eléctricas Profesionales",
     description: "Calculadoras de sección, caída de tensión, informes SEV y más herramientas para electricistas de Chile, México, Perú y Latinoamérica.",
-    url: "https://vmelectric.cl",
+    url: "https://www.vmelectric.cl",
     siteName: "VMElectric",
     locale: "es_CL",
     type: "website",

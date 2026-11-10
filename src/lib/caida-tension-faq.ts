@@ -15,14 +15,24 @@ export const CAIDA_TENSION_FAQS: FaqItem[] = [
       'Es la diferencia entre la tensión que entrega la fuente y la que llega al equipo final. Se produce por la resistencia del conductor y aumenta con la longitud del tramo, la corriente y la sección del cable: a mayor distancia o consumo, mayor pérdida de voltaje.',
   },
   {
+    question: '¿Es lo mismo caída de tensión que caída de voltaje?',
+    answer:
+      'Sí. «Caída de tensión», «caída de voltaje» y «pérdida de tensión» se usan como sinónimos para el mismo fenómeno: la reducción de voltaje que sufre la corriente al circular por un conductor. En Chile y Perú se habla más de caída de tensión, mientras que en México y otros países es común decir caída de voltaje. El cálculo es idéntico: se mide en voltios y se expresa como porcentaje de la tensión nominal.',
+  },
+  {
     question: '¿Cómo se calcula la caída de tensión?',
     answer:
-      'En monofásico se usa ΔV = (2 × ρ × L × I) / S, y en trifásico ΔV = (√3 × ρ × L × I) / S. ρ es la resistividad del cobre (0,018 Ω·mm²/m), L la longitud en metros, I la corriente en amperes y S la sección del conductor en mm². El porcentaje se obtiene dividiendo ΔV por la tensión nominal y multiplicando por 100.',
+      'En monofásico se usa ΔV = (2 × ρ × L × I) / S, y en trifásico ΔV = (√3 × ρ × L × I) / S. ρ es la resistividad del cobre (0,018 Ω·mm²/m), L la longitud en metros, I la corriente en amperes y S la sección del conductor en mm². El porcentaje se obtiene dividiendo ΔV por la tensión nominal y multiplicando por 100. Por ejemplo, con 220 V, 30 m, 20 A y 4 mm² la caída es 5,4 V, equivalente a un 2,45 %.',
   },
   {
     question: '¿Cuál es la caída de tensión máxima permitida?',
     answer:
-      'Depende de la normativa de cada país y del tipo de circuito. Esta calculadora usa 3 % de la tensión nominal como referencia práctica; en Chile la RIC N°4, en México la NOM-001-SEDE y en Perú el CNE-Utilización establecen sus propios límites. Verifica siempre el valor exigido en tu instalación.',
+      'Depende de la normativa de cada país y del tipo de circuito (circuito derivado o alimentador). Esta calculadora usa 3 % de la tensión nominal como referencia práctica y conservadora; en Chile la RIC N°4 y la NCh Elec. 4/2003, en México la NOM-001-SEDE y en Perú el CNE-Utilización establecen sus propios límites. Verifica siempre el valor exigido en tu instalación antes de dar por válido el resultado.',
+  },
+  {
+    question: '¿Cuál es la caída de tensión permitida en Chile?',
+    answer:
+      'En Chile el límite lo fijan la RIC N°4 y la NCh Elec. 4/2003, que distinguen entre circuitos y alimentadores. Como referencia, en una red monofásica de 220 V el 3 % equivale a 6,6 V de pérdida y en una trifásica de 380 V a 11,4 V. Introduce la tensión de tu instalación en la calculadora para comprobar si el tramo cumple ese porcentaje.',
   },
   {
     question: '¿Sirve para México, Perú y otros países de Latinoamérica?',

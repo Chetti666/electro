@@ -1,10 +1,20 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Cálculo de Sección de Conductores - Normativa RIC | VMElectric',
-  description: 'Calcula la sección mínima del conductor eléctrico según normativa chilena RIC. Limita la caída de tensión y asegura el voltaje correcto en tus instalaciones.',
+  title: 'Calculadora de Sección de Cable y Conductores (mm² y AWG) | VMElectric',
+  description: 'Calcula la sección del conductor en mm² o AWG según la caída de tensión admisible, la corriente y la longitud. Fórmulas universales para Chile, México y Perú.',
+  keywords: [
+    'calculadora de sección de cable',
+    'calculo de seccion de conductores',
+    'sección por caída de tensión',
+    'calibre de cable',
+    'sección de cable mm2',
+    'AWG a mm2',
+    'dimensionar conductor',
+    'RIC N°4',
+  ],
   alternates: {
-    canonical: 'https://vmelectric.cl/calculadoras/seccion',
+    canonical: 'https://www.vmelectric.cl/calculadoras/seccion',
   },
 };
 

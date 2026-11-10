@@ -1,7 +1,7 @@
 import { MetadataRoute } from 'next';
 import { prisma } from '@/lib/prisma';
 
-const BASE_URL = 'https://vmelectric.cl';
+const BASE_URL = 'https://www.vmelectric.cl';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Rutas estáticas públicas

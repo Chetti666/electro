@@ -16,7 +16,7 @@ export function createCommerceOrder(): string {
 
 export function getSiteUrl(fallbackOrigin?: string): string {
   const configured = process.env.NEXT_PUBLIC_SITE_URL?.trim();
-  return (configured || fallbackOrigin || 'https://vmelectric.cl').replace(
+  return (configured || fallbackOrigin || 'https://www.vmelectric.cl').replace(
     /\/+$/,
     ''
   );

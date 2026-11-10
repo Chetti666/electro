@@ -40,3 +40,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# exportaciones de Google Search Console (datos privados de rendimiento)
+.gsc/
