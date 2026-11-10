@@ -14,17 +14,42 @@ export async function generateMetadata({ params }: Props) {
   const { slug } = await params;
   const article = await prisma.article.findUnique({
     where: { slug, status: 'PUBLISHED' },
+    include: { author: { select: { name: true } } },
   });
 
   if (!article) return { title: 'Artículo no encontrado - VMElectric' };
 
+  const url = `https://www.vmelectric.cl/blog/${slug}`;
+  const plainContent = article.content.replace(/<[^>]*>/g, ' ');
+  const description = (article.excerpt || plainContent)
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 155);
+
   return {
     title: `${article.title} | VMElectric`,
-    description: article.excerpt || article.title,
+    description,
     alternates: {
-      canonical: `https://www.vmelectric.cl/blog/${slug}`,
+      canonical: url,
     },
-    openGraph: article.imageUrl ? { images: [article.imageUrl] } : undefined,
+    openGraph: {
+      title: article.title,
+      description,
+      url,
+      siteName: 'VMElectric',
+      locale: 'es_CL',
+      type: 'article',
+      publishedTime: article.createdAt.toISOString(),
+      modifiedTime: article.updatedAt.toISOString(),
+      authors: article.author.name ? [article.author.name] : undefined,
+      images: article.imageUrl ? [article.imageUrl] : undefined,
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: article.title,
+      description,
+      images: article.imageUrl ? [article.imageUrl] : undefined,
+    },
   };
 }
 
@@ -42,8 +67,98 @@ export default async function ArticlePage({ params }: Props) {
     notFound();
   }
 
+  // Artículos relacionados: primero los de la misma categoría y luego los más recientes.
+  const sameCategory = article.categoryId
+    ? await prisma.article.findMany({
+        where: {
+          status: 'PUBLISHED',
+          categoryId: article.categoryId,
+          id: { not: article.id },
+        },
+        select: { id: true, title: true, slug: true, excerpt: true },
+        orderBy: { updatedAt: 'desc' },
+        take: 4,
+      })
+    : [];
+
+  const related =
+    sameCategory.length >= 4
+      ? sameCategory
+      : [
+          ...sameCategory,
+          ...(await prisma.article.findMany({
+            where: {
+              status: 'PUBLISHED',
+              id: { notIn: [article.id, ...sameCategory.map((item) => item.id)] },
+            },
+            select: { id: true, title: true, slug: true, excerpt: true },
+            orderBy: { updatedAt: 'desc' },
+            take: 4 - sameCategory.length,
+          })),
+        ];
+
+  const articleUrl = `https://www.vmelectric.cl/blog/${slug}`;
+  const structuredData = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'BlogPosting',
+        headline: article.title,
+        description: article.excerpt ?? undefined,
+        image: article.imageUrl ? [article.imageUrl] : undefined,
+        datePublished: article.createdAt.toISOString(),
+        dateModified: article.updatedAt.toISOString(),
+        inLanguage: 'es',
+        articleSection: article.category?.name,
+        author: {
+          '@type': 'Person',
+          name: article.author.name ?? 'VMElectric',
+        },
+        publisher: {
+          '@type': 'Organization',
+          name: 'VMElectric',
+          logo: {
+            '@type': 'ImageObject',
+            url: 'https://www.vmelectric.cl/icon-512.png',
+          },
+        },
+        mainEntityOfPage: {
+          '@type': 'WebPage',
+          '@id': articleUrl,
+        },
+      },
+      {
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          {
+            '@type': 'ListItem',
+            position: 1,
+            name: 'Inicio',
+            item: 'https://www.vmelectric.cl/',
+          },
+          {
+            '@type': 'ListItem',
+            position: 2,
+            name: 'Blog',
+            item: 'https://www.vmelectric.cl/blog',
+          },
+          {
+            '@type': 'ListItem',
+            position: 3,
+            name: article.title,
+            item: articleUrl,
+          },
+        ],
+      },
+    ],
+  };
+
   return (
     <section className="pt-24 pb-12 md:pt-32">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
       <div className="container mx-auto px-4 max-w-4xl">
         <Link
           href="/blog"
@@ -136,6 +251,73 @@ export default async function ArticlePage({ params }: Props) {
             </p>
           )}
         </article>
+
+        {related.length > 0 && (
+          <section
+            className="mt-12 pt-8"
+            aria-labelledby="articulos-relacionados"
+            style={{ borderTop: '1px solid var(--card-border)' }}
+          >
+            <h2
+              id="articulos-relacionados"
+              className="text-xl font-bold mb-4"
+              style={{ color: 'var(--foreground)' }}
+            >
+              Artículos relacionados
+            </h2>
+            <ul className="space-y-3">
+              {related.map((item) => (
+                <li key={item.id}>
+                  <Link
+                    href={`/blog/${item.slug}`}
+                    className="group block rounded-xl p-4 transition-colors"
+                    style={{
+                      background: 'var(--card-bg)',
+                      border: '1px solid var(--card-border)',
+                    }}
+                  >
+                    <span
+                      className="block font-semibold leading-snug group-hover:text-primary-light"
+                      style={{ color: 'var(--foreground)' }}
+                    >
+                      {item.title}
+                    </span>
+                    {item.excerpt && (
+                      <span
+                        className="mt-1 block text-sm leading-relaxed"
+                        style={{ color: 'var(--foreground-dim)' }}
+                      >
+                        {item.excerpt}
+                      </span>
+                    )}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+            <p
+              className="mt-4 text-sm"
+              style={{ color: 'var(--foreground-muted)' }}
+            >
+              ¿Necesitas verificar un cálculo? Usa la{' '}
+              <Link
+                href="/calculadoras/caida-tension"
+                className="underline"
+                style={{ color: 'var(--secondary)' }}
+              >
+                calculadora de caída de tensión
+              </Link>{' '}
+              o la{' '}
+              <Link
+                href="/calculadoras/empalmes"
+                className="underline"
+                style={{ color: 'var(--secondary)' }}
+              >
+                calculadora de empalmes
+              </Link>
+              .
+            </p>
+          </section>
+        )}
 
         <div
           className="mt-12 pt-8 text-center"
