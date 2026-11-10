@@ -24,13 +24,45 @@ import {
   type ElectricalSystem,
 } from '@/lib/electrical';
 import { formatResultCopy, withReference } from '@/lib/copy-format';
+import { SECCION_FAQS } from '@/lib/seccion-faq';
 
 const FORM_KEY = 'vmelectric:calc:seccion:form:v1';
 const HISTORY_KEY = 'vmelectric:calc:seccion:history:v1';
 
+/** Secciones comerciales con el calibre AWG/kcmil que las cubre. */
+const SECTION_TABLE = [
+  { mm2: 1.5, awg: '14', area: 2.08 },
+  { mm2: 2.5, awg: '12', area: 3.31 },
+  { mm2: 4, awg: '10', area: 5.26 },
+  { mm2: 6, awg: '8', area: 8.37 },
+  { mm2: 10, awg: '6', area: 13.3 },
+  { mm2: 16, awg: '4', area: 21.2 },
+  { mm2: 25, awg: '3', area: 26.7 },
+  { mm2: 35, awg: '1', area: 42.4 },
+  { mm2: 50, awg: '1/0', area: 53.5 },
+  { mm2: 70, awg: '3/0', area: 85 },
+  { mm2: 95, awg: '4/0', area: 107 },
+  { mm2: 120, awg: '250 kcmil', area: 127 },
+  { mm2: 150, awg: '300 kcmil', area: 152 },
+  { mm2: 185, awg: '400 kcmil', area: 203 },
+  { mm2: 240, awg: '500 kcmil', area: 253 },
+  { mm2: 300, awg: '600 kcmil', area: 304 },
+] as const;
+
+/** Casos frecuentes usados en la tabla orientativa (220 V monofásico, 3 %). */
+const COMMON_CASES = [
+  { current: 10, length: 20 },
+  { current: 16, length: 25 },
+  { current: 20, length: 30 },
+  { current: 25, length: 40 },
+  { current: 32, length: 50 },
+  { current: 40, length: 60 },
+] as const;
+
 type SectionForm = {
   referencia: string;
   tipoSistema: ElectricalSystem;
+  tension: string;
   longitud: string;
   corriente: string;
   caidaTension: string;
@@ -39,6 +71,7 @@ type SectionForm = {
 type SectionHistoryItem = HistoryEntry & {
   referencia: string;
   tipoSistema: ElectricalSystem;
+  tension?: string;
   longitud: string;
   corriente: string;
   caidaTension: string;
@@ -49,6 +82,7 @@ type SectionHistoryItem = HistoryEntry & {
 const DEFAULT_FORM: SectionForm = {
   referencia: '',
   tipoSistema: 'monofasico',
+  tension: '',
   longitud: '',
   corriente: '',
   caidaTension: '',
@@ -57,6 +91,19 @@ const DEFAULT_FORM: SectionForm = {
 function toPositive(value: string): number | null {
   const parsed = Number.parseFloat(value.replace(',', '.'));
   return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+}
+
+/** Número con separador decimal de es-CL (coma). */
+function formatNumber(value: number, decimals = 2): string {
+  return value.toLocaleString('es-CL', {
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals,
+  });
+}
+
+/** Número con coma decimal y hasta 2 decimales, sin ceros de relleno. */
+function formatLoose(value: number): string {
+  return value.toLocaleString('es-CL', { maximumFractionDigits: 2 });
 }
 
 function systemLabel(system: ElectricalSystem): string {
@@ -109,6 +156,9 @@ export default function CalculoSeccionPage() {
     caidaTension: toPositive(form.caidaTension),
   };
 
+  const tensionNominal =
+    toPositive(form.tension) ?? NOMINAL_VOLTAGE[form.tipoSistema];
+
   const completo =
     form.longitud.trim() !== '' &&
     form.corriente.trim() !== '' &&
@@ -143,6 +193,7 @@ export default function CalculoSeccionPage() {
   // Al cambiar o limpiar los datos vuelve a «Calcular».
   const formSignature = [
     form.tipoSistema,
+    form.tension,
     form.longitud,
     form.corriente,
     form.caidaTension,
@@ -155,13 +206,13 @@ export default function CalculoSeccionPage() {
       ? [
           `S = (${factorLabel} × ρ × L × I) / Vp`,
           `S = (${factorLabel} × ${COPPER_RESISTIVITY} Ω·mm²/m × ${form.longitud} m × ${form.corriente} A) / ${form.caidaTension} V`,
-          `S = ${seccion.toFixed(2)} mm²`,
+          `S = ${formatNumber(seccion)} mm²`,
         ]
       : [];
 
   const porcentajeVp =
     longitudes.caidaTension !== null
-      ? (longitudes.caidaTension / NOMINAL_VOLTAGE[form.tipoSistema]) * 100
+      ? (longitudes.caidaTension / tensionNominal) * 100
       : null;
 
   const error = completo && !validos
@@ -179,7 +230,7 @@ export default function CalculoSeccionPage() {
             {
               heading: 'Resultado',
               lines: [
-                `Sección mínima: ${seccion.toFixed(2)} mm²`,
+                `Sección mínima: ${formatNumber(seccion)} mm²`,
                 ...(comercial !== null
                   ? [`Sección comercial: ${comercial} mm²`]
                   : []),
@@ -192,9 +243,7 @@ export default function CalculoSeccionPage() {
             {
               heading: 'Datos',
               lines: [
-                `Sistema: ${systemLabel(form.tipoSistema)} (${NOMINAL_VOLTAGE[
-                  form.tipoSistema
-                ]} V)`,
+                `Sistema: ${systemLabel(form.tipoSistema)} (${tensionNominal} V)`,
                 `Longitud: ${form.longitud} m`,
                 `Corriente: ${form.corriente} A`,
                 `Caída admisible: ${form.caidaTension} V`,
@@ -215,10 +264,7 @@ export default function CalculoSeccionPage() {
   };
 
   const applyVpPreset = (ratio: number) => {
-    updateField(
-      'caidaTension',
-      (NOMINAL_VOLTAGE[form.tipoSistema] * ratio).toFixed(1)
-    );
+    updateField('caidaTension', (tensionNominal * ratio).toFixed(1));
   };
 
   const resetFields = () => {
@@ -235,6 +281,7 @@ export default function CalculoSeccionPage() {
     setForm({
       referencia: item.referencia ?? '',
       tipoSistema: item.tipoSistema,
+      tension: item.tension ?? '',
       longitud: item.longitud,
       corriente: item.corriente,
       caidaTension: item.caidaTension,
@@ -251,6 +298,7 @@ export default function CalculoSeccionPage() {
       latest !== undefined &&
       (latest.referencia ?? '') === referencia &&
       latest.tipoSistema === form.tipoSistema &&
+      (latest.tension ?? '') === form.tension &&
       latest.longitud === form.longitud &&
       latest.corriente === form.corriente &&
       latest.caidaTension === form.caidaTension;
@@ -259,6 +307,7 @@ export default function CalculoSeccionPage() {
       history.add({
         referencia,
         tipoSistema: form.tipoSistema,
+        tension: form.tension,
         longitud: form.longitud,
         corriente: form.corriente,
         caidaTension: form.caidaTension,
@@ -268,13 +317,14 @@ export default function CalculoSeccionPage() {
 
       void recordCalculation({
         type: 'SECCION',
-        title: withReference(`Sección ${seccion.toFixed(2)} mm²`, referencia),
+        title: withReference(`Sección ${formatNumber(seccion)} mm²`, referencia),
         input: {
           referencia,
           longitud: form.longitud,
           corriente: form.corriente,
           caidaTension: form.caidaTension,
           tipoSistema: form.tipoSistema,
+          tension: form.tension,
         },
         result: { seccion, comercial, tipoSistema: form.tipoSistema },
       });
@@ -294,12 +344,14 @@ export default function CalculoSeccionPage() {
           className="text-3xl font-bold mb-2"
           style={{ color: 'var(--foreground)' }}
         >
-          Cálculo de Sección de Conductores
+          Calculadora de Sección de Cable y Conductores (mm²)
         </h1>
         <p style={{ color: 'var(--foreground-muted)' }}>
-          Calcula la sección mínima que cumple la caída de tensión para una
-          longitud y corriente dadas. El resultado se actualiza mientras
-          escribes.
+          Calcula la sección mínima del conductor que cumple la caída de tensión
+          para una longitud y corriente dadas, y obtén la sección comercial
+          recomendada en mm² y su equivalencia en AWG. Funciona en instalaciones
+          monofásicas y trifásicas de Chile, México, Perú y toda Latinoamérica. El
+          resultado se actualiza mientras escribes.
         </p>
       </div>
 
@@ -356,6 +408,27 @@ export default function CalculoSeccionPage() {
                   <span className="ml-2">Trifásica (380 V)</span>
                 </label>
               </div>
+            </div>
+
+            <div>
+              <label htmlFor="Vn" className="form-label">
+                Tensión nominal (Vn) en voltios (opcional)
+              </label>
+              <input
+                type="number"
+                id="Vn"
+                inputMode="decimal"
+                min="0"
+                step="any"
+                className="form-input"
+                value={form.tension}
+                onChange={(event) => updateField('tension', event.target.value)}
+                placeholder={`Ej: ${NOMINAL_VOLTAGE[form.tipoSistema]}`}
+              />
+              <p className="mt-2 text-[11px]" style={{ color: 'var(--foreground-dim)' }}>
+                Se usa para los atajos de 3 % y 5 %. Si lo dejas vacío se toma
+                220 V en monofásico y 380 V en trifásico.
+              </p>
             </div>
 
             <div>
@@ -417,7 +490,7 @@ export default function CalculoSeccionPage() {
                   Atajos:
                 </span>
                 {[0.03, 0.05].map((ratio) => {
-                  const volts = NOMINAL_VOLTAGE[form.tipoSistema] * ratio;
+                  const volts = tensionNominal * ratio;
                   return (
                     <button
                       key={ratio}
@@ -512,7 +585,7 @@ export default function CalculoSeccionPage() {
                     className="text-2xl sm:text-3xl font-bold"
                     style={{ color: 'var(--success)' }}
                   >
-                    {seccion.toFixed(2)} mm²
+                    {formatNumber(seccion)} mm²
                   </p>
                 </div>
 
@@ -529,8 +602,8 @@ export default function CalculoSeccionPage() {
                   )}
                   {porcentajeVp !== null && (
                     <span className="badge badge-primary">
-                      Vp = {porcentajeVp.toFixed(2)} % de{' '}
-                      {NOMINAL_VOLTAGE[form.tipoSistema]} V
+                      Vp = {formatNumber(porcentajeVp)} % de{' '}
+                      {tensionNominal} V
                     </span>
                   )}
                 </div>
@@ -642,7 +715,7 @@ export default function CalculoSeccionPage() {
                           className="font-semibold text-base sm:text-lg"
                           style={{ color: 'var(--primary-light)' }}
                         >
-                          {item.seccion.toFixed(2)} mm²
+                          {formatNumber(item.seccion)} mm²
                         </p>
                         <p
                           className="text-xs sm:text-sm"
@@ -725,6 +798,393 @@ export default function CalculoSeccionPage() {
           </div>
         </div>
       </div>
+
+      <section className="mt-14 space-y-6" aria-labelledby="guia-seccion">
+        <div className="card p-6 md:p-8">
+          <h2
+            id="guia-seccion"
+            className="text-2xl font-bold mb-4"
+            style={{ color: 'var(--foreground)' }}
+          >
+            Fórmula para calcular la sección de un conductor
+          </h2>
+          <p
+            className="text-sm leading-relaxed mb-4"
+            style={{ color: 'var(--foreground-muted)' }}
+          >
+            La sección por caída de tensión se obtiene despejando el área del
+            conductor en la fórmula de caída de tensión. El resultado se expresa
+            en mm² y siempre se adopta la sección comercial inmediatamente
+            superior, porque una sección menor no cumpliría el límite exigido.
+          </p>
+          <pre
+            className="overflow-x-auto rounded-lg p-4 text-xs sm:text-sm mb-3"
+            style={{
+              background: 'var(--background-secondary)',
+              border: '1px solid var(--card-border)',
+              color: 'var(--foreground)',
+            }}
+          >
+{`Monofásico:  S = (2 × ρ × L × I) / Vp
+Trifásico:   S = (√3 × ρ × L × I) / Vp`}
+          </pre>
+          <ul
+            className="text-sm space-y-1 list-disc pl-5 mb-5"
+            style={{ color: 'var(--foreground-muted)' }}
+          >
+            <li>
+              <strong>S:</strong> sección del conductor en mm².
+            </li>
+            <li>
+              <strong>ρ:</strong> resistividad del cobre, 0,018 Ω·mm²/m.
+            </li>
+            <li>
+              <strong>L:</strong> longitud del tramo en metros (m).
+            </li>
+            <li>
+              <strong>I:</strong> corriente de carga en amperes (A).
+            </li>
+            <li>
+              <strong>Vp:</strong> caída de tensión admisible en voltios (V).
+            </li>
+          </ul>
+
+          <h3
+            className="text-lg font-semibold mb-2"
+            style={{ color: 'var(--foreground)' }}
+          >
+            Ejemplo de cálculo paso a paso
+          </h3>
+          <p
+            className="text-sm leading-relaxed mb-2"
+            style={{ color: 'var(--foreground-muted)' }}
+          >
+            Circuito monofásico de 220 V con 50 m de cable, 15 A de carga y un
+            límite del 3 %:
+          </p>
+          <ol
+            className="text-sm space-y-1 list-decimal pl-5 mb-3"
+            style={{ color: 'var(--foreground-muted)' }}
+          >
+            <li>
+              Caída admisible: 3 % de 220 V = <strong>6,6 V</strong>.
+            </li>
+            <li>
+              Aplica la fórmula: (2 × 0,018 × 50 × 15) / 6,6 = 27 / 6,6 ={' '}
+              <strong>4,09 mm²</strong>.
+            </li>
+            <li>
+              Sección comercial: <strong>6 mm²</strong>, el siguiente valor de la
+              serie métrica.
+            </li>
+            <li>
+              Equivalencia: <strong>10 AWG</strong> (5,26 mm²) también supera los
+              4,09 mm² requeridos.
+            </li>
+          </ol>
+          <p
+            className="text-sm leading-relaxed mb-5"
+            style={{ color: 'var(--foreground-dim)' }}
+          >
+            En trifásico de 380 V, con 50 m, 40 A y el mismo 3 % (11,4 V), la
+            fórmula usa √3: (1,732 × 0,018 × 50 × 40) / 11,4 ={' '}
+            <strong>5,47 mm²</strong>, que también se resuelve con 6 mm²
+            comerciales. A igual carga y longitud, el trifásico requiere menos
+            sección que el monofásico.
+          </p>
+
+          <h3
+            className="text-lg font-semibold mb-2"
+            style={{ color: 'var(--foreground)' }}
+          >
+            Sección del conductor en Chile, México y Perú
+          </h3>
+          <ul
+            className="text-sm space-y-2 list-disc pl-5 mb-2"
+            style={{ color: 'var(--foreground-muted)' }}
+          >
+            <li>
+              <strong>Chile:</strong> el Pliego Técnico Normativo RIC N°4 y la NCh
+              Elec. 4/2003 fijan la caída de tensión admisible y las secciones
+              mínimas por circuito. Las redes de consumo suelen trabajar a 220 V
+              monofásico y 380 V trifásico.
+            </li>
+            <li>
+              <strong>México:</strong> la NOM-001-SEDE define los límites de caída
+              de tensión para circuitos derivados y alimentadores, con tensiones
+              habituales de 127 V y 220 V.
+            </li>
+            <li>
+              <strong>Perú:</strong> el Código Nacional de Electricidad
+              (CNE-Utilización) establece los límites; la tensión residencial más
+              común es 220 V.
+            </li>
+          </ul>
+          <p
+            className="text-sm leading-relaxed"
+            style={{ color: 'var(--foreground-dim)' }}
+          >
+            La fórmula no cambia entre países: solo debes usar la tensión de tu
+            red y el porcentaje que exige tu normativa. Verifica siempre el valor
+            vigente en tu instalación.
+          </p>
+        </div>
+
+        <div className="card p-6 md:p-8">
+          <h2
+            className="text-2xl font-bold mb-3"
+            style={{ color: 'var(--foreground)' }}
+          >
+            Tabla de secciones comerciales y equivalencia AWG
+          </h2>
+          <p
+            className="text-sm leading-relaxed mb-4"
+            style={{ color: 'var(--foreground-muted)' }}
+          >
+            El calibre indicado es el más pequeño cuya área es igual o superior a
+            la sección en mm², es decir, el que la cubre sin quedarse corto.
+          </p>
+          <div className="overflow-x-auto">
+            <table
+              className="w-full text-sm"
+              style={{ borderCollapse: 'collapse' }}
+            >
+              <thead>
+                <tr style={{ color: 'var(--foreground)' }}>
+                  <th
+                    className="text-left font-semibold px-3 py-2"
+                    style={{ borderBottom: '1px solid var(--card-border)' }}
+                  >
+                    Sección (mm²)
+                  </th>
+                  <th
+                    className="text-left font-semibold px-3 py-2"
+                    style={{ borderBottom: '1px solid var(--card-border)' }}
+                  >
+                    Calibre AWG/kcmil
+                  </th>
+                  <th
+                    className="text-left font-semibold px-3 py-2"
+                    style={{ borderBottom: '1px solid var(--card-border)' }}
+                  >
+                    Área del calibre (mm²)
+                  </th>
+                </tr>
+              </thead>
+              <tbody style={{ color: 'var(--foreground-muted)' }}>
+                {SECTION_TABLE.map((row) => (
+                  <tr key={row.mm2}>
+                    <td
+                      className="px-3 py-1.5"
+                      style={{ borderBottom: '1px solid var(--card-border)' }}
+                    >
+                      {formatLoose(row.mm2)}
+                    </td>
+                    <td
+                      className="px-3 py-1.5"
+                      style={{ borderBottom: '1px solid var(--card-border)' }}
+                    >
+                      {row.awg}
+                    </td>
+                    <td
+                      className="px-3 py-1.5"
+                      style={{ borderBottom: '1px solid var(--card-border)' }}
+                    >
+                      {formatLoose(row.area)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div className="card p-6 md:p-8">
+          <h2
+            className="text-2xl font-bold mb-3"
+            style={{ color: 'var(--foreground)' }}
+          >
+            ¿Qué sección de cable necesito? Casos frecuentes
+          </h2>
+          <p
+            className="text-sm leading-relaxed mb-4"
+            style={{ color: 'var(--foreground-muted)' }}
+          >
+            Valores calculados en monofásico de 220 V, cobre (ρ = 0,018 Ω·mm²/m) y
+            una caída de tensión máxima del 3 % (6,6 V).
+          </p>
+          <div className="overflow-x-auto">
+            <table
+              className="w-full text-sm"
+              style={{ borderCollapse: 'collapse' }}
+            >
+              <thead>
+                <tr style={{ color: 'var(--foreground)' }}>
+                  <th
+                    className="text-left font-semibold px-3 py-2"
+                    style={{ borderBottom: '1px solid var(--card-border)' }}
+                  >
+                    Corriente
+                  </th>
+                  <th
+                    className="text-left font-semibold px-3 py-2"
+                    style={{ borderBottom: '1px solid var(--card-border)' }}
+                  >
+                    Longitud
+                  </th>
+                  <th
+                    className="text-left font-semibold px-3 py-2"
+                    style={{ borderBottom: '1px solid var(--card-border)' }}
+                  >
+                    Sección mínima
+                  </th>
+                  <th
+                    className="text-left font-semibold px-3 py-2"
+                    style={{ borderBottom: '1px solid var(--card-border)' }}
+                  >
+                    Comercial
+                  </th>
+                </tr>
+              </thead>
+              <tbody style={{ color: 'var(--foreground-muted)' }}>
+                {COMMON_CASES.map((item) => {
+                  const needed = requiredSection({
+                    system: 'monofasico',
+                    lengthM: item.length,
+                    currentA: item.current,
+                    maxDropV: 220 * 0.03,
+                  });
+                  const comercialCase = nextCommercialSection(needed);
+                  return (
+                    <tr key={`${item.current}-${item.length}`}>
+                      <td
+                        className="px-3 py-1.5"
+                        style={{ borderBottom: '1px solid var(--card-border)' }}
+                      >
+                        {item.current} A
+                      </td>
+                      <td
+                        className="px-3 py-1.5"
+                        style={{ borderBottom: '1px solid var(--card-border)' }}
+                      >
+                        {item.length} m
+                      </td>
+                      <td
+                        className="px-3 py-1.5"
+                        style={{ borderBottom: '1px solid var(--card-border)' }}
+                      >
+                        {formatNumber(needed)} mm²
+                      </td>
+                      <td
+                        className="px-3 py-1.5"
+                        style={{ borderBottom: '1px solid var(--card-border)' }}
+                      >
+                        {comercialCase !== null ? `${formatLoose(comercialCase)} mm²` : '—'}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+          <p
+            className="mt-4 text-sm leading-relaxed"
+            style={{ color: 'var(--foreground-dim)' }}
+          >
+            Esta tabla resuelve solo el criterio de caída de tensión. Debes
+            comprobar además la corriente admisible del conductor con las tablas
+            de tu normativa y adoptar la sección mayor de ambos criterios.
+          </p>
+        </div>
+
+        <div className="card p-6 md:p-8">
+          <h2
+            className="text-2xl font-bold mb-4"
+            style={{ color: 'var(--foreground)' }}
+          >
+            Preguntas frecuentes sobre la sección del conductor
+          </h2>
+          <div className="space-y-3">
+            {SECCION_FAQS.map((faq) => (
+              <details
+                key={faq.question}
+                className="rounded-lg p-4"
+                style={{
+                  background: 'var(--background-secondary)',
+                  border: '1px solid var(--card-border)',
+                }}
+              >
+                <summary
+                  className="cursor-pointer text-sm sm:text-base font-semibold"
+                  style={{ color: 'var(--foreground)' }}
+                >
+                  {faq.question}
+                </summary>
+                <p
+                  className="mt-3 text-sm leading-relaxed"
+                  style={{ color: 'var(--foreground-muted)' }}
+                >
+                  {faq.answer}
+                </p>
+              </details>
+            ))}
+          </div>
+        </div>
+
+        <div className="card p-6 md:p-8">
+          <h2
+            className="text-2xl font-bold mb-4"
+            style={{ color: 'var(--foreground)' }}
+          >
+            Sigue calculando
+          </h2>
+          <ul
+            className="space-y-2 text-sm"
+            style={{ color: 'var(--foreground-muted)' }}
+          >
+            <li>
+              <Link
+                href="/calculadoras/caida-tension"
+                className="underline"
+                style={{ color: 'var(--secondary)' }}
+              >
+                Calculadora de caída de tensión
+              </Link>{' '}
+              para verificar la pérdida de voltaje del conductor ya instalado.
+            </li>
+            <li>
+              <Link
+                href="/calculadoras/seccion-ric"
+                className="underline"
+                style={{ color: 'var(--secondary)' }}
+              >
+                Corriente admisible por RIC
+              </Link>{' '}
+              para comprobar que el cable soporta la carga.
+            </li>
+            <li>
+              <Link
+                href="/calculadoras/calculadora-corriente"
+                className="underline"
+                style={{ color: 'var(--secondary)' }}
+              >
+                Calculadora de corriente y potencia
+              </Link>{' '}
+              para convertir watts y kW en amperes.
+            </li>
+            <li>
+              <Link
+                href="/blog"
+                className="underline"
+                style={{ color: 'var(--secondary)' }}
+              >
+                Blog técnico
+              </Link>{' '}
+              con guías de normativa y buenas prácticas eléctricas.
+            </li>
+          </ul>
+        </div>
+      </section>
     </div>
   );
 }

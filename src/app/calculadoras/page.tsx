@@ -17,8 +17,8 @@ export default function Calculadoras() {
   const calculadoras: Calculadora[] = [
     {
       id: 'seccion',
-      title: 'Cálculo de Sección de Conductores',
-      description: 'Calcula la sección minima del conductor. Determina la sección necesaria para limitar la Caída de Tensión y asegurar que el voltaje que llega a la carga final sea suficiente.',
+      title: 'Calculadora de Sección de Cable (mm² y AWG)',
+      description: 'Calcula la sección mínima del conductor por caída de tensión y obtén la sección comercial en mm² y su equivalente AWG.',
       icon: <Zap className="h-6 w-6" />,
       color: 'blue'
     },
