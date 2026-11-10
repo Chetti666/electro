@@ -20,10 +20,22 @@ const rajdhani = Rajdhani({
   weight: ["300", "400", "500", "600", "700"],
 });
 
+const organizationSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: 'VMElectric',
+  url: 'https://vmelectric.cl',
+  logo: 'https://vmelectric.cl/icon-512.png',
+  email: 'vmelectric2025@gmail.com',
+  description:
+    'Herramientas eléctricas online para profesionales: calculadoras de caída de tensión, sección de conductores, corriente y generadores de informes técnicos.',
+  areaServed: ['CL', 'MX', 'PE'],
+};
+
 export const metadata: Metadata = {
   metadataBase: new URL('https://vmelectric.cl'),
   title: "VMElectric - Herramientas Eléctricas Profesionales",
-  description: "Plataforma integral para cálculos eléctricos, informes técnicos y herramientas normativas para profesionales en Chile.",
+  description: "Plataforma integral para cálculos eléctricos, informes técnicos y herramientas normativas para profesionales de Chile, México, Perú y Latinoamérica.",
   keywords: ["RIC", "TE1", "PLIEGO", "SEC", "4/2003", "calculadora eléctrica", "informe eléctrico", "normativa chilena", "instalaciones eléctricas"],
   alternates: {
     canonical: 'https://vmelectric.cl',
@@ -36,7 +48,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: "VMElectric - Herramientas Eléctricas Profesionales",
-    description: "Calculadoras de sección, caída de tensión, informes SEV y más herramientas para electricistas.",
+    description: "Calculadoras de sección, caída de tensión, informes SEV y más herramientas para electricistas de Chile, México, Perú y Latinoamérica.",
     url: "https://vmelectric.cl",
     siteName: "VMElectric",
     locale: "es_CL",
@@ -45,7 +57,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "VMElectric - Herramientas Eléctricas Profesionales",
-    description: "Calculadoras de sección, caída de tensión, informes SEV y más herramientas para electricistas.",
+    description: "Calculadoras eléctricas, informes técnicos y normativa para electricistas de Chile, México, Perú y Latinoamérica.",
   },
 };
 
@@ -67,6 +79,10 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${rajdhani.variable} antialiased min-h-screen flex flex-col`}
       >
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+        />
         <RouteTracker />
         <Header />
         <main className="flex-grow pb-16 md:pb-0">

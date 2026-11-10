@@ -46,8 +46,8 @@ const calculadoras: Calculadora[] = [
   },
   {
     id: 'caida-tension',
-    title: 'Cálculo de Caída de Tensión',
-    description: 'Determina el porcentaje de pérdida de voltaje en un conductor. Esencial para verificar el cumplimiento normativo.',
+    title: 'Calculadora de Caída de Tensión',
+    description: 'Calcula gratis la caída de tensión en voltios y porcentaje. Obtén la longitud máxima del conductor y verifica el límite del 3 %.',
     icon: <Activity className="h-6 w-6" />,
     color: 'emerald'
   },

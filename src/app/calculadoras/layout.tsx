@@ -1,9 +1,9 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Calculadoras Eléctricas - Cálculos de Sección, Caída de Tensión | VMElectric',
-  description: 'Utiliza nuestras calculadoras eléctricas profesionales: cálculo de sección de conductores, caída de tensión, corriente admisible RIC, empalmes normativos y más.',
-  keywords: ['RIC', 'TE1', 'PLIEGO', 'SEC', '4/2003', 'calculadora eléctrica', 'sección conductores', 'caída tensión', 'corriente admisible', 'empalme normativo'],
+  title: 'Calculadoras Eléctricas Online - Sección y Caída de Tensión | VMElectric',
+  description: 'Calculadoras eléctricas gratis: sección de conductores, caída de tensión, corriente y empalmes. Fórmulas universales para profesionales de Chile, México, Perú y Latinoamérica.',
+  keywords: ['calculadora eléctrica', 'calculadora caída de tensión', 'sección conductores', 'caída tensión', 'corriente admisible', 'empalme normativo', 'calculadora eléctrica México', 'calculadora eléctrica Perú'],
   alternates: {
     canonical: 'https://vmelectric.cl/calculadoras',
   },

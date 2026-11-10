@@ -18,14 +18,14 @@ export default function Calculadoras() {
     {
       id: 'seccion',
       title: 'Cálculo de Sección de Conductores',
-      description: 'Calcula la sección minima del conductor. Determina la sección necesaria para imitar la Caída de Tensión y asegurar que el voltaje que llega a la carga final sea suficiente.',
+      description: 'Calcula la sección minima del conductor. Determina la sección necesaria para limitar la Caída de Tensión y asegurar que el voltaje que llega a la carga final sea suficiente.',
       icon: <Zap className="h-6 w-6" />,
       color: 'blue'
     },
     {
       id: 'caida-tension',
-      title: 'Cálculo de Caída de Tensión',
-      description: 'Determina el porcentaje de pérdida de voltaje que ocurrirá en un conductor ya dimensionado. Esencial para verificar el cumplimiento normativo.',
+      title: 'Calculadora de Caída de Tensión',
+      description: 'Calcula gratis la caída de tensión en voltios y porcentaje, la longitud máxima del conductor y el límite del 3 %. Útil en Chile, México, Perú y toda Latinoamérica.',
       icon: <Activity className="h-6 w-6" />,
       color: 'emerald'
     },
@@ -91,7 +91,7 @@ export default function Calculadoras() {
       >
         <h1 className="section-title">Calculadoras Eléctricas</h1>
         <p className="section-subtitle">
-          Selecciona una de nuestras calculadoras especializadas para realizar tus cálculos eléctricos de manera precisa y eficiente.
+          Selecciona una de nuestras calculadoras especializadas para realizar tus cálculos eléctricos de forma precisa. Funcionan con las fórmulas eléctricas universales usadas en Chile, México, Perú y toda Latinoamérica.
         </p>
       </motion.div>
 

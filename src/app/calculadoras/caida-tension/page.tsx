@@ -39,12 +39,11 @@ import {
   nominalVoltage,
   phaseFactor,
   voltageDrop,
-  voltageDropLimit,
-  voltageDropPercent,
   maxLengthForDrop,
   type ElectricalSystem,
 } from '@/lib/electrical';
 import { formatResultCopy, withReference } from '@/lib/copy-format';
+import { CAIDA_TENSION_FAQS } from '@/lib/caida-tension-faq';
 
 ChartJS.register(
   CategoryScale,
@@ -68,6 +67,7 @@ const CHART_GRID = 'rgba(148, 163, 184, 0.14)';
 type DropForm = {
   referencia: string;
   tipoSistema: ElectricalSystem;
+  tension: string;
   seccion: string;
   longitudMaxima: string;
   corriente: string;
@@ -76,6 +76,7 @@ type DropForm = {
 type DropHistoryItem = HistoryEntry & {
   referencia: string;
   tipoSistema: ElectricalSystem;
+  tension?: string;
   seccion: string;
   longitudMaxima: string;
   corriente: string;
@@ -87,6 +88,7 @@ type DropHistoryItem = HistoryEntry & {
 const DEFAULT_FORM: DropForm = {
   referencia: '',
   tipoSistema: 'monofasico',
+  tension: '',
   seccion: '',
   longitudMaxima: '',
   corriente: '',
@@ -136,7 +138,8 @@ export default function CalculoVpPage() {
   const validos =
     seccion !== null && longitud !== null && corriente !== null;
 
-  const limiteV = voltageDropLimit(form.tipoSistema);
+  const tensionNominal = toPositive(form.tension) ?? nominalVoltage(form.tipoSistema);
+  const limiteV = tensionNominal * MAX_VOLTAGE_DROP_RATIO;
 
   const vp = useMemo(() => {
     if (!validos) return null;
@@ -150,7 +153,7 @@ export default function CalculoVpPage() {
   }, [validos, form.tipoSistema, seccion, longitud, corriente]);
 
   const porcentaje =
-    vp !== null ? voltageDropPercent(form.tipoSistema, vp) : null;
+    vp !== null ? (vp / tensionNominal) * 100 : null;
   const cumple = vp !== null ? vp <= limiteV + 1e-9 : null;
 
   const longitudMaxima = useMemo(() => {
@@ -344,6 +347,7 @@ export default function CalculoVpPage() {
   // Al cambiar o limpiar los datos vuelve a «Calcular».
   const formSignature = [
     form.tipoSistema,
+    form.tension,
     form.seccion,
     form.longitudMaxima,
     form.corriente,
@@ -393,9 +397,7 @@ export default function CalculoVpPage() {
             {
               heading: 'Datos',
               lines: [
-                `Sistema: ${systemLabel(form.tipoSistema)} (${nominalVoltage(
-                  form.tipoSistema
-                )} V)`,
+                `Sistema: ${systemLabel(form.tipoSistema)} (${tensionNominal} V)`,
                 `Sección: ${sectionLabel(form.seccion)}`,
                 `Longitud: ${form.longitudMaxima} m`,
                 `Corriente: ${form.corriente} A`,
@@ -426,6 +428,7 @@ export default function CalculoVpPage() {
       latest !== undefined &&
       (latest.referencia ?? '') === referencia &&
       latest.tipoSistema === form.tipoSistema &&
+      (latest.tension ?? '') === form.tension &&
       latest.seccion === form.seccion &&
       latest.longitudMaxima === form.longitudMaxima &&
       latest.corriente === form.corriente;
@@ -434,6 +437,7 @@ export default function CalculoVpPage() {
       history.add({
         referencia,
         tipoSistema: form.tipoSistema,
+        tension: form.tension,
         seccion: form.seccion,
         longitudMaxima: form.longitudMaxima,
         corriente: form.corriente,
@@ -451,6 +455,7 @@ export default function CalculoVpPage() {
         input: {
           referencia,
           tipoSistema: form.tipoSistema,
+          tension: form.tension,
           seccion: form.seccion,
           longitudMaxima: form.longitudMaxima,
           corriente: form.corriente,
@@ -485,6 +490,7 @@ export default function CalculoVpPage() {
     setForm({
       referencia: item.referencia ?? '',
       tipoSistema: item.tipoSistema,
+      tension: item.tension ?? '',
       seccion: item.seccion,
       longitudMaxima: item.longitudMaxima,
       corriente: item.corriente,
@@ -498,12 +504,14 @@ export default function CalculoVpPage() {
           className="text-3xl font-bold mb-2"
           style={{ color: 'var(--foreground)' }}
         >
-          Calculadora de Caída de Tensión (Vp)
+          Calculadora de Caída de Tensión (V y %)
         </h1>
         <p style={{ color: 'var(--foreground-muted)' }}>
-          Visualiza la caída de tensión a lo largo del conductor, su límite del{' '}
-          {Math.round(MAX_VOLTAGE_DROP_RATIO * 100)} % y la longitud máxima
-          admisible. El resultado se actualiza mientras escribes.
+          Calcula gratis la caída de tensión de un conductor en voltios y
+          porcentaje, el límite del {Math.round(MAX_VOLTAGE_DROP_RATIO * 100)} %
+          y la longitud máxima admisible. Sirve para instalaciones monofásicas y
+          trifásicas de Chile, México, Perú y toda Latinoamérica. El resultado se
+          actualiza mientras escribes.
         </p>
       </div>
 
@@ -550,6 +558,31 @@ export default function CalculoVpPage() {
                   <option value="monofasico">Monofásico (220 V)</option>
                   <option value="trifasico">Trifásico (380 V)</option>
                 </select>
+              </div>
+
+              <div>
+                <label htmlFor="Vn" className="form-label">
+                  Tensión nominal (Vn) en voltios (opcional)
+                </label>
+                <input
+                  type="number"
+                  id="Vn"
+                  inputMode="decimal"
+                  min="0"
+                  step="any"
+                  value={form.tension}
+                  onChange={(event) => updateField('tension', event.target.value)}
+                  placeholder={`Ej: ${nominalVoltage(form.tipoSistema)}`}
+                  className="form-input"
+                />
+                <p
+                  className="mt-2 text-[11px]"
+                  style={{ color: 'var(--foreground-dim)' }}
+                >
+                  Si lo dejas vacío se usa 220 V en monofásico y 380 V en
+                  trifásico. Ajusta 127 V, 220 V, 240 V o la tensión de tu país
+                  para obtener el porcentaje correcto.
+                </p>
               </div>
 
               <div>
@@ -951,6 +984,203 @@ export default function CalculoVpPage() {
           </div>
         </div>
       </div>
+
+      <section className="mt-14 space-y-6" aria-labelledby="guia-caida-tension">
+        <div className="card p-6 md:p-8">
+          <h2
+            id="guia-caida-tension"
+            className="text-2xl font-bold mb-4"
+            style={{ color: 'var(--foreground)' }}
+          >
+            ¿Cómo calcular la caída de tensión?
+          </h2>
+          <p
+            className="text-sm leading-relaxed mb-5"
+            style={{ color: 'var(--foreground-muted)' }}
+          >
+            La caída de tensión es la pérdida de voltaje que se produce a lo
+            largo de un conductor debido a su resistencia. Cuanto mayor es la
+            longitud del tramo, la corriente o la resistencia del cable, mayor es
+            la pérdida que llega a la carga. Esta calculadora de caída de tensión
+            obtiene el resultado en voltios y en porcentaje, y además indica la
+            longitud máxima que cumple el límite del{' '}
+            {Math.round(MAX_VOLTAGE_DROP_RATIO * 100)} % tomado como referencia.
+          </p>
+
+          <h3
+            className="text-lg font-semibold mb-2"
+            style={{ color: 'var(--foreground)' }}
+          >
+            Fórmula de caída de tensión
+          </h3>
+          <pre
+            className="overflow-x-auto rounded-lg p-4 text-xs sm:text-sm mb-3"
+            style={{
+              background: 'var(--background-secondary)',
+              border: '1px solid var(--card-border)',
+              color: 'var(--foreground)',
+            }}
+          >
+{`Monofásico:  ΔV = (2 × ρ × L × I) / S
+Trifásico:   ΔV = (√3 × ρ × L × I) / S
+Porcentaje:  %ΔV = (ΔV / Vn) × 100`}
+          </pre>
+          <ul
+            className="text-sm space-y-1 list-disc pl-5 mb-5"
+            style={{ color: 'var(--foreground-muted)' }}
+          >
+            <li>
+              <strong>ΔV:</strong> caída de tensión en voltios (V).
+            </li>
+            <li>
+              <strong>ρ:</strong> resistividad del cobre, 0,018 Ω·mm²/m.
+            </li>
+            <li>
+              <strong>L:</strong> longitud del conductor en metros (m).
+            </li>
+            <li>
+              <strong>I:</strong> corriente de carga en amperes (A).
+            </li>
+            <li>
+              <strong>S:</strong> sección del conductor en mm².
+            </li>
+            <li>
+              <strong>Vn:</strong> tensión nominal de la instalación en voltios.
+            </li>
+          </ul>
+
+          <h3
+            className="text-lg font-semibold mb-2"
+            style={{ color: 'var(--foreground)' }}
+          >
+            Caída de tensión en Chile, México y Perú
+          </h3>
+          <p
+            className="text-sm leading-relaxed mb-3"
+            style={{ color: 'var(--foreground-muted)' }}
+          >
+            La fórmula es la misma en todos los países; lo que cambia es la
+            tensión nominal y el límite que exige cada normativa:
+          </p>
+          <ul
+            className="text-sm space-y-2 list-disc pl-5 mb-4"
+            style={{ color: 'var(--foreground-muted)' }}
+          >
+            <li>
+              <strong>Chile:</strong> el Pliego Técnico Normativo RIC N°4 y el
+              TE1 establecen los límites de caída de tensión. Las redes de
+              consumo suelen trabajar a 220 V monofásico y 380 V trifásico.
+            </li>
+            <li>
+              <strong>México:</strong> la NOM-001-SEDE define los límites para
+              circuitos derivados y alimentadores. Es habitual encontrar 127 V
+              monofásico y 220 V en sistemas bifásicos o trifásicos.
+            </li>
+            <li>
+              <strong>Perú:</strong> el Código Nacional de Electricidad
+              (CNE-Utilización) fija los límites de caída de tensión. La tensión
+              residencial más común es 220 V.
+            </li>
+          </ul>
+          <p
+            className="text-sm leading-relaxed"
+            style={{ color: 'var(--foreground-dim)' }}
+          >
+            Si trabajas con una tensión distinta a 220 V o 380 V, escríbela en el
+            campo «Tensión nominal» para que el porcentaje y el límite se ajusten
+            a tu instalación. Verifica siempre el valor admisible en la normativa
+            vigente de tu país.
+          </p>
+        </div>
+
+        <div className="card p-6 md:p-8">
+          <h2
+            className="text-2xl font-bold mb-4"
+            style={{ color: 'var(--foreground)' }}
+          >
+            Preguntas frecuentes sobre la caída de tensión
+          </h2>
+          <div className="space-y-3">
+            {CAIDA_TENSION_FAQS.map((faq) => (
+              <details
+                key={faq.question}
+                className="rounded-lg p-4"
+                style={{
+                  background: 'var(--background-secondary)',
+                  border: '1px solid var(--card-border)',
+                }}
+              >
+                <summary
+                  className="cursor-pointer text-sm sm:text-base font-semibold"
+                  style={{ color: 'var(--foreground)' }}
+                >
+                  {faq.question}
+                </summary>
+                <p
+                  className="mt-3 text-sm leading-relaxed"
+                  style={{ color: 'var(--foreground-muted)' }}
+                >
+                  {faq.answer}
+                </p>
+              </details>
+            ))}
+          </div>
+        </div>
+
+        <div className="card p-6 md:p-8">
+          <h2
+            className="text-2xl font-bold mb-4"
+            style={{ color: 'var(--foreground)' }}
+          >
+            Sigue calculando
+          </h2>
+          <ul
+            className="space-y-2 text-sm"
+            style={{ color: 'var(--foreground-muted)' }}
+          >
+            <li>
+              <Link
+                href="/calculadoras/seccion"
+                className="underline"
+                style={{ color: 'var(--secondary)' }}
+              >
+                Calculadora de sección de conductores
+              </Link>{' '}
+              para dimensionar el cable según la caída de tensión admisible.
+            </li>
+            <li>
+              <Link
+                href="/calculadoras/calculadora-corriente"
+                className="underline"
+                style={{ color: 'var(--secondary)' }}
+              >
+                Calculadora de corriente eléctrica
+              </Link>{' '}
+              para obtener los amperes a partir de la potencia y la tensión.
+            </li>
+            <li>
+              <Link
+                href="/calculadoras/seccion-ric"
+                className="underline"
+                style={{ color: 'var(--secondary)' }}
+              >
+                Corriente admisible por RIC
+              </Link>{' '}
+              para verificar la capacidad de transporte del conductor.
+            </li>
+            <li>
+              <Link
+                href="/blog"
+                className="underline"
+                style={{ color: 'var(--secondary)' }}
+              >
+                Blog técnico
+              </Link>{' '}
+              con guías de normativa y buenas prácticas eléctricas.
+            </li>
+          </ul>
+        </div>
+      </section>
     </div>
   );
 }
