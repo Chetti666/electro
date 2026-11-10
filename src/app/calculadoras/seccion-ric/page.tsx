@@ -2,7 +2,15 @@
 
 import { useState, useMemo, FormEvent } from 'react';
 import Link from 'next/link';
+import { Trash2 } from 'lucide-react';
 import { useCalculationRecorder } from '@/hooks/useCalculationRecorder';
+import { usePersistentState } from '@/hooks/usePersistentState';
+import {
+  useCalculationHistory,
+  type HistoryEntry,
+} from '@/hooks/useCalculationHistory';
+import { CopyResultButton } from '@/components/calculadoras/CopyResultButton';
+import { formatResultCopy, withReference } from '@/lib/copy-format';
 import { datosConductores, tablasDeCalculo, metodosInstalacion } from './data';
 import { DonationSupportCard } from '@/components/DonationSupportCard';
 
@@ -11,7 +19,26 @@ interface Resultado {
   equivalente: string;
   corrienteMaxima: number;
   tablaRef: string;
+  conductor: string;
+  corrienteCircuito: number;
+  metodo: string;
+  metodoDescripcion: string;
+  temperatura: number | null;
 }
+
+type RicHistoryItem = HistoryEntry & {
+  referencia: string;
+  conductorId: string;
+  conductor: string;
+  corriente: string;
+  metodo: string;
+  metodoDescripcion: string;
+  seccion: number;
+  equivalente: string;
+  corrienteMaxima: number;
+  tablaRef: string;
+  temperatura: number | null;
+};
 
 export default function SeccionRicPage() {
   // --- ESTADOS ---
@@ -20,6 +47,13 @@ export default function SeccionRicPage() {
   const [metodo, setMetodo] = useState('B1');
   const [resultado, setResultado] = useState<Resultado | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [referencia, setReferencia] = usePersistentState(
+    'vmelectric:calc:seccion-ric:referencia:v1',
+    ''
+  );
+  const history = useCalculationHistory<RicHistoryItem>(
+    'vmelectric:calc:seccion-ric:history:v1'
+  );
   const recordCalculation = useCalculationRecorder();
 
   // --- DATOS DERIVADOS ---
@@ -72,28 +106,114 @@ export default function SeccionRicPage() {
     if (seccionEncontrada) {
       const textoAWG = seccionEncontrada.awg ? ` (${seccionEncontrada.awg} AWG)` : '';
       const textoKcmil = seccionEncontrada.kcmil ? ` (${seccionEncontrada.kcmil} kcmil)` : '';
+      const metodoInfo = metodosInstalacion.find((m) => m.id === metodoActual);
+      const ref = referencia.trim();
 
       const nuevoResultado: Resultado = {
         seccion: seccionEncontrada.seccion_mm2,
         equivalente: textoAWG + textoKcmil,
         corrienteMaxima: seccionEncontrada[metodoActual] as number,
         tablaRef: selectedConductor.tabla_ref === 'movil' ? '4.5' : '4.4',
+        conductor: selectedConductor.nombre,
+        corrienteCircuito: corrienteNum,
+        metodo: metodoActual,
+        metodoDescripcion:
+          metodoInfo?.label ?? `Método ${metodoActual}`,
+        temperatura:
+          typeof seccionEncontrada.temp === 'number'
+            ? seccionEncontrada.temp
+            : null,
       };
       setResultado(nuevoResultado);
 
-      void recordCalculation({
-        type: 'SECCION_RIC',
-        title: `Sección RIC ${nuevoResultado.seccion} mm²`,
-        input: {
-          conductor: selectedConductor.nombre,
+      const latest = history.items[0];
+      const duplicate =
+        latest !== undefined &&
+        (latest.referencia ?? '') === ref &&
+        latest.conductorId === selectedConductorId &&
+        latest.corriente === corriente &&
+        latest.metodo === metodoActual;
+
+      if (!duplicate) {
+        history.add({
+          referencia: ref,
+          conductorId: selectedConductorId,
+          conductor: nuevoResultado.conductor,
           corriente,
           metodo: metodoActual,
-        },
-        result: { ...nuevoResultado },
-      });
+          metodoDescripcion: nuevoResultado.metodoDescripcion,
+          seccion: nuevoResultado.seccion,
+          equivalente: nuevoResultado.equivalente,
+          corrienteMaxima: nuevoResultado.corrienteMaxima,
+          tablaRef: nuevoResultado.tablaRef,
+          temperatura: nuevoResultado.temperatura,
+        });
+
+        void recordCalculation({
+          type: 'SECCION_RIC',
+          title: withReference(
+            `Sección RIC ${nuevoResultado.seccion} mm²`,
+            ref
+          ),
+          input: {
+            referencia: ref,
+            conductor: selectedConductor.nombre,
+            corriente,
+            metodo: metodoActual,
+          },
+          result: { ...nuevoResultado },
+        });
+      }
     } else {
       setError(`No se encontró un conductor para ${corrienteNum} A con el método ${metodoActual}. La corriente podría ser demasiado alta.`);
     }
+  };
+
+  const resumen =
+    resultado === null
+      ? ''
+      : formatResultCopy({
+          title: withReference('CÁLCULO DE SECCIÓN POR CORRIENTE ADMISIBLE', referencia),
+          sections: [
+            {
+              heading: 'Resultado',
+              lines: [
+                `Conductor seleccionado: ${resultado.conductor}`,
+                `Corriente del circuito: ${resultado.corrienteCircuito} A`,
+                `Sección mínima: ${resultado.seccion} mm²${resultado.equivalente}`,
+                `Corriente máxima: ${resultado.corrienteMaxima} A`,
+              ],
+            },
+            {
+              heading: 'Tabla de origen',
+              lines: [
+                `Tabla N° ${resultado.tablaRef} de la RIC N° 4`,
+                resultado.metodoDescripcion,
+                ...(resultado.temperatura !== null
+                  ? [`Temperatura de servicio: ${resultado.temperatura} °C`]
+                  : []),
+              ],
+            },
+          ],
+        });
+
+  const restore = (item: RicHistoryItem) => {
+    setReferencia(item.referencia ?? '');
+    setSelectedConductorId(item.conductorId);
+    setCorriente(item.corriente);
+    setMetodo(item.metodo);
+    setResultado({
+      seccion: item.seccion,
+      equivalente: item.equivalente,
+      corrienteMaxima: item.corrienteMaxima,
+      tablaRef: item.tablaRef,
+      conductor: item.conductor,
+      corrienteCircuito: Number.parseFloat(item.corriente) || 0,
+      metodo: item.metodo,
+      metodoDescripcion: item.metodoDescripcion,
+      temperatura: item.temperatura,
+    });
+    setError(null);
   };
 
   // --- RENDERIZADO ---
@@ -112,6 +232,19 @@ export default function SeccionRicPage() {
           <div className="card">
             <h2 className="text-lg sm:text-xl font-semibold mb-4 text-gray-900 dark:text-white">Calculadora</h2>
             <form onSubmit={handleCalcular} className="space-y-6">
+              <div>
+                <label htmlFor="referencia" className="form-label">Referencia (opcional)</label>
+                <input
+                  type="text"
+                  id="referencia"
+                  maxLength={60}
+                  value={referencia}
+                  onChange={(e) => setReferencia(e.target.value)}
+                  placeholder="Ej: Circuito 1, Tablero A"
+                  className="form-input"
+                />
+              </div>
+
               <div>
                 <label htmlFor="conductorSelect" className="form-label">1. Seleccione el Conductor</label>
                 <select id="conductorSelect" value={selectedConductorId} onChange={handleConductorChange} className="form-select">
@@ -175,17 +308,87 @@ export default function SeccionRicPage() {
 
           {(resultado || error) && (
             <div className="card">
-              <h2 className="text-lg sm:text-xl font-semibold mb-4 text-gray-900 dark:text-white">Resultado del Cálculo</h2>
+              <div className="mb-4 flex items-center justify-between gap-3">
+                <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">Resultado del Cálculo</h2>
+                <CopyResultButton text={resumen} />
+              </div>
               {error && <div className="p-4 bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-200 rounded-md">{error}</div>}
               {resultado && (
                 <div className="p-4 bg-emerald-100 dark:bg-emerald-900/50 text-emerald-800 dark:text-emerald-200 rounded-md text-center">
+                  {referencia.trim() && (
+                    <p className="text-sm font-semibold">{referencia.trim()}</p>
+                  )}
                   <p className="text-sm">(Ref. Tabla N° {resultado.tablaRef} RIC N° 04)</p>
                   <p className="mt-2">Para una corriente de <strong>{corriente} A</strong>, la sección mínima es:</p>
                   <p className="text-2xl sm:text-3xl font-bold my-2">{resultado.seccion} mm²<span className="text-lg sm:text-xl">{resultado.equivalente}</span></p>
                   <p className="text-sm">Soportando una corriente máx. de: <strong>{resultado.corrienteMaxima} A</strong></p>
+                  <p className="mt-2 text-xs">
+                    {resultado.metodoDescripcion}
+                    {resultado.temperatura !== null
+                      ? ` · ${resultado.temperatura} °C`
+                      : ''}
+                  </p>
                   <em className="text-xs mt-4 block">Nota: Siempre verifique las condiciones específicas de instalación y normativas locales.</em>
                 </div>
               )}
+            </div>
+          )}
+
+          {history.items.length > 0 && (
+            <div className="card">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">Historial</h2>
+                <button
+                  onClick={history.clear}
+                  className="text-sm text-red-600 hover:underline dark:text-red-400"
+                >
+                  Limpiar
+                </button>
+              </div>
+              <div className="space-y-3 max-h-96 overflow-y-auto pr-2">
+                {history.items.map((item) => (
+                  <div
+                    key={item.id}
+                    className="rounded-lg p-3 border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        {item.referencia ? (
+                          <p className="text-xs font-semibold text-amber-600 dark:text-amber-400">
+                            {item.referencia}
+                          </p>
+                        ) : null}
+                        <p className="font-semibold text-base sm:text-lg text-emerald-700 dark:text-emerald-400">
+                          {item.seccion} mm²{item.equivalente} · {item.corrienteMaxima} A
+                        </p>
+                        <p className="text-xs text-gray-600 dark:text-gray-400">
+                          {item.conductor}
+                        </p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                          I: {item.corriente} A · {item.metodoDescripcion} · Tabla N° {item.tablaRef}
+                        </p>
+                      </div>
+                      <div className="flex shrink-0 items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => restore(item)}
+                          className="rounded-md px-2 py-1 text-xs font-semibold border border-gray-300 dark:border-gray-600 text-amber-600 dark:text-amber-400"
+                        >
+                          Usar
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => history.remove(item.id)}
+                          aria-label="Eliminar cálculo del historial"
+                          className="rounded-md p-1.5 border border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" aria-hidden />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
         </div>

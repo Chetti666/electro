@@ -18,6 +18,7 @@ import {
   powerFromCurrent,
   type ElectricalSystem,
 } from '@/lib/electrical';
+import { formatResultCopy, withReference } from '@/lib/copy-format';
 
 const FORM_KEY = 'vmelectric:calc:corriente:form:v1';
 const HISTORY_KEY = 'vmelectric:calc:corriente:history:v1';
@@ -26,6 +27,7 @@ type Objective = 'corriente' | 'potencia';
 type PowerUnit = 'W' | 'kW';
 
 type CurrentForm = {
+  referencia: string;
   calculoObjetivo: Objective;
   tipoSistema: ElectricalSystem;
   potencia: string;
@@ -36,6 +38,7 @@ type CurrentForm = {
 };
 
 type CurrentHistoryItem = HistoryEntry & {
+  referencia: string;
   calculoObjetivo: Objective;
   tipoSistema: ElectricalSystem;
   potencia: string;
@@ -50,6 +53,7 @@ type CurrentHistoryItem = HistoryEntry & {
 };
 
 const DEFAULT_FORM: CurrentForm = {
+  referencia: '',
   calculoObjetivo: 'corriente',
   tipoSistema: 'monofasico',
   potencia: '',
@@ -171,16 +175,68 @@ export default function CalculadoraCorrientePage() {
   ].join('|');
   const yaCalculado = resultado !== null && lastCalculated === formSignature;
 
-  const resumen = resultado
-    ? [
-        `${resultado.etiqueta}: ${resultado.valor.toFixed(2)} ${resultado.unidad}`,
-        `Potencia: ${(resultado.potenciaW / 1000).toFixed(2)} kW · Aparente: ${(
-          resultado.aparente / 1000
-        ).toFixed(2)} kVA`,
-        `${systemLabel(form.tipoSistema)} · V: ${form.voltaje} V · FP: ${form.cosPhi}`,
-        'Calculado con VMElectric',
-      ].join('\n')
-    : '';
+  const mono = form.tipoSistema === 'monofasico';
+  const formulaLines: string[] =
+    resultado === null
+      ? []
+      : form.calculoObjetivo === 'corriente'
+        ? [
+            `I = P / (${mono ? 'V × cosφ' : '√3 × V × cosφ'})`,
+            `I = ${resultado.potenciaW} W / (${
+              mono
+                ? `${form.voltaje} V × ${form.cosPhi}`
+                : `√3 × ${form.voltaje} V × ${form.cosPhi}`
+            })`,
+            `I = ${resultado.valor.toFixed(2)} A`,
+          ]
+        : [
+            `P = ${mono ? 'V × I × cosφ' : '√3 × V × I × cosφ'}`,
+            `P = ${
+              mono
+                ? `${form.voltaje} V × ${form.corriente} A × ${form.cosPhi}`
+                : `√3 × ${form.voltaje} V × ${form.corriente} A × ${form.cosPhi}`
+            }`,
+            `P = ${resultado.valor.toFixed(2)} W`,
+          ];
+
+  const resumen =
+    resultado === null
+      ? ''
+      : formatResultCopy({
+          title: withReference(
+            form.calculoObjetivo === 'corriente'
+              ? 'CÁLCULO DE CORRIENTE'
+              : 'CÁLCULO DE POTENCIA',
+            form.referencia
+          ),
+          sections: [
+            {
+              heading: 'Resultado',
+              lines: [
+                `${resultado.etiqueta}: ${resultado.valor.toFixed(2)} ${
+                  resultado.unidad
+                }${
+                  resultado.unidad === 'W'
+                    ? ` (${(resultado.valor / 1000).toFixed(2)} kW)`
+                    : ''
+                }`,
+                `Potencia aparente: ${(resultado.aparente / 1000).toFixed(2)} kVA`,
+              ],
+            },
+            { heading: 'Fórmula', lines: formulaLines },
+            {
+              heading: 'Datos',
+              lines: [
+                `Sistema: ${systemLabel(form.tipoSistema)}`,
+                form.calculoObjetivo === 'corriente'
+                  ? `Potencia: ${(resultado.potenciaW / 1000).toFixed(2)} kW`
+                  : `Corriente: ${form.corriente} A`,
+                `Voltaje: ${form.voltaje} V`,
+                `Factor de potencia: ${form.cosPhi}`,
+              ],
+            },
+          ],
+        });
 
   const updateField = <K extends keyof CurrentForm>(
     field: K,
@@ -202,8 +258,10 @@ export default function CalculadoraCorrientePage() {
     if (!resultado) return;
 
     const latest = history.items[0];
+    const referencia = form.referencia.trim();
     const duplicate =
       latest !== undefined &&
+      (latest.referencia ?? '') === referencia &&
       latest.calculoObjetivo === form.calculoObjetivo &&
       latest.tipoSistema === form.tipoSistema &&
       latest.potencia === form.potencia &&
@@ -214,6 +272,7 @@ export default function CalculadoraCorrientePage() {
 
     if (!duplicate) {
       history.add({
+        referencia,
         calculoObjetivo: form.calculoObjetivo,
         tipoSistema: form.tipoSistema,
         potencia: form.potencia,
@@ -229,10 +288,14 @@ export default function CalculadoraCorrientePage() {
 
       void recordCalculation({
         type: 'CORRIENTE_POTENCIA',
-        title: `${resultado.etiqueta}: ${resultado.valor.toFixed(2)} ${
-          resultado.unidad
-        }`,
+        title: withReference(
+          `${resultado.etiqueta}: ${resultado.valor.toFixed(2)} ${
+            resultado.unidad
+          }`,
+          referencia
+        ),
         input: {
+          referencia,
           calculoObjetivo: form.calculoObjetivo,
           tipoSistema: form.tipoSistema,
           potencia: potenciaW !== null ? String(potenciaW) : form.potencia,
@@ -258,6 +321,7 @@ export default function CalculadoraCorrientePage() {
   const resetFields = () => {
     setForm((previous) => ({
       ...previous,
+      referencia: '',
       potencia: '',
       corriente: '',
       voltaje: '',
@@ -266,6 +330,7 @@ export default function CalculadoraCorrientePage() {
 
   const restore = (item: CurrentHistoryItem) => {
     setForm({
+      referencia: item.referencia ?? '',
       calculoObjetivo: item.calculoObjetivo,
       tipoSistema: item.tipoSistema,
       potencia: item.potencia,
@@ -301,6 +366,23 @@ export default function CalculadoraCorrientePage() {
             Datos de entrada
           </h2>
           <form onSubmit={handleCalcular} className="space-y-4">
+            <div>
+              <label htmlFor="referencia" className="form-label">
+                Referencia (opcional)
+              </label>
+              <input
+                type="text"
+                id="referencia"
+                maxLength={60}
+                className="form-input"
+                value={form.referencia}
+                onChange={(event) =>
+                  updateField('referencia', event.target.value)
+                }
+                placeholder="Ej: Circuito 1, Tablero A"
+              />
+            </div>
+
             <div>
               <label htmlFor="objetivo" className="form-label">
                 1. ¿Qué deseas calcular?
@@ -561,12 +643,26 @@ export default function CalculadoraCorrientePage() {
                   >
                     {resultado.valor.toFixed(2)} {resultado.unidad}
                   </p>
+                  {resultado.unidad === 'W' && (
+                    <p
+                      className="text-sm"
+                      style={{ color: 'var(--foreground-muted)' }}
+                    >
+                      ≈ {(resultado.valor / 1000).toFixed(2)} kW
+                    </p>
+                  )}
                 </div>
 
                 <div className="flex flex-wrap items-center justify-center gap-2">
-                  <span className="badge badge-primary">
-                    Potencia: {(resultado.potenciaW / 1000).toFixed(2)} kW
-                  </span>
+                  {resultado.unidad === 'A' ? (
+                    <span className="badge badge-primary">
+                      Potencia: {(resultado.potenciaW / 1000).toFixed(2)} kW
+                    </span>
+                  ) : (
+                    <span className="badge badge-primary">
+                      Corriente: {form.corriente} A
+                    </span>
+                  )}
                   <span className="badge badge-warning">
                     Aparente: {(resultado.aparente / 1000).toFixed(2)} kVA
                   </span>
@@ -631,6 +727,14 @@ export default function CalculadoraCorrientePage() {
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div>
+                        {item.referencia ? (
+                          <p
+                            className="text-xs font-semibold"
+                            style={{ color: 'var(--secondary)' }}
+                          >
+                            {item.referencia}
+                          </p>
+                        ) : null}
                         <p
                           className="font-semibold text-base sm:text-lg"
                           style={{ color: 'var(--primary-light)' }}
