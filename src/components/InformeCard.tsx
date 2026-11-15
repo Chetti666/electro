@@ -13,9 +13,10 @@ export interface InformeCardProps {
   icon: ReactNode;
   color: ColorType;
   className?: string;
+  cta?: string;
 }
 
-const InformeCard = React.forwardRef<HTMLAnchorElement, InformeCardProps>(({ className, id, title, description, icon, color }, ref) => {
+const InformeCard = React.forwardRef<HTMLAnchorElement, InformeCardProps>(({ className, id, title, description, icon, color, cta = 'ABRIR FORMULARIO' }, ref) => {
   const colorClasses = {
     blue: {
       border: 'rgba(37, 99, 235, 0.3)',
@@ -97,7 +98,7 @@ const InformeCard = React.forwardRef<HTMLAnchorElement, InformeCardProps>(({ cla
             letterSpacing: '0.5px'
           }}
         >
-          ABRIR FORMULARIO
+          {cta}
           <svg className="w-4 h-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>

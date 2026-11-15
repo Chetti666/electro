@@ -1,0 +1,395 @@
+/* ==========================================
+   Orden de Trabajo A4 — estilos exclusivos
+   Prefijo .ot- para no interferir con el resto
+   del sitio. La hoja mide 210mm x 297mm.
+   ========================================== */
+
+.ot-tool {
+  --ot-ink: #0f172a;
+  --ot-border: #94a3b8;
+  min-height: 100vh;
+  /* El header del sitio es `fixed`: hay que reservar su alto */
+  padding: 5.25rem 1rem 3.5rem;
+  background: #0b1121;
+  color: #e2e8f0;
+}
+
+/* ---------- Barra de herramientas (solo pantalla) ---------- */
+.ot-toolbar {
+  width: 100%;
+  max-width: 1120px;
+  margin: 0 auto 1.5rem;
+  background: #0f172a;
+  border: 1px solid #1e293b;
+  border-radius: 14px;
+  box-shadow: 0 24px 60px -30px rgba(0, 0, 0, 0.9);
+  overflow: hidden;
+}
+
+.ot-toolbar-inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.15rem;
+}
+
+.ot-brand {
+  display: flex;
+  align-items: center;
+  min-width: 240px;
+}
+
+.ot-brand h1 {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.2;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  color: #ffffff;
+}
+
+.ot-brand p {
+  margin: 0.2rem 0 0;
+  font-size: 0.72rem;
+  color: #94a3b8;
+  line-height: 1.35;
+}
+
+.ot-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 0.6rem;
+}
+
+.ot-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #94a3b8;
+}
+
+.ot-field input,
+.ot-field select {
+  height: 2.2rem;
+  border-radius: 0.55rem;
+  border: 1px solid #334155;
+  background: #1e293b;
+  color: #ffffff;
+  padding: 0 0.6rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  outline: none;
+}
+
+.ot-field input[type='number'] {
+  width: 6.2rem;
+  text-align: center;
+}
+
+.ot-field select {
+  min-width: 7.5rem;
+}
+
+.ot-field input:focus,
+.ot-field select:focus {
+  border-color: #f59e0b;
+  box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.15);
+}
+
+.ot-download {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  height: 2.35rem;
+  padding: 0 1rem;
+  border: 0;
+  border-radius: 0.6rem;
+  background: linear-gradient(135deg, #f59e0b, #fbbf24);
+  color: #0f172a;
+  font-size: 0.8rem;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 10px 22px -10px rgba(245, 158, 11, 0.65);
+  transition: transform 0.15s ease, filter 0.15s ease;
+}
+
+.ot-download:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.05);
+}
+
+.ot-download:active {
+  transform: scale(0.98);
+}
+
+.ot-toolbar-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.4rem 0.9rem;
+  padding: 0.65rem 1.15rem;
+  border-top: 1px solid #1e293b;
+  font-size: 0.72rem;
+  color: #94a3b8;
+}
+
+.ot-toolbar-foot strong {
+  color: #fbbf24;
+  font-weight: 700;
+}
+
+.ot-note {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+/* ---------- Vista previa ---------- */
+.ot-preview {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 24px;
+  width: 100%;
+  overflow-x: auto;
+  padding: 0 0.25rem 1rem;
+}
+
+/* ---------- Hoja A4 ---------- */
+.ot-page {
+  width: 210mm;
+  height: 297mm;
+  /* Centra la hoja cuando hay espacio; si el contenedor es más angosto,
+     los márgenes automáticos se anulan y la hoja queda desplazable. */
+  margin: 0 auto;
+  /* 20mm superior para encuadernar/talonario, 10mm laterales, 8mm inferior */
+  padding: 20mm 10mm 8mm 10mm;
+  background: #ffffff;
+  color: #0f172a;
+  box-shadow: 0 20px 30px -10px rgba(0, 0, 0, 0.5),
+    0 10px 15px -5px rgba(0, 0, 0, 0.3);
+  box-sizing: border-box;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  flex: 0 0 auto;
+  page-break-after: avoid;
+  break-after: avoid;
+}
+
+.ot-page * {
+  box-sizing: border-box;
+}
+
+/* ---------- Tarjetas y encabezados ---------- */
+.ot-card {
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  overflow: hidden;
+  background-color: #ffffff;
+  margin-bottom: 6px;
+}
+
+.ot-card-flush {
+  margin-bottom: 0;
+}
+
+/* Los fondos suaves van como clase propia: el CSS sin capas gana a las
+   utilidades bg-* de Tailwind, así que no se pueden mezclar con .ot-card. */
+.ot-card-muted {
+  background-color: #f8fafc;
+}
+
+.ot-card-soft {
+  background-color: rgba(248, 250, 252, 0.7);
+}
+
+.ot-card-header {
+  background-color: #e2e8f0;
+  border-bottom: 1px solid #cbd5e1;
+  padding: 3px 8px;
+  font-weight: 700;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: #1e293b;
+  text-align: left;
+}
+
+/* ---------- Área rayada de observaciones ---------- */
+.ot-ruled {
+  height: 100%;
+  min-height: 100%;
+  background-image: linear-gradient(
+    to bottom,
+    #cbd5e1 0,
+    #cbd5e1 1px,
+    #ffffff 1px,
+    #ffffff 22px
+  );
+  background-size: 100% 22px;
+  background-repeat: repeat-y;
+  background-position: 0 0;
+}
+
+/* ---------- Campos en blanco (sin inputs) ---------- */
+.ot-line {
+  display: inline-block;
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 1.05em;
+  border-bottom: 1px dashed #64748b;
+  vertical-align: baseline;
+}
+
+.ot-check-row {
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+  font-weight: 600;
+}
+
+.ot-check {
+  width: 13px;
+  height: 13px;
+  border: 1.2px solid #0f172a;
+  border-radius: 2px;
+  background-color: #ffffff;
+  margin-right: 4px;
+  flex: 0 0 auto;
+  display: inline-block;
+}
+
+.ot-mono {
+  font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas,
+    'Liberation Mono', monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+.ot-badge {
+  font-size: 7.5px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: 1px solid #94a3b8;
+  color: #475569;
+  background-color: #f1f5f9;
+}
+
+.ot-badge-copy {
+  border-color: #f59e0b;
+  color: #b45309;
+  background-color: #fef3c7;
+}
+
+/* ==========================================
+   IMPRESIÓN: una hoja por página, sin chrome
+   ========================================== */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 20mm 10mm 15mm 10mm;
+  }
+
+  html,
+  body {
+    background: #ffffff !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    min-height: 0 !important;
+  }
+
+  /* Ocultar header, footer y navegación del sitio (hijos directos de body) */
+  body.ot-print-ready > header,
+  body.ot-print-ready > footer,
+  body.ot-print-ready > nav {
+    display: none !important;
+  }
+
+  body.ot-print-ready > main {
+    margin: 0 !important;
+    padding: 0 !important;
+    min-height: 0 !important;
+  }
+
+  /* El wrapper de PageTransition puede conservar opacity/transform */
+  body.ot-print-ready > main > div {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  .no-print,
+  .ot-toolbar,
+  .ot-toolbar-foot {
+    display: none !important;
+  }
+
+  .ot-tool,
+  .ot-preview {
+    background: transparent !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+    display: block !important;
+  }
+
+  .ot-page {
+    width: 100% !important;
+    height: 100vh !important;
+    max-height: 100vh !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+    border: none !important;
+    border-radius: 0 !important;
+    overflow: hidden !important;
+    page-break-after: always !important;
+    break-after: page !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  .ot-page:last-child {
+    page-break-after: auto !important;
+    break-after: auto !important;
+  }
+
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .ot-tool {
+    /* 44px del header móvil + aire */
+    padding: 4rem 0.5rem 2.5rem;
+  }
+
+  .ot-toolbar-inner {
+    justify-content: center;
+  }
+
+  .ot-brand {
+    min-width: 0;
+    text-align: left;
+  }
+
+  .ot-controls {
+    width: 100%;
+  }
+}

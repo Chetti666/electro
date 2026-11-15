@@ -3,7 +3,7 @@
 import InformeCard, { ColorType } from '@/components/InformeCard';
 import { ReactNode } from 'react';
 import { motion, Variants } from 'framer-motion';
-import { Activity, FileText, Camera, Search } from 'lucide-react';
+import { Activity, FileText, Camera, Search, ClipboardList } from 'lucide-react';
 
 export default function Informes() {
   type Informe = {
@@ -12,6 +12,7 @@ export default function Informes() {
     description: string;
     icon: ReactNode;
     color: ColorType;
+    cta?: string;
   };
 
   const informes: Informe[] = [
@@ -42,6 +43,14 @@ export default function Informes() {
       description: 'Facilita la creación de tu informe para el levantamiento de instalaciones existentes. Detalla puntos críticos y recomendaciones.',
       icon: <Search className="h-6 w-6" />,
       color: 'green'
+    },
+    {
+      id: 'orden-trabajo',
+      title: 'Generador de Órdenes de Trabajo',
+      description: 'Genera talonarios de órdenes de trabajo en blanco con folio consecutivo. Elige folio inicial, cantidad y emisión; no se capturan datos.',
+      icon: <ClipboardList className="h-6 w-6" />,
+      color: 'amber',
+      cta: 'ABRIR GENERADOR'
     }
   ];
 
@@ -95,6 +104,7 @@ export default function Informes() {
               description={informe.description}
               icon={informe.icon}
               color={informe.color}
+              cta={informe.cta}
             />
           </motion.div>
         ))}
