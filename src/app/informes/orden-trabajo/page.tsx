@@ -371,7 +371,7 @@ function OrderPage({ folio, emision }: { folio: string; emision: Emision }) {
 }
 
 export default function OrdenTrabajoPage() {
-  const [folioInput, setFolioInput] = useState('451');
+  const [folioInput, setFolioInput] = useState('1');
   const [qtyInput, setQtyInput] = useState('1');
   const [emision, setEmision] = useState<Emision>('original');
 
