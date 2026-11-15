@@ -151,7 +151,7 @@ function OrderPage({ folio, emision }: { folio: string; emision: Emision }) {
                 <span className="font-bold text-slate-800 whitespace-nowrap">
                   Tipo Instalación:
                 </span>
-                <Line />
+                
               </div>
               <div className="col-span-4 flex items-center justify-start gap-3 px-1">
                 <span className="font-bold text-slate-800">Empalme:</span>
@@ -162,7 +162,7 @@ function OrderPage({ folio, emision }: { folio: string; emision: Emision }) {
                 <span className="font-bold text-slate-800 whitespace-nowrap">
                   Capacidad nom.:
                 </span>
-                <Line />
+                
               </div>
             </div>
 
@@ -176,7 +176,7 @@ function OrderPage({ folio, emision }: { folio: string; emision: Emision }) {
                 <Check>Con cortocircuito / falla</Check>
                 <div className="flex items-center gap-1">
                   <Check>Otro:</Check>
-                  <Line width="6rem" />
+                  
                 </div>
               </div>
             </div>
@@ -207,7 +207,7 @@ function OrderPage({ folio, emision }: { folio: string; emision: Emision }) {
 
             <div className="p-1 bg-white flex items-start gap-1">
               <span className="font-bold text-slate-800 w-20">Observación:</span>
-              <Line />
+              
             </div>
 
             <div className="p-1 bg-slate-50/70 flex items-center gap-2 flex-wrap">
@@ -221,7 +221,7 @@ function OrderPage({ folio, emision }: { folio: string; emision: Emision }) {
                 <Check>Reparación</Check>
                 <div className="flex items-center gap-1">
                   <Check>Otro:</Check>
-                  <Line width="6rem" />
+                  
                 </div>
               </div>
             </div>
@@ -249,9 +249,9 @@ function OrderPage({ folio, emision }: { folio: string; emision: Emision }) {
               <span className="block text-[7.5px] font-bold text-slate-500 uppercase">
                 PRESUPUESTO TOTAL
               </span>
-              <div className="flex items-center justify-center font-bold text-slate-900 mt-0.5">
+              <div className="flex items-center justify-start font-bold text-slate-900 mt-0.5">
                 <span>$</span>
-                <Line />
+                
               </div>
             </div>
 
@@ -259,9 +259,9 @@ function OrderPage({ folio, emision }: { folio: string; emision: Emision }) {
               <span className="block text-[7.5px] font-bold text-slate-500 uppercase">
                 ABONO / ANTICIPO
               </span>
-              <div className="flex items-center justify-center font-bold text-emerald-700 mt-0.5">
+              <div className="flex items-center justify-start font-bold text-emerald-700 mt-0.5">
                 <span>$</span>
-                <Line />
+                
               </div>
             </div>
 
@@ -270,7 +270,7 @@ function OrderPage({ folio, emision }: { folio: string; emision: Emision }) {
                 COTIZACIÓN / REF.
               </span>
               <div className="flex items-center justify-center font-bold text-slate-800 mt-0.5">
-                <Line className="ot-mono" />
+                
               </div>
             </div>
 
@@ -278,9 +278,9 @@ function OrderPage({ folio, emision }: { folio: string; emision: Emision }) {
               <span className="block text-[7.5px] font-bold text-amber-900 uppercase">
                 SALDO PENDIENTE
               </span>
-              <div className="flex items-center justify-center font-extrabold text-amber-950 mt-0.5">
+              <div className="flex items-center justify-start font-extrabold text-amber-950 mt-0.5">
                 <span>$</span>
-                <Line />
+                
               </div>
             </div>
           </div>
