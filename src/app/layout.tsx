@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Rajdhani } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -8,16 +8,27 @@ import PageTransition from '@/components/PageTransition';
 import { GoogleAnalytics } from '@next/third-parties/google';
 import RouteTracker from '@/components/RouteTracker';
 
-const inter = Inter({
+// Fuentes servidas localmente (subset latin) para que el build no dependa
+// de la red de Google Fonts. Ver scripts/download-fonts.mjs.
+const inter = localFont({
+  src: "./fonts/inter-latin-var.woff2",
   variable: "--font-inter",
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700", "800"],
+  weight: "300 800",
+  display: "swap",
+  fallback: ["system-ui", "sans-serif"],
 });
 
-const rajdhani = Rajdhani({
+const rajdhani = localFont({
+  src: [
+    { path: "./fonts/rajdhani-latin-300.woff2", weight: "300", style: "normal" },
+    { path: "./fonts/rajdhani-latin-400.woff2", weight: "400", style: "normal" },
+    { path: "./fonts/rajdhani-latin-500.woff2", weight: "500", style: "normal" },
+    { path: "./fonts/rajdhani-latin-600.woff2", weight: "600", style: "normal" },
+    { path: "./fonts/rajdhani-latin-700.woff2", weight: "700", style: "normal" },
+  ],
   variable: "--font-rajdhani",
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
+  display: "swap",
+  fallback: ["sans-serif"],
 });
 
 const organizationSchema = {
