@@ -12,7 +12,7 @@ import Autoplay from "embla-carousel-autoplay";
 import { motion, Variants } from "framer-motion";
 import CalculadoraCard, { ColorType as CalculadoraColor } from '@/components/CalculadoraCard';
 import InformeCard, { ColorType as InformeColor } from '@/components/InformeCard';
-import { Calculator, FileText, BarChart3, Zap, Activity, Camera, ClipboardCheck, Search, Loader2 } from 'lucide-react';
+import { Calculator, FileText, BarChart3, Zap, Activity, Camera, ClipboardCheck, ClipboardList, Search, Loader2 } from 'lucide-react';
 import { sendGAEvent } from '@next/third-parties/google';
 
 const SampleDocumentsViewer = dynamic(
@@ -34,6 +34,7 @@ type Informe = {
   description: string;
   icon: React.ReactNode;
   color: InformeColor;
+  cta?: string;
 };
 
 const calculadoras: Calculadora[] = [
@@ -109,6 +110,14 @@ const informes: Informe[] = [
     description: 'Levantamiento de instalaciones existentes. Detalla puntos críticos y recomendaciones.',
     icon: <Search className="h-6 w-6" />,
     color: 'green'
+  },
+  {
+    id: 'orden-trabajo',
+    title: 'Generador de Órdenes de Trabajo',
+    description: 'Genera talonarios de órdenes de trabajo en blanco con folio consecutivo. Elige folio inicial, cantidad y emisión; no se capturan datos.',
+    icon: <ClipboardList className="h-6 w-6" />,
+    color: 'amber',
+    cta: 'ABRIR GENERADOR'
   }
 ];
 
@@ -271,6 +280,49 @@ export default function Home() {
                         }}
                       >
                         Explorar Informes
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              </CarouselItem>
+
+              <CarouselItem className="pl-4 md:basis-1/1 lg:basis-1/1">
+                <div className="p-1">
+                  <div
+                    className="relative overflow-hidden rounded-2xl h-[400px] flex flex-col justify-center items-center text-center p-8 md:p-12"
+                    style={{
+                      background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(37, 99, 235, 0.05) 50%, rgba(245, 158, 11, 0.1) 100%)',
+                      border: '1px solid var(--card-border)',
+                    }}
+                  >
+                    <div className="relative z-10 max-w-2xl">
+                      <motion.div
+                        initial={{ scale: 0.8, opacity: 0 }}
+                        whileInView={{ scale: 1, opacity: 1 }}
+                        transition={{ duration: 0.5 }}
+                        className="h-20 w-20 rounded-xl flex items-center justify-center mb-6 mx-auto"
+                        style={{
+                          background: 'rgba(245, 158, 11, 0.1)',
+                          border: '1px solid rgba(245, 158, 11, 0.3)',
+                        }}
+                      >
+                        <ClipboardList className="h-10 w-10" style={{ color: '#f59e0b' }} />
+                      </motion.div>
+                      <h3 className="text-3xl sm:text-4xl font-bold mb-4" style={{ color: 'var(--foreground)' }}>Órdenes de Trabajo</h3>
+                      <p className="text-lg sm:text-xl mb-8" style={{ color: 'var(--foreground-muted)' }}>
+                        Genera talonarios A4 en blanco con folio consecutivo, listos para imprimir y usar en terreno.
+                      </p>
+                      <Link
+                        href="/informes/orden-trabajo"
+                        onClick={() => sendGAEvent({ event: 'click_cta', value: 'hero_ordenes_trabajo' })}
+                        className="inline-flex items-center justify-center px-8 py-3 text-base font-semibold rounded-lg transition-all"
+                        style={{
+                          background: '#f59e0b',
+                          border: '1px solid #f59e0b',
+                          color: '#fff',
+                        }}
+                      >
+                        Generar Órdenes
                       </Link>
                     </div>
                   </div>
