@@ -28,6 +28,7 @@ import {
 } from '@/hooks/useCalculationHistory';
 import { usePersistentState } from '@/hooks/usePersistentState';
 import { CopyResultButton } from '@/components/calculadoras/CopyResultButton';
+import { CalculatorTour } from '@/components/calculadoras/CalculatorTour';
 import { DonationSupportCard } from '@/components/DonationSupportCard';
 import {
   AWG_PRESETS,
@@ -500,12 +501,15 @@ export default function CalculoVpPage() {
   return (
     <div className="container mx-auto px-4 pt-24 pb-12 md:pt-32">
       <div className="mb-8">
-        <h1
-          className="text-3xl font-bold mb-2"
-          style={{ color: 'var(--foreground)' }}
-        >
-          Calculadora de Caída de Tensión (V y %)
-        </h1>
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <h1
+            className="text-3xl font-bold mb-2"
+            style={{ color: 'var(--foreground)' }}
+          >
+            Calculadora de Caída de Tensión (V y %)
+          </h1>
+          <CalculatorTour guideId="caida-tension" />
+        </div>
         <p style={{ color: 'var(--foreground-muted)' }}>
           Calcula gratis la caída de tensión (también llamada caída de voltaje o
           pérdida de tensión) de un conductor en voltios y porcentaje, el límite
@@ -852,7 +856,7 @@ export default function CalculoVpPage() {
               >
                 Resultados
               </h2>
-              <CopyResultButton text={resumen} />
+              <CopyResultButton text={resumen} dataTour="copiar-resultado" />
             </div>
 
             {vp === null && !error && (

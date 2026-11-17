@@ -10,6 +10,7 @@ import {
   type HistoryEntry,
 } from '@/hooks/useCalculationHistory';
 import { CopyResultButton } from '@/components/calculadoras/CopyResultButton';
+import { CalculatorTour } from '@/components/calculadoras/CalculatorTour';
 import { formatResultCopy, withReference } from '@/lib/copy-format';
 import { datosConductores, tablasDeCalculo, metodosInstalacion } from './data';
 import { DonationSupportCard } from '@/components/DonationSupportCard';
@@ -220,7 +221,10 @@ export default function SeccionRicPage() {
   return (
     <div className="container mx-auto px-4 pt-24 pb-12 md:pt-32">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Corriente Admisible de Conductores (RIC)</h1>
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Corriente Admisible de Conductores (RIC)</h1>
+          <CalculatorTour guideId="seccion-ric" />
+        </div>
         <p className="text-gray-600 dark:text-gray-400">
           Determina la sección de conductor según su tipo, método de instalación y la norma RIC N°4.
         </p>
@@ -229,7 +233,7 @@ export default function SeccionRicPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Columna de Formulario y Detalles */}
         <div className="lg:col-span-2 space-y-8">
-          <div className="card">
+          <div className="card" data-tour="ric-form">
             <h2 className="text-lg sm:text-xl font-semibold mb-4 text-gray-900 dark:text-white">Calculadora</h2>
             <form onSubmit={handleCalcular} className="space-y-6">
               <div>
@@ -310,7 +314,7 @@ export default function SeccionRicPage() {
             <div className="card">
               <div className="mb-4 flex items-center justify-between gap-3">
                 <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">Resultado del Cálculo</h2>
-                <CopyResultButton text={resumen} />
+                <CopyResultButton text={resumen} dataTour="copiar-resultado" />
               </div>
               {error && <div className="p-4 bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-200 rounded-md">{error}</div>}
               {resultado && (

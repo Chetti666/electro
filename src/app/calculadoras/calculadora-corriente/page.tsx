@@ -11,6 +11,7 @@ import {
 } from '@/hooks/useCalculationHistory';
 import { usePersistentState } from '@/hooks/usePersistentState';
 import { CopyResultButton } from '@/components/calculadoras/CopyResultButton';
+import { CalculatorTour } from '@/components/calculadoras/CalculatorTour';
 import { DonationSupportCard } from '@/components/DonationSupportCard';
 import {
   apparentPower,
@@ -344,12 +345,15 @@ export default function CalculadoraCorrientePage() {
   return (
     <div className="container mx-auto px-4 pt-24 pb-12 md:pt-32">
       <div className="mb-8">
-        <h1
-          className="text-3xl font-bold mb-2"
-          style={{ color: 'var(--foreground)' }}
-        >
-          Calculadora de Corriente y Potencia
-        </h1>
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <h1
+            className="text-3xl font-bold mb-2"
+            style={{ color: 'var(--foreground)' }}
+          >
+            Calculadora de Corriente y Potencia
+          </h1>
+          <CalculatorTour guideId="corriente" />
+        </div>
         <p style={{ color: 'var(--foreground-muted)' }}>
           Calcula la corriente en amperes (A) a partir de la potencia y el
           voltaje, o la potencia en watts (W) y kW a partir de la corriente. Sirve
@@ -614,7 +618,7 @@ export default function CalculadoraCorrientePage() {
               >
                 Resultados
               </h2>
-              <CopyResultButton text={resumen} />
+              <CopyResultButton text={resumen} dataTour="copiar-resultado" />
             </div>
 
             {!resultado && !error && (

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useCalculationRecorder } from '@/hooks/useCalculationRecorder';
 import { empalmesData, type Empalme, type TipoInstalacion } from './data';
 import { DonationSupportCard } from '@/components/DonationSupportCard';
+import { CalculatorTour } from '@/components/calculadoras/CalculatorTour';
 
 // --- Tipos ---
 type HistoryItem = {
@@ -106,7 +107,10 @@ export default function EmpalmesPage() {
     return (
         <div className="container mx-auto px-4 pt-24 pb-12 md:pt-32">
             <div className="mb-8">
-                <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Calculadora de Empalme Eléctrico</h1>
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                    <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Calculadora de Empalme Eléctrico</h1>
+                    <CalculatorTour guideId="empalmes" />
+                </div>
                 <p className="text-gray-600 dark:text-gray-400">
                     Encuentra el tipo de empalme normalizado según la potencia o corriente que necesites.
                 </p>
@@ -118,7 +122,7 @@ export default function EmpalmesPage() {
                     <div className="card">
                         <h2 className="text-lg sm:text-xl font-semibold mb-4 text-gray-900 dark:text-white">Datos de Entrada</h2>
                         <form onSubmit={handleSubmit} className="space-y-6">
-                            <div>
+                            <div data-tour="empalmes-metodo">
                                 <label className="form-label">Calcular por</label>
                                 <div className="flex flex-wrap gap-4">
                                     <label className="inline-flex items-center">

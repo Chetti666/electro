@@ -4,6 +4,7 @@ import { useRef, useState } from 'react';
 import html2canvas from 'html2canvas';
 import Link from 'next/link';
 import { DonationSupportCard } from '@/components/DonationSupportCard';
+import { CalculatorTour } from '@/components/calculadoras/CalculatorTour';
 
 interface LabelData {
   fabricante: string;
@@ -134,7 +135,10 @@ export default function ElectricalPanelLabelGenerator() {
   return (
     <div className="container mx-auto px-4 pt-24 pb-12 md:pt-32">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Generador de Rótulos para Tableros</h1>
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Generador de Rótulos para Tableros</h1>
+          <CalculatorTour guideId="rotuladora" />
+        </div>
         <p className="text-gray-600 dark:text-gray-400">Crea rótulos para tableros eléctricos según la normativa RIC N°02.</p>
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">

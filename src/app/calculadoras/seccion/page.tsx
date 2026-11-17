@@ -11,6 +11,7 @@ import {
 } from '@/hooks/useCalculationHistory';
 import { usePersistentState } from '@/hooks/usePersistentState';
 import { CopyResultButton } from '@/components/calculadoras/CopyResultButton';
+import { CalculatorTour } from '@/components/calculadoras/CalculatorTour';
 import { DonationSupportCard } from '@/components/DonationSupportCard';
 import {
   COPPER_RESISTIVITY,
@@ -340,12 +341,15 @@ export default function CalculoSeccionPage() {
   return (
     <div className="container mx-auto px-4 pt-24 pb-12 md:pt-32">
       <div className="mb-8">
-        <h1
-          className="text-3xl font-bold mb-2"
-          style={{ color: 'var(--foreground)' }}
-        >
-          Calculadora de Sección de Cable y Conductores (mm²)
-        </h1>
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <h1
+            className="text-3xl font-bold mb-2"
+            style={{ color: 'var(--foreground)' }}
+          >
+            Calculadora de Sección de Cable y Conductores (mm²)
+          </h1>
+          <CalculatorTour guideId="seccion" />
+        </div>
         <p style={{ color: 'var(--foreground-muted)' }}>
           Calcula la sección mínima del conductor que cumple la caída de tensión
           para una longitud y corriente dadas, y obtén la sección comercial
@@ -382,7 +386,7 @@ export default function CalculoSeccionPage() {
               />
             </div>
 
-            <div>
+            <div data-tour="seccion-sistema">
               <label className="form-label">Tipo de Sistema</label>
               <div className="flex flex-wrap gap-4">
                 <label className="inline-flex items-center">
@@ -555,7 +559,7 @@ export default function CalculoSeccionPage() {
               >
                 Resultados
               </h2>
-              <CopyResultButton text={resumen} />
+              <CopyResultButton text={resumen} dataTour="copiar-resultado" />
             </div>
 
             {seccion === null && !error && (

@@ -40,10 +40,12 @@ export function CopyResultButton({
   text,
   label = 'Copiar resultado',
   className = '',
+  dataTour,
 }: {
   text: string;
   label?: string;
   className?: string;
+  dataTour?: string;
 }) {
   const [status, setStatus] = useState<CopyStatus>('idle');
   const [isOpen, setIsOpen] = useState(false);
@@ -146,6 +148,7 @@ export function CopyResultButton({
         disabled={!text}
         aria-haspopup="dialog"
         aria-live="polite"
+        data-tour={dataTour}
         className={`inline-flex items-center gap-2 rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${className}`}
         style={{
           border: '1px solid var(--card-border)',
