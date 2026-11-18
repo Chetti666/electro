@@ -19,7 +19,7 @@ import {
     Wrench,
 } from 'lucide-react';
 
-// Pilares del proyecto: gratis, sostenido por la comunidad y con desarrollo a medida
+// Pilares del proyecto: gratis, sostenido por la comunidad y con adaptaciones a medida
 const pillars = [
     {
         title: 'Herramientas de uso libre',
@@ -38,10 +38,10 @@ const pillars = [
         color: '#fb7185',
     },
     {
-        title: 'Desarrollo a medida',
+        title: 'Adaptaciones a medida',
         description:
-            'Cuando una empresa necesita algo que no existe, lo construimos: flujos propios, informes con su marca y planillas internas. Ese trabajo se cotiza aparte y financia lo gratuito.',
-        points: ['Proyectos personalizados por encargo', 'Lo que desarrollamos también queda para la comunidad'],
+            'No desarrollamos software complejo desde cero. Lo que hacemos es personalizar las herramientas que ya existen: formularios con tus datos, informes con tu marca y ajustes puntuales a tu forma de trabajar. Primero revisamos si es viable y después se cotiza.',
+        points: ['Personalización de formularios y planillas existentes', 'Evaluamos la factibilidad antes de cotizar'],
         icon: Sparkles,
         color: '#fbbf24',
     },
@@ -74,9 +74,9 @@ const communityActions = [
 // Ejemplos de encargos personalizados
 const customToolExamples = [
     'Informes y presupuestos con tu logo, membrete y firmas',
-    'Planillas internas y bases de precios de tu empresa',
-    'Calculadoras y flujos adaptados a tus procedimientos',
-    'Paneles de seguimiento para tus proyectos y obras',
+    'Formularios y planillas adaptados a los datos de tu empresa',
+    'Campos y criterios propios en las calculadoras existentes',
+    'Revisamos contigo si una herramienta más compleja es viable',
 ];
 
 const teamMembers = [
@@ -157,12 +157,12 @@ export default function AboutUsPage() {
                 </div>
 
                 <p className="mt-4 text-xs" style={{ color: 'var(--foreground-dim)' }}>
-                    ¿Tu empresa necesita algo propio?{' '}
+                    ¿Necesitas adaptar alguna herramienta a tu forma de trabajar?{' '}
                     <Link
                         href="/contact"
                         className="underline transition-colors hover:text-primary-light"
                     >
-                        Hablemos de un desarrollo a medida
+                        Cuéntanos tu caso
                     </Link>
                     .
                 </p>
@@ -311,7 +311,7 @@ export default function AboutUsPage() {
                 </div>
             </motion.section>
 
-            {/* Donaciones / desarrollo a medida */}
+            {/* Donaciones / adaptaciones a medida */}
             <motion.section
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -422,9 +422,11 @@ export default function AboutUsPage() {
                         className="mt-4 text-sm leading-relaxed"
                         style={{ color: 'var(--foreground-muted)' }}
                     >
-                        Cuando una empresa, consultora o instalador necesita algo específico,
-                        desarrollamos la herramienta completa: desde una calculadora con sus
-                        criterios hasta un generador de documentos con su identidad corporativa.
+                        No hacemos software de alta complejidad. Lo que sí podemos hacer es
+                        personalizar lo que ya está construido: agregar campos a un formulario,
+                        ajustar un informe a tu identidad corporativa o adaptar una planilla a tus
+                        criterios. Antes de cotizar, revisamos juntos si el cambio es factible y
+                        tiene sentido para tu trabajo.
                     </p>
 
                     <ul className="mt-4 space-y-2">
@@ -446,7 +448,7 @@ export default function AboutUsPage() {
 
                     <Link href="/contact" className="btn btn-secondary mt-6 w-full sm:w-auto">
                         <MessageSquare className="h-4 w-4" aria-hidden />
-                        Cotizar un desarrollo
+                        Consultar una adaptación
                     </Link>
                 </div>
             </motion.section>
@@ -492,8 +494,8 @@ export default function AboutUsPage() {
                             estar al alcance de cualquiera que trabaje en terreno. En su lugar,
                             elegimos un camino más lento pero más honesto: dejar todo abierto,
                             escuchar a la comunidad y sostener el proyecto con donaciones
-                            voluntarias y con el desarrollo de soluciones específicas para empresas
-                            que necesitan ir más allá.
+                            voluntarias y con la personalización de herramientas para empresas que
+                            necesitan ajustarlas a su forma de trabajar.
                         </p>
                     </div>
                 </div>

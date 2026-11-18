@@ -263,7 +263,7 @@ export default function ContactPage() {
           className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto text-center"
         >
           {[
-            { icon: Mail, title: 'Email', desc: 'contacto@electrocalc.com' },
+            { icon: Mail, title: 'Email', desc: 'vmelectric2025@gmail.com' },
             { icon: Zap, title: 'Respuesta', desc: 'En menos de 48h' },
             { icon: MessageSquare, title: 'Soporte', desc: 'Para consultas técnicas' }
           ].map((item, i) => (
