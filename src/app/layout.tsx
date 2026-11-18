@@ -47,7 +47,7 @@ export const metadata: Metadata = {
   metadataBase: new URL('https://www.vmelectric.cl'),
   title: "VMElectric - Herramientas Eléctricas Profesionales",
   description: "Plataforma integral para cálculos eléctricos, informes técnicos y herramientas normativas para profesionales de Chile, México, Perú y Latinoamérica.",
-  keywords: ["RIC", "TE1", "PLIEGO", "SEC", "4/2003", "calculadora eléctrica", "informe eléctrico", "normativa chilena", "instalaciones eléctricas"],
+  keywords: ["RIC", "TE1", "PLIEGO", "SEC", "calculadora eléctrica", "informe eléctrico", "normativa chilena", "instalaciones eléctricas"],
   alternates: {
     canonical: 'https://www.vmelectric.cl',
   },

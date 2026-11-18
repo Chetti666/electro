@@ -27,12 +27,12 @@ export const CAIDA_TENSION_FAQS: FaqItem[] = [
   {
     question: '¿Cuál es la caída de tensión máxima permitida?',
     answer:
-      'Depende de la normativa de cada país y del tipo de circuito (circuito derivado o alimentador). Esta calculadora usa 3 % de la tensión nominal como referencia práctica y conservadora; en Chile la RIC N°4 y la NCh Elec. 4/2003, en México la NOM-001-SEDE y en Perú el CNE-Utilización establecen sus propios límites. Verifica siempre el valor exigido en tu instalación antes de dar por válido el resultado.',
+      'La norma limita la caída en alimentadores, subalimentadores y conductores al 3 % de la tensión nominal de la alimentación, y la caída total en el punto más desfavorable de la instalación al 5 %. Esta calculadora compara la caída del tramo con el 3 %; para el total debes sumar las caídas de los tramos aguas arriba. En Chile lo exigen los Pliegos Técnicos Normativos RIC de la SEC; en México, la NOM-001-SEDE; y en Perú, el CNE-Utilización. Verifica siempre el valor aplicable a tu instalación.',
   },
   {
     question: '¿Cuál es la caída de tensión permitida en Chile?',
     answer:
-      'En Chile el límite lo fijan la RIC N°4 y la NCh Elec. 4/2003, que distinguen entre circuitos y alimentadores. Como referencia, en una red monofásica de 220 V el 3 % equivale a 6,6 V de pérdida y en una trifásica de 380 V a 11,4 V. Introduce la tensión de tu instalación en la calculadora para comprobar si el tramo cumple ese porcentaje.',
+      'En Chile, los Pliegos Técnicos Normativos RIC de la SEC limitan la caída del tramo (alimentadores, subalimentadores y conductores) al 3 % de la tensión nominal y la caída total en el punto más desfavorable de la instalación al 5 %. En una red monofásica de 220 V, el 3 % equivale a 6,6 V y el 5 % a 11 V; en una trifásica de 380 V, a 11,4 V y 19 V respectivamente. Esta calculadora comprueba el 3 % del tramo; para el total, suma las caídas parciales.',
   },
   {
     question: '¿Sirve para México, Perú y otros países de Latinoamérica?',

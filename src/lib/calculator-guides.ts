@@ -27,7 +27,7 @@ export const CALCULATOR_GUIDES = {
     {
       target: '#Vn',
       title: 'Tensión nominal',
-      body: 'Se usa para los atajos de 3 % y 5 %. Si tu red es 127 V (México) o 240 V, escríbela aquí; si la dejas vacía se asume 220 V o 380 V.',
+      body: 'Se usa para convertir los límites de 3 % y 5 % a voltios. Si tu red es 127 V (México) o 240 V, escríbela aquí; si la dejas vacía se asume 220 V o 380 V.',
     },
     {
       target: '#L',
@@ -42,7 +42,7 @@ export const CALCULATOR_GUIDES = {
     {
       target: '#Vp',
       title: 'Caída de tensión permitida',
-      body: 'Escribe la caída en volts o usa los atajos: 3 % para circuitos y 5 % para alimentadores. Con 220 V, el 3 % equivale a 6,6 V.',
+      body: 'La norma limita la caída en alimentadores, subalimentadores y conductores al 3 % de la tensión nominal; la caída total en el punto más desfavorable no debe superar el 5 %. Escribe la caída en volts o usa los atajos: con 220 V, 3 % = 6,6 V y 5 % = 11 V.',
     },
     {
       target: 'button[type="submit"]',
@@ -79,7 +79,7 @@ export const CALCULATOR_GUIDES = {
     {
       target: 'button[type="submit"]',
       title: 'Lee el resultado',
-      body: 'Obtendrás la caída en volts y %, si cumple el límite del 3 % y la longitud máxima admisible para esa sección y corriente.',
+      body: 'Obtendrás la caída en volts y %, si este tramo cumple el límite del 3 % y la longitud máxima admisible. Recuerda que la caída total en el punto más desfavorable de la instalación no debe superar el 5 %.',
     },
   ],
   corriente: [

@@ -6,7 +6,7 @@ const PAGE_URL = 'https://www.vmelectric.cl/calculadoras/caida-tension';
 export const metadata: Metadata = {
   title: 'Calculadora de Caída de Tensión (Voltaje) | VMElectric',
   description:
-    'Calculadora de caída de tensión gratis: obtén la pérdida de voltaje en V y % en circuitos monofásicos y trifásicos. Chile, México, Perú y Latinoamérica.',
+    'Calculadora de caída de tensión gratis: obtén la pérdida de voltaje en V y % y comprueba el límite del 3 % en alimentadores, subalimentadores y conductores. Chile, México, Perú y Latinoamérica.',
   keywords: [
     'calculadora caída de tensión',
     'caída de tensión',
@@ -26,7 +26,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Calculadora de Caída de Tensión (Voltaje) | VMElectric',
     description:
-      'Calcula gratis la caída de tensión en voltios y porcentaje, la longitud máxima admisible y el cumplimiento del límite del 3 %. Fórmulas universales para Chile, México, Perú y Latinoamérica.',
+      'Calcula gratis la caída de tensión en voltios y porcentaje, la longitud máxima admisible y el cumplimiento del 3 % del tramo. La caída total en el punto más desfavorable no debe superar el 5 %. Fórmulas universales para Chile, México, Perú y Latinoamérica.',
     url: PAGE_URL,
     siteName: 'VMElectric',
     locale: 'es_CL',
@@ -47,7 +47,7 @@ const structuredData = [
     name: 'Calculadora de Caída de Tensión',
     url: PAGE_URL,
     description:
-      'Calculadora gratuita de caída de tensión para circuitos monofásicos y trifásicos. Calcula la pérdida de voltaje en voltios y porcentaje, la longitud máxima del conductor y verifica el límite del 3 %.',
+      'Calculadora gratuita de caída de tensión para circuitos monofásicos y trifásicos. Calcula la pérdida de voltaje en voltios y porcentaje, la longitud máxima del conductor y verifica el límite del 3 % del tramo; la caída total en el punto más desfavorable no debe superar el 5 %.',
     applicationCategory: 'UtilitiesApplication',
     operatingSystem: 'Web',
     inLanguage: 'es',
@@ -61,7 +61,7 @@ const structuredData = [
       'Cálculo de caída de tensión en voltios y porcentaje',
       'Circuitos monofásicos y trifásicos',
       'Selección de sección en mm² y equivalencia AWG',
-      'Longitud máxima admisible según el límite del 3 %',
+      'Longitud máxima admisible según el límite del 3 % del tramo',
       'Gráfico de caída de tensión versus longitud',
     ],
   },

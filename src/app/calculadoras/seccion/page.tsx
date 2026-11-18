@@ -430,8 +430,8 @@ export default function CalculoSeccionPage() {
                 placeholder={`Ej: ${NOMINAL_VOLTAGE[form.tipoSistema]}`}
               />
               <p className="mt-2 text-[11px]" style={{ color: 'var(--foreground-dim)' }}>
-                Se usa para los atajos de 3 % y 5 %. Si lo dejas vacío se toma
-                220 V en monofásico y 380 V en trifásico.
+                Se usa para convertir a voltios los límites de 3 % y 5 %. Si lo
+                dejas vacío se toma 220 V en monofásico y 380 V en trifásico.
               </p>
             </div>
 
@@ -515,6 +515,11 @@ export default function CalculoSeccionPage() {
                   );
                 })}
               </div>
+              <p className="mt-2 text-[11px]" style={{ color: 'var(--foreground-dim)' }}>
+                El 3 % limita la caída del tramo (alimentadores, subalimentadores y
+                conductores); el 5 %, la caída total en el punto más desfavorable
+                de la instalación.
+              </p>
             </div>
 
             <div className="flex flex-wrap items-center gap-3 pt-4">
@@ -908,10 +913,10 @@ Trifásico:   S = (√3 × ρ × L × I) / Vp`}
             style={{ color: 'var(--foreground-muted)' }}
           >
             <li>
-              <strong>Chile:</strong> el Pliego Técnico Normativo RIC N°4 y la NCh
-              Elec. 4/2003 fijan la caída de tensión admisible y las secciones
-              mínimas por circuito. Las redes de consumo suelen trabajar a 220 V
-              monofásico y 380 V trifásico.
+              <strong>Chile:</strong> los Pliegos Técnicos Normativos RIC de la
+              SEC fijan la caída de tensión admisible y las secciones mínimas por
+              circuito. Las redes de consumo suelen trabajar a 220 V monofásico y
+              380 V trifásico.
             </li>
             <li>
               <strong>México:</strong> la NOM-001-SEDE define los límites de caída
