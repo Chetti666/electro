@@ -386,8 +386,9 @@ export default function CalculoVpPage() {
               lines: [
                 `Caída de tensión: ${vp.toFixed(2)} V`,
                 `Porcentaje: ${porcentaje.toFixed(2)} %`,
-                `Estado: ${cumple ? 'cumple' : 'supera'} el límite de 3 %`,
-                `Límite: ${limiteV.toFixed(2)} V`,
+                `Estado: ${cumple ? 'cumple' : 'supera'} el 3 % del tramo`,
+                `Límite del tramo: ${limiteV.toFixed(2)} V`,
+                'Caída total admisible en el punto más desfavorable: 5 %',
                 ...(longitudMaxima !== null
                   ? [`Longitud máxima: ${longitudMaxima.toFixed(2)} m`]
                   : []),
@@ -512,11 +513,13 @@ export default function CalculoVpPage() {
         </div>
         <p style={{ color: 'var(--foreground-muted)' }}>
           Calcula gratis la caída de tensión (también llamada caída de voltaje o
-          pérdida de tensión) de un conductor en voltios y porcentaje, el límite
-          del {Math.round(MAX_VOLTAGE_DROP_RATIO * 100)} % y la longitud máxima
-          admisible. Sirve para instalaciones monofásicas y trifásicas de Chile,
-          México, Perú y toda Latinoamérica. El resultado se actualiza mientras
-          escribes.
+          pérdida de tensión) de un conductor en voltios y porcentaje, y compárala
+          con el límite del {Math.round(MAX_VOLTAGE_DROP_RATIO * 100)} % que la
+          norma aplica a alimentadores, subalimentadores y conductores. Ten en
+          cuenta que la caída total en el punto más desfavorable de la instalación
+          no debe superar el 5 %. Sirve para instalaciones monofásicas y trifásicas
+          de Chile, México, Perú y toda Latinoamérica. El resultado se actualiza
+          mientras escribes.
         </p>
       </div>
 
@@ -803,8 +806,8 @@ export default function CalculoVpPage() {
                           style={{ color: 'var(--foreground-dim)' }}
                         >
                           {item.cumple
-                            ? 'Cumple el límite de 3 %'
-                            : 'Supera el límite de 3 %'}
+                            ? 'Cumple el 3 % del tramo'
+                            : 'Supera el 3 % del tramo'}
                         </p>
                       </div>
                       <div className="flex shrink-0 items-center gap-2">
@@ -896,12 +899,12 @@ export default function CalculoVpPage() {
                     }`}
                   >
                     {cumple
-                      ? `Cumple el límite de ${Math.round(
+                      ? `Cumple el ${Math.round(
                           MAX_VOLTAGE_DROP_RATIO * 100
-                        )} %`
-                      : `Supera el límite de ${Math.round(
+                        )} % del tramo`
+                      : `Supera el ${Math.round(
                           MAX_VOLTAGE_DROP_RATIO * 100
-                        )} %`}
+                        )} % del tramo`}
                   </span>
                   <span className="badge badge-primary">
                     Límite: {limiteV.toFixed(2)} V
@@ -917,6 +920,15 @@ export default function CalculoVpPage() {
                     </span>
                   )}
                 </div>
+
+                <p
+                  className="text-center text-xs"
+                  style={{ color: 'var(--foreground-dim)' }}
+                >
+                  El 3 % se aplica a este tramo (alimentadores, subalimentadores y
+                  conductores). La caída total en el punto más desfavorable de la
+                  instalación no debe superar el 5 % de la tensión nominal.
+                </p>
 
                 {!cumple && (
                   <p
@@ -1110,11 +1122,11 @@ Porcentaje:  %ΔV = (ΔV / Vn) × 100`}
             style={{ color: 'var(--foreground-muted)' }}
           >
             <li>
-              <strong>Chile:</strong> la caída de tensión permitida se fija en el
-              Pliego Técnico Normativo RIC N°4 y en la NCh Elec. 4/2003, que
-              distingue entre circuitos y alimentadores. Las redes de consumo
-              suelen trabajar a 220 V monofásico y 380 V trifásico, por lo que una
-              pérdida de voltaje monofásica de 3 % equivale a unos 6,6 V.
+              <strong>Chile:</strong> los Pliegos Técnicos Normativos RIC de la
+              SEC exigen que la caída en alimentadores, subalimentadores y
+              conductores no supere el 3 % de la tensión nominal, y que la caída
+              total en el punto más desfavorable de la instalación no exceda el
+              5 %. En 220 V, el 3 % equivale a 6,6 V y el 5 % a 11 V.
             </li>
             <li>
               <strong>México:</strong> la NOM-001-SEDE define los límites para

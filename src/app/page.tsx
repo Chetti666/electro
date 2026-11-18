@@ -48,7 +48,7 @@ const calculadoras: Calculadora[] = [
   {
     id: 'caida-tension',
     title: 'Calculadora de Caída de Tensión',
-    description: 'Calcula gratis la caída de tensión en voltios y porcentaje. Obtén la longitud máxima del conductor y verifica el límite del 3 %.',
+    description: 'Calcula la caída de tensión en voltios y porcentaje, la longitud máxima del conductor y el límite del 3 % del tramo. La caída total no debe superar el 5 %.',
     icon: <Activity className="h-6 w-6" />,
     color: 'emerald'
   },

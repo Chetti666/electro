@@ -25,7 +25,7 @@ export default function Calculadoras() {
     {
       id: 'caida-tension',
       title: 'Calculadora de Caída de Tensión',
-      description: 'Calcula gratis la caída de tensión en voltios y porcentaje, la longitud máxima del conductor y el límite del 3 %. Útil en Chile, México, Perú y toda Latinoamérica.',
+      description: 'Calcula la caída de tensión en voltios y porcentaje, la longitud máxima del conductor y el límite del 3 % del tramo. La caída total en el punto más desfavorable no debe superar el 5 %.',
       icon: <Activity className="h-6 w-6" />,
       color: 'emerald'
     },

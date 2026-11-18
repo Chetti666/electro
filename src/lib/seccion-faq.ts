@@ -27,7 +27,7 @@ export const SECCION_FAQS: FaqItem[] = [
   {
     question: '¿La sección por caída de tensión garantiza que el cable soporte la corriente?',
     answer:
-      'No. Son dos criterios independientes: la caída de tensión limita la pérdida de voltaje y la corriente admisible limita el calentamiento del conductor. Debes calcular ambos y adoptar la sección mayor. La capacidad de corriente se consulta en las tablas de la norma correspondiente (RIC N°4 en Chile, NOM-001-SEDE en México, CNE-Utilización en Perú).',
+      'No. Son dos criterios independientes: la caída de tensión limita la pérdida de voltaje y la corriente admisible limita el calentamiento del conductor. Debes calcular ambos y adoptar la sección mayor. La capacidad de corriente se consulta en las tablas de la norma correspondiente (Pliegos Técnicos Normativos RIC de la SEC en Chile, NOM-001-SEDE en México, CNE-Utilización en Perú).',
   },
   {
     question: '¿Sirve para instalaciones de México, Perú y otros países?',

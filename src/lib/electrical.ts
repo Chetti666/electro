@@ -14,7 +14,11 @@ export const NOMINAL_VOLTAGE: Record<ElectricalSystem, number> = {
   trifasico: 380,
 };
 
-/** Límite normativo usado por las calculadoras: 3 % de la tensión nominal. */
+/**
+ * Límite normativo por tramo (alimentadores, subalimentadores y conductores):
+ * 3 % de la tensión nominal. La caída total en el punto más desfavorable de la
+ * instalación no debe superar el 5 %.
+ */
 export const MAX_VOLTAGE_DROP_RATIO = 0.03;
 
 /** Secciones comerciales de conductor (mm²). */
