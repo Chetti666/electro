@@ -8,109 +8,91 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticRoutes: MetadataRoute.Sitemap = [
     {
       url: BASE_URL,
-      lastModified: new Date(),
       changeFrequency: 'weekly',
       priority: 1.0,
     },
     {
       url: `${BASE_URL}/calculadoras`,
-      lastModified: new Date(),
       changeFrequency: 'monthly',
       priority: 0.9,
     },
     {
       url: `${BASE_URL}/calculadoras/seccion`,
-      lastModified: new Date(),
       changeFrequency: 'monthly',
       priority: 0.8,
     },
     {
       url: `${BASE_URL}/calculadoras/caida-tension`,
-      lastModified: new Date(),
       changeFrequency: 'monthly',
       priority: 0.9,
     },
     {
       url: `${BASE_URL}/calculadoras/seccion-ric`,
-      lastModified: new Date(),
       changeFrequency: 'monthly',
       priority: 0.8,
     },
     {
       url: `${BASE_URL}/calculadoras/empalmes`,
-      lastModified: new Date(),
       changeFrequency: 'monthly',
       priority: 0.8,
     },
     {
       url: `${BASE_URL}/calculadoras/calculadora-corriente`,
-      lastModified: new Date(),
       changeFrequency: 'monthly',
       priority: 0.8,
     },
     {
       url: `${BASE_URL}/calculadoras/rotuladora`,
-      lastModified: new Date(),
       changeFrequency: 'monthly',
       priority: 0.8,
     },
     {
       url: `${BASE_URL}/informes`,
-      lastModified: new Date(),
       changeFrequency: 'monthly',
       priority: 0.9,
     },
     {
       url: `${BASE_URL}/informes/informe-resistividad`,
-      lastModified: new Date(),
       changeFrequency: 'monthly',
       priority: 0.8,
     },
     {
       url: `${BASE_URL}/informes/presupuesto`,
-      lastModified: new Date(),
       changeFrequency: 'monthly',
       priority: 0.8,
     },
     {
       url: `${BASE_URL}/informes/informe-fotografico`,
-      lastModified: new Date(),
       changeFrequency: 'monthly',
       priority: 0.8,
     },
     {
       url: `${BASE_URL}/informes/informe-inspeccion`,
-      lastModified: new Date(),
       changeFrequency: 'monthly',
       priority: 0.8,
     },
     {
       url: `${BASE_URL}/informes/orden-trabajo`,
-      lastModified: new Date(),
       changeFrequency: 'monthly',
       priority: 0.8,
     },
     {
       url: `${BASE_URL}/blog`,
-      lastModified: new Date(),
       changeFrequency: 'daily',
       priority: 0.8,
     },
     {
       url: `${BASE_URL}/about`,
-      lastModified: new Date(),
       changeFrequency: 'monthly',
       priority: 0.5,
     },
     {
       url: `${BASE_URL}/contact`,
-      lastModified: new Date(),
       changeFrequency: 'monthly',
       priority: 0.5,
     },
     {
       url: `${BASE_URL}/donar`,
-      lastModified: new Date(),
       changeFrequency: 'monthly',
       priority: 0.5,
     },
@@ -118,12 +100,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   // Artículos del blog publicados (dinámico)
   let blogRoutes: MetadataRoute.Sitemap = [];
+  let latestArticleUpdate: Date | undefined;
   try {
     const articles = await prisma.article.findMany({
       where: { status: 'PUBLISHED' },
       select: { slug: true, updatedAt: true },
       orderBy: { updatedAt: 'desc' },
     });
+
+    latestArticleUpdate = articles[0]?.updatedAt;
 
     blogRoutes = articles.map((article) => ({
       url: `${BASE_URL}/blog/${article.slug}`,
@@ -133,6 +118,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }));
   } catch {
     // Si la BD no está disponible en build, continúa sin artículos
+  }
+
+  // El índice del blog solo cambia cuando se publica o edita un artículo.
+  if (latestArticleUpdate) {
+    const blogRoute = staticRoutes.find(
+      (route) => route.url === `${BASE_URL}/blog`
+    );
+    if (blogRoute) blogRoute.lastModified = latestArticleUpdate;
   }
 
   return [...staticRoutes, ...blogRoutes];

@@ -3,11 +3,27 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { prisma } from '@/lib/prisma';
 import { Calendar, User, FolderOpen, ArrowLeft } from 'lucide-react';
+import {
+  getAbsoluteArticleImageSrc,
+  getArticleImageSrc,
+} from '@/lib/article-image';
 
-export const dynamic = 'force-dynamic';
+// Los artículos cambian poco: ISR evita consultar la base en cada visita.
+export const revalidate = 300;
 
 interface Props {
   params: Promise<{ slug: string }>;
+}
+
+// Prerenderiza los artículos publicados; los nuevos se generan on-demand y
+// quedan cacheados por el revalidate de abajo.
+export async function generateStaticParams() {
+  const articles = await prisma.article.findMany({
+    where: { status: 'PUBLISHED' },
+    select: { slug: true },
+  });
+
+  return articles.map(({ slug }) => ({ slug }));
 }
 
 export async function generateMetadata({ params }: Props) {
@@ -20,6 +36,7 @@ export async function generateMetadata({ params }: Props) {
   if (!article) return { title: 'Artículo no encontrado - VMElectric' };
 
   const url = `https://www.vmelectric.cl/blog/${slug}`;
+  const image = getAbsoluteArticleImageSrc(article);
   const plainContent = article.content.replace(/<[^>]*>/g, ' ');
   const description = (article.excerpt || plainContent)
     .replace(/\s+/g, ' ')
@@ -42,13 +59,13 @@ export async function generateMetadata({ params }: Props) {
       publishedTime: article.createdAt.toISOString(),
       modifiedTime: article.updatedAt.toISOString(),
       authors: article.author.name ? [article.author.name] : undefined,
-      images: article.imageUrl ? [article.imageUrl] : undefined,
+      images: image ? [image] : undefined,
     },
     twitter: {
       card: 'summary_large_image',
       title: article.title,
       description,
-      images: article.imageUrl ? [article.imageUrl] : undefined,
+      images: image ? [image] : undefined,
     },
   };
 }
@@ -98,6 +115,8 @@ export default async function ArticlePage({ params }: Props) {
         ];
 
   const articleUrl = `https://www.vmelectric.cl/blog/${slug}`;
+  const imageSrc = getArticleImageSrc(article);
+  const absoluteImage = getAbsoluteArticleImageSrc(article);
   const structuredData = {
     '@context': 'https://schema.org',
     '@graph': [
@@ -105,7 +124,7 @@ export default async function ArticlePage({ params }: Props) {
         '@type': 'BlogPosting',
         headline: article.title,
         description: article.excerpt ?? undefined,
-        image: article.imageUrl ? [article.imageUrl] : undefined,
+        image: absoluteImage ? [absoluteImage] : undefined,
         datePublished: article.createdAt.toISOString(),
         dateModified: article.updatedAt.toISOString(),
         inLanguage: 'es',
@@ -170,10 +189,10 @@ export default async function ArticlePage({ params }: Props) {
         </Link>
 
         <article>
-          {article.imageUrl && (
+          {imageSrc && (
             <div className="rounded-xl overflow-hidden mb-8 relative bg-black/20" style={{ aspectRatio: '16/9' }}>
               <Image
-                src={article.imageUrl}
+                src={imageSrc}
                 alt={article.title}
                 fill
                 sizes="(max-width: 768px) 100vw, 800px"

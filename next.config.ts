@@ -2,6 +2,12 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   images: {
+    localPatterns: [
+      {
+        // Permite las portadas servidas por /api/articles/[id]/image?v=...
+        pathname: '/**',
+      },
+    ],
     remotePatterns: [
       {
         protocol: 'https',
